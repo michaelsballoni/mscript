@@ -1,0 +1,18 @@
+Port mscript to c++
+
+Fix dates to be timestamps, not just dates
+
+system function
+
+import statement to glue scripts together
+
+module system for bringing in C++ code
+	Windows-only?
+	module == DLL?
+
+package manager
+
+First modules:
+4db
+file system
+httplite
