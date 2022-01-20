@@ -6,13 +6,7 @@ system function
 
 import statement to glue scripts together
 
-module system for bringing in C++ code
-	Windows-only?
-	module == DLL?
-
-package manager
-
-First modules:
+libraries:
 4db
 file system
 httplite
