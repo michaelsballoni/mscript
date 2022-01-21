@@ -5,6 +5,11 @@ VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mscript-lib", "mscript-lib\mscript-lib.vcxproj", "{BFAB6023-E2F9-4B7D-9384-5090E1034092}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mscript-tests", "mscript-tests\mscript-tests.vcxproj", "{97FDF0D2-0CE8-42BC-A00F-AA91EEAC29F4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BFAB6023-E2F9-4B7D-9384-5090E1034092} = {BFAB6023-E2F9-4B7D-9384-5090E1034092}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +26,14 @@ Global
 		{BFAB6023-E2F9-4B7D-9384-5090E1034092}.Release|x64.Build.0 = Release|x64
 		{BFAB6023-E2F9-4B7D-9384-5090E1034092}.Release|x86.ActiveCfg = Release|Win32
 		{BFAB6023-E2F9-4B7D-9384-5090E1034092}.Release|x86.Build.0 = Release|Win32
+		{97FDF0D2-0CE8-42BC-A00F-AA91EEAC29F4}.Debug|x64.ActiveCfg = Debug|x64
+		{97FDF0D2-0CE8-42BC-A00F-AA91EEAC29F4}.Debug|x64.Build.0 = Debug|x64
+		{97FDF0D2-0CE8-42BC-A00F-AA91EEAC29F4}.Debug|x86.ActiveCfg = Debug|Win32
+		{97FDF0D2-0CE8-42BC-A00F-AA91EEAC29F4}.Debug|x86.Build.0 = Debug|Win32
+		{97FDF0D2-0CE8-42BC-A00F-AA91EEAC29F4}.Release|x64.ActiveCfg = Release|x64
+		{97FDF0D2-0CE8-42BC-A00F-AA91EEAC29F4}.Release|x64.Build.0 = Release|x64
+		{97FDF0D2-0CE8-42BC-A00F-AA91EEAC29F4}.Release|x86.ActiveCfg = Release|Win32
+		{97FDF0D2-0CE8-42BC-A00F-AA91EEAC29F4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
