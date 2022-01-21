@@ -1,10 +1,5 @@
 Port mscript to c++
-create unit tests project
-define list, index, object("variant": double, wstring, bool, list, or index), 
 mscript-core:	port code and unit tests and get to pass as you go
-	Utils
-	ListDictionary
-		may already have this type, check 4db
 	Names
 	SymbolTable
 	SymbolStacker

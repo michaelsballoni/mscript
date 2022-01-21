@@ -5,7 +5,7 @@
 
 #pragma warning(disable: 26812) // enum 
 
-// We need a customer hasher the object type, so we forward declare object
+// We need a custom hasher for the object type, so we forward declare object
 // and leave the hasher implementation until after the object implementation
 namespace mscript
 {
@@ -62,58 +62,9 @@ namespace mscript
 
 		object_type type() const { return m_type; }
 
-		std::wstring toString() const
-		{
-			switch (m_type)
-			{
-			case STRING:
-				return m_string;
+		std::wstring toString() const;
 
-			case NUMBER:
-				return num2wstr(m_number);
-
-			case BOOL:
-				return m_bool ? L"true" : L"false";
-
-			case LIST:
-			{
-				std::vector<std::wstring> listStrs;
-				for (const auto& obj : m_list)
-					listStrs.push_back(obj.toString());
-				return join(listStrs, L", ");
-			}
-
-			case INDEX:
-			{
-				std::vector<std::wstring> indexStrs;
-				for (const auto& kvp : m_index.vec())
-					indexStrs.push_back(kvp.first.toString() + L": " + kvp.second.toString());
-				return join(indexStrs, L", ");
-			}
-
-			default:
-				raiseError("Invalid object type: " + num2str(int(m_type)));
-			}
-		}
-
-		static std::string getTypeName(object_type typeVal)
-		{
-			switch (typeVal)
-			{
-			case NUMBER:
-				return "number";
-			case STRING:
-				return "string";
-			case BOOL:
-				return "bool";
-			case LIST:
-				return "list";
-			case INDEX:
-				return "index";
-			default:
-				raiseError("Invalid type: " + num2str(int(typeVal)));
-			}
-		}
+		static std::string getTypeName(object_type typeVal);
 
 		double numberVal() const { validateType(NUMBER); return m_number; }
 
@@ -134,11 +85,9 @@ namespace mscript
 		}
 		bool operator!=(const object& other) const { return !operator==(other); }
 
-		void validateType(object_type shouldBe) const
-		{
-			if (m_type != shouldBe)
-				raiseError("Invalid type access: should be " + getTypeName(shouldBe) + ", is " + getTypeName(m_type));
-		}
+		void validateType(object_type shouldBe) const;
+
+		double getOneDouble(const std::string& function);
 
 	private:
 		object_type m_type = NUMBER;
@@ -150,9 +99,4 @@ namespace mscript
 		list m_list;
 		index m_index;
 	};
-}
-
-std::size_t std::hash<mscript::object>::operator()(const mscript::object& obj) const
-{
-	return std::hash<std::wstring>()(obj.toString());
 }

@@ -15,10 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="mscript-object-tests.cpp">
+    <ClCompile Include="object-tests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils-tests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

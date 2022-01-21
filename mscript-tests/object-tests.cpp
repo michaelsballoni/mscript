@@ -12,7 +12,7 @@ namespace mscript
 	TEST_CLASS(TestObject)
 	{
 	public:
-		TEST_METHOD(ObjectConstructorTests)
+		TEST_METHOD(ObjectTests)
 		{
 			{
 				object obj;
