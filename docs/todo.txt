@@ -1,14 +1,15 @@
 Port mscript to c++
 
+
 Fix dates to be full timestamps, not just dates
 Add tolocal and toutc functions
 
 system function
 
+===
+
 import statement to glue scripts together
 	If going to do separate scripts and modules namespaces are a must
-
-libraries:
 
 modules:
 Figure out how python C/C++ modules work
