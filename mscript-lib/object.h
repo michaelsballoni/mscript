@@ -32,6 +32,7 @@ namespace mscript
 		// Who needs more the five kinds of things?
 		enum object_type
 		{
+			NOTHING,
 			NUMBER,
 			STRING,
 			BOOL,
@@ -39,7 +40,11 @@ namespace mscript
 			INDEX
 		};
 
-		object(double number = 0.0)
+		object(object_type objType = NOTHING)
+			: m_type(objType)
+		{}
+
+		object(double number)
 			: m_type(NUMBER)
 			, m_number(number)
 		{}
@@ -66,6 +71,8 @@ namespace mscript
 
 		static std::string getTypeName(object_type typeVal);
 
+		bool isNull() const { return m_type == NOTHING; }
+
 		double numberVal() const { validateType(NUMBER); return m_number; }
 
 		const std::wstring& stringVal() const { validateType(STRING); return m_string; }
@@ -90,7 +97,7 @@ namespace mscript
 		double getOneDouble(const std::string& function);
 
 	private:
-		object_type m_type = NUMBER;
+		object_type m_type = NOTHING;
 
 		double m_number = 0.0;
 		std::wstring m_string;

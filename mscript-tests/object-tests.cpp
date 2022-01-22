@@ -16,8 +16,9 @@ namespace mscript
 		{
 			{
 				object obj;
-				Assert::IsTrue(obj.type() == object::NUMBER);
-				Assert::AreEqual(0.0, obj.numberVal());
+				Assert::IsTrue(obj.type() == object::NOTHING);
+				Assert::AreEqual(toWideStr("null"), obj.toString());
+				Assert::AreEqual(std::string("nothing"), object::getTypeName(obj.type()));
 			}
 
 			{

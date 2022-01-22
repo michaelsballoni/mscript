@@ -13,6 +13,9 @@ namespace mscript
 	{
 		switch (m_type)
 		{
+		case NOTHING:
+			return L"null";
+
 		case STRING:
 			return m_string;
 
@@ -47,6 +50,8 @@ namespace mscript
 	{
 		switch (typeVal)
 		{
+		case NOTHING:
+			return "nothing";
 		case NUMBER:
 			return "number";
 		case STRING:
