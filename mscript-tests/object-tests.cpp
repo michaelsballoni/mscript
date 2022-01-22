@@ -2,6 +2,7 @@
 #include "CppUnitTest.h"
 
 #include "object.h"
+#include "utils.h"
 
 #pragma comment(lib, "mscript-lib")
 

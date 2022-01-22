@@ -1,7 +1,10 @@
 #pragma once
 
-#include "utils.h"
-#include "includes.h"
+#include "vectormap.h"
+
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 #pragma warning(disable: 26812) // enum 
 

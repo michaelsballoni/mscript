@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "object.h"
+#include "utils.h"
 
 // Finish up the custom hasher for the object type
 std::size_t std::hash<mscript::object>::operator()(const mscript::object& obj) const

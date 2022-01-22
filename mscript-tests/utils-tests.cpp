@@ -3,6 +3,7 @@
 
 #include "object.h"
 #include "names.h"
+#include "utils.h"
 
 #pragma comment(lib, "mscript-lib")
 

@@ -1,9 +1,5 @@
 Port mscript to c++
 mscript-core:	port code and unit tests and get to pass as you go
-	Names
-	SymbolTable
-	SymbolStacker
-	SymbolSmacker
 	Expression
 	ScriptProcessor
 
