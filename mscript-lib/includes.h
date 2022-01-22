@@ -4,6 +4,8 @@
 
 #include "vectormap.h"
 
+#include <charconv>
+#include <cmath>
 #include <codecvt>
 #include <locale>
 #include <memory>

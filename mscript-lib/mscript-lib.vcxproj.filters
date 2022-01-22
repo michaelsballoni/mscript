@@ -36,6 +36,9 @@
     <ClInclude Include="symbols.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="expressions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -51,6 +54,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="symbols.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="expressions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

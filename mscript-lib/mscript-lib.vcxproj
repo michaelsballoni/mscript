@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="expressions.h" />
     <ClInclude Include="includes.h" />
     <ClInclude Include="names.h" />
     <ClInclude Include="object.h" />
@@ -172,6 +173,7 @@
     <ClInclude Include="vectormap.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="expressions.cpp" />
     <ClCompile Include="names.cpp" />
     <ClCompile Include="object.cpp" />
     <ClCompile Include="pch.cpp">

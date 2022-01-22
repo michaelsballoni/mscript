@@ -71,5 +71,73 @@ namespace mscript
 			Assert::IsTrue(!isReserved(L"disney"));
 			Assert::IsTrue(isReserved(L"null"));
 		}
+
+		TEST_METHOD(TrimTests)
+		{
+			Assert::AreEqual(toWideStr(""), trim(L""));
+			
+			Assert::AreEqual(toWideStr(""), trim(L" "));
+			Assert::AreEqual(toWideStr(""), trim(L"\t"));
+			Assert::AreEqual(toWideStr(""), trim(L"\n"));
+
+			Assert::AreEqual(toWideStr(""), trim(L"  "));
+			Assert::AreEqual(toWideStr(""), trim(L"   "));
+
+			Assert::AreEqual(toWideStr("a"), trim(L"a"));
+			Assert::AreEqual(toWideStr("ab"), trim(L"ab"));
+			Assert::AreEqual(toWideStr("abc"), trim(L"abc"));
+
+			Assert::AreEqual(toWideStr("a"), trim(L" a"));
+			Assert::AreEqual(toWideStr("ab"), trim(L" ab"));
+			Assert::AreEqual(toWideStr("abc"), trim(L" abc"));
+
+			Assert::AreEqual(toWideStr("a"), trim(L"a "));
+			Assert::AreEqual(toWideStr("ab"), trim(L"ab "));
+			Assert::AreEqual(toWideStr("abc"), trim(L"abc "));
+
+			Assert::AreEqual(toWideStr("a"), trim(L" a "));
+			Assert::AreEqual(toWideStr("ab"), trim(L" ab "));
+			Assert::AreEqual(toWideStr("abc"), trim(L" abc "));
+		}
+
+		TEST_METHOD(ReplaceTests)
+		{
+			std::wstring str;
+
+			str = L"";
+			replace(str, L"", L"");
+			Assert::AreEqual(toWideStr(""), str);
+
+			str = L"";
+			replace(str, L"foo", L"bar");
+			Assert::AreEqual(toWideStr(""), str);
+
+			str = L"blet";
+			replace(str, L"foo", L"bar");
+			Assert::AreEqual(toWideStr("blet"), str);
+
+			str = L"foobar";
+			replace(str, L"foo", L"bar");
+			Assert::AreEqual(toWideStr("barbar"), str);
+
+			str = L"foobletfoo";
+			replace(str, L"foo", L"bar");
+			Assert::AreEqual(toWideStr("barbletbar"), str);
+		}
+
+		TEST_METHOD(StartsWithTests)
+		{
+			Assert::IsTrue(!startsWith(L"", L""));
+			Assert::IsTrue(!startsWith(L"foo", L""));
+			Assert::IsTrue(!startsWith(L"", L"foo"));
+			Assert::IsTrue(!startsWith(L"fo", L"foo"));
+			Assert::IsTrue(!startsWith(L"fob", L"foo"));
+			Assert::IsTrue(!startsWith(L"foblle", L"foo"));
+
+			Assert::IsTrue(startsWith(L"foo", L"foo"));
+			Assert::IsTrue(startsWith(L"food", L"foo"));
+			Assert::IsTrue(startsWith(L"foodie", L"foo"));
+		}
+
 	};
 }

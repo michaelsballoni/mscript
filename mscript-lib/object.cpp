@@ -47,6 +47,28 @@ namespace mscript
 		}
 	}
 
+	double object::toNumber() const
+	{
+		switch (m_type)
+		{
+		case STRING: return _wtof(m_string.c_str());
+		case NUMBER: return m_number;
+		case BOOL: return m_bool ? 1.0 : 0.0;
+		default: raiseError("Cannot convert to number: " + getTypeName(type()));
+		}
+	}
+
+	size_t object::toLength() const
+	{
+		switch (m_type)
+		{
+		case STRING: return m_string.length();
+		case LIST: return m_list.size();
+		case INDEX: return m_index.size();
+		default: raiseError(L"Invalid type for getting length: " + getTypeName(type()));
+		}
+	}
+
 	std::string object::getTypeName(object_type typeVal)
 	{
 		switch (typeVal)
@@ -72,14 +94,5 @@ namespace mscript
 	{
 		if (m_type != shouldBe)
 			raiseError("Invalid type access: should be " + getTypeName(shouldBe) + ", is " + getTypeName(m_type));
-	}
-
-	double object::getOneDouble(const std::string& function)
-	{
-		validateType(LIST);
-		if (m_list.size() != 1 || m_list[0].type() != object::NUMBER)
-			raiseError("Function " + function + " requires one numeric parameter");
-		else
-			return m_list[0].numberVal();
 	}
 }

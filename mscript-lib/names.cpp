@@ -32,11 +32,13 @@ bool mscript::isReserved(const std::wstring& name)
 {
     static std::unordered_set<std::wstring> ReservedWords
     {
+        L"nothing",
         L"null",
         L"true",
         L"false",
         L"and",
         L"or",
+        L"not",
         L"list",
         L"index",
         L"number",

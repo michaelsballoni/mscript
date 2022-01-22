@@ -41,4 +41,69 @@ namespace mscript
         }
         return retVal;
     }
+
+    std::wstring mscript::trim(const std::wstring& str)
+    {
+        if (str.empty())
+            return L"";
+
+        if (str.length() == 1)
+        {
+            if (iswspace(str[0]))
+                return L"";
+            else
+                return str;
+        }
+
+        if (!iswspace(str.front()) && !iswspace(str.back()))
+            return str;
+
+        std::wstring retVal;
+        retVal.reserve(str.length());
+
+        // skip whitespace
+        size_t c = 0;
+        while (c < str.length() && iswspace(str[c]))
+            ++c;
+
+        // copy the rest
+        while (c < str.length())
+            retVal.push_back(str[c++]);
+
+        // pop whitespace
+        while (!retVal.empty() && iswspace(retVal.back()))
+            retVal.pop_back();
+
+        return retVal;
+    }
+}
+
+void mscript::replace(std::wstring& str, const std::wstring& from, const std::wstring& to)
+{
+    size_t pos;
+    size_t offset = 0;
+    const size_t fromSize = from.size();
+    const size_t increment = to.size();
+    while ((pos = str.find(from, offset)) != std::wstring::npos)
+    {
+        str.replace(pos, fromSize, to);
+        offset = pos + increment;
+    }
+}
+
+bool mscript::startsWith(const std::wstring& str, const std::wstring& starter)
+{
+    if (str.empty() || starter.empty())
+        return false;
+
+    if (starter.length() > str.length())
+        return false;
+
+    for (size_t s = 0; s < starter.length(); ++s)
+    {
+        if (str[s] != starter[s])
+            return false;
+    }
+
+    return true;
 }

@@ -71,6 +71,8 @@ namespace mscript
 		object_type type() const { return m_type; }
 
 		std::wstring toString() const;
+		double toNumber() const;
+		size_t toLength() const;
 
 		static std::string getTypeName(object_type typeVal);
 
@@ -96,8 +98,6 @@ namespace mscript
 		bool operator!=(const object& other) const { return !operator==(other); }
 
 		void validateType(object_type shouldBe) const;
-
-		double getOneDouble(const std::string& function);
 
 	private:
 		object_type m_type = NOTHING;

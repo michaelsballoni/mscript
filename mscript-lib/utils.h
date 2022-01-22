@@ -5,8 +5,8 @@
 #include <vector>
 
 // Use macros for exception raising helpers to not pollute the stack trace
-#define raiseError(msg) throw std::runtime_error(std::string((msg)).c_str())
-#define raiseWError(msg) throw std::runtime_error(std::string(toNarrowStr((msg))).c_str())
+#define raiseError(msg) throw mscript::script_exception(std::string((msg)).c_str())
+#define raiseWError(msg) throw mscript::script_exception(std::wstring(((msg))).c_str())
 
 namespace mscript
 {
@@ -17,4 +17,28 @@ namespace mscript
     std::wstring toWideStr(const std::string& str);
 
     std::wstring join(const std::vector<std::wstring>& strs, const wchar_t* seperator);
+
+    std::wstring trim(const std::wstring& str);
+
+    void replace(std::wstring& str, const std::wstring& from, const std::wstring& to);
+
+    bool startsWith(const std::wstring& str, const std::wstring& starter);
+
+    /// <summary>
+    /// script_exception has the line number and text of the line where the exception occurred
+    /// </summary>
+    class script_exception : public std::runtime_error
+    {
+    public:
+        script_exception(const std::wstring& msg)
+            : script_exception(toNarrowStr(msg))
+        { }
+
+        script_exception(const std::string& msg)
+            : std::runtime_error(msg.c_str())
+        { }
+
+        std::wstring line;
+        int line_number = -1;
+    };
 }

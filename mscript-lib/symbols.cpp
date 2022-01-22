@@ -4,10 +4,7 @@
 #include "utils.h"
 
 namespace mscript
-{    /// <summary>
-    /// Remove all frames but the top global frame and return those
-    /// </summary>
-    /// <returns></returns>
+{
     symbol_table::stack symbol_table::smackFrames()
     {
         if (m_symbols.empty())
@@ -20,18 +17,11 @@ namespace mscript
         return retVal;
     }
 
-    /// <summary>
-    /// Given previously smacked frames, restore them
-    /// </summary>
-    /// <param name="frames">Stack frames to restore</param>
     void symbol_table::restoreFrames(const symbol_table::stack& frames)
     {
         m_symbols.insert(m_symbols.end(), frames.begin(), frames.end());
     }
 
-    /// <summary>
-    /// Does a name exist in the symbol table?
-    /// </summary>
     bool symbol_table::contains(const std::wstring& name)
     {
         for (int s = int(m_symbols.size()) - 1; s >= 0; --s)
@@ -43,9 +33,6 @@ namespace mscript
         return false;
     }
 
-    /// <summary>
-    /// Set a new named variable with an initial value
-    /// </summary>
     void symbol_table::set(const std::wstring& name, const object& value)
     {
         validateName(name);
@@ -58,9 +45,6 @@ namespace mscript
         dict.insert({ name, value });
     }
 
-    /// <summary>
-    /// Update the value of a named variable
-    /// </summary>
     void symbol_table::assign(const std::wstring& name, object value)
     {
         for (int s = int(m_symbols.size()) - 1; s >= 0; --s)
@@ -75,9 +59,6 @@ namespace mscript
         raiseWError(L"Name not set yet: " + name);
     }
 
-    /// <summary>
-    /// Try to get the value of a named variable
-    /// </summary>
     bool symbol_table::tryGet(const std::wstring& name, object& answer)
     {
         answer = object();
@@ -94,9 +75,6 @@ namespace mscript
         return false;
     }
 
-    /// <summary>
-    /// Get the value of a named variable
-    /// </summary>
     object symbol_table::get(const std::wstring& name)
     {
         object answer;
