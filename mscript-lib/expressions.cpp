@@ -109,13 +109,13 @@ namespace mscript
 
         for (size_t opdx = 0; opdx < sm_ops.size(); ++opdx)
         {
-            std::string op = sm_ops[opdx];
+            const std::string& op = sm_ops[opdx];
             size_t opLen = op.size();
 
             size_t parenCount = 0;
             bool inString = false;
 
-            for (int idx = expStr.size() - 1; idx >= 0; --idx)
+            for (int idx = int(expStr.size()) - 1; idx >= 0; --idx)
             {
                 wchar_t c = expStr[idx];
 
@@ -165,6 +165,7 @@ namespace mscript
 
                         object leftVal = evaluate(leftStr);
 
+                        // Short circuitry
                         if ((op == "and" || op == "&&") && !leftVal.boolVal())
                         {
                             value = false;
@@ -186,7 +187,7 @@ namespace mscript
                                 else
                                     raiseError("Invalid operator for null values: " + op);
                             }
-                            else if (leftVal.type() == object::STRING || rightVal.type() == object.STRING)
+                            else if (leftVal.type() == object::STRING || rightVal.type() == object::STRING)
                             {
                                 std::wstring leftValStr = leftVal.toString();
                                 std::wstring rightValStr = rightVal.toString();
@@ -256,24 +257,26 @@ namespace mscript
                                 bool leftBool = leftVal.boolVal();
                                 bool rightBool = rightVal.boolVal();
 
-                                if (op == "and") 
-                                    value = leftBool && rightBool; 
-                                else if (op == "&&") 
-                                    value = leftBool && rightBool; 
-                                else if (op == "or") 
-                                    value = leftBool || rightBool; 
-                                else if (op == "||") 
-                                    value = leftBool || rightBool; 
-                                else 
+                                if (op == "and")
+                                    value = leftBool && rightBool;
+                                else if (op == "&&")
+                                    value = leftBool && rightBool;
+                                else if (op == "or")
+                                    value = leftBool || rightBool;
+                                else if (op == "||")
+                                    value = leftBool || rightBool;
+                                else
                                     raiseError("Unrecognized boolean operator: " + op);
                             }
+                            else
+                                raiseError("Expression types do not match: " + op);
                         }
                         return value;
                     }
                     else
                     {
                         if (idx > 0)
-                            idx = reverseFind(expStr, op, idx);
+                            idx = reverseFind(expStr, toWideStr(op), idx);
                     }
                 }
             }
@@ -284,7 +287,7 @@ namespace mscript
         {
             std::wstring functionName = expStr.substr(0, leftParen);
 
-            int subStrLen = (expStr.size() - 1) - leftParen - 1;
+            int subStrLen = (int(expStr.size()) - 1) - int(leftParen) - 1;
 
             expStr = expStr.substr(leftParen + 1, subStrLen);
 
@@ -319,7 +322,7 @@ namespace mscript
         raiseWError(L"Expression not evaluated: " + expStr);
     }
 
-    bool expression::isOperator(std::wstring expr, std::string op, int n)
+    bool expression::isOperator(std::wstring expr, const std::string& op, int n)
     {
         expr = trim(expr);
         if (expr.empty())
@@ -389,9 +392,9 @@ namespace mscript
         return true;
     }
 
-    int expression::reverseFind(std::wstring source, const std::wstring& search, int start)
+    int expression::reverseFind(const std::wstring& source, const std::wstring& searchW, int start)
     {
-        int searchLen = search.length();
+        int searchLen = int(searchW.length());
         if (searchLen > source.length())
             return -1;
 
@@ -410,7 +413,7 @@ namespace mscript
             if (source.length() - (p + searchLen) >= 0)
             {
                 std::wstring sign = source.substr(p, searchLen);
-                if (sign == search && openP == closeP)
+                if (sign == searchW && openP == closeP)
                     return p;
             }
 
@@ -423,7 +426,7 @@ namespace mscript
         return -1;
     }
 
-    object::list expression::processParameters(const std::vector<std::wstring> expStrs)
+    object::list expression::processParameters(const std::vector<std::wstring>& expStrs)
     {
         object::list values;
         values.reserve(expStrs.size());
@@ -484,66 +487,68 @@ namespace mscript
             return paramList[0].numberVal();
     }
 
-    object expression::executeFunction(const std::wstring& function, const object::list& paramList)
+    object expression::executeFunction(const std::wstring& functionW, const object::list& paramList)
     {
+        const std::string function = toNarrowStr(functionW);
+
         object first = paramList.size() == 0 ? object::NOTHING : paramList[0];
 
-        if (function == L"abs") return abs(getOneDouble(paramList, "abs"));
+        if (function == "abs") return abs(getOneDouble(paramList, "abs"));
 
-        else if (function == L"sqrt") return sqrt(getOneDouble(paramList, "sqrt"));
-        else if (function == L"ceil") return ceil(getOneDouble(paramList, "ceil"));
-        else if (function == L"floor") return floor(getOneDouble(paramList, "floor"));
-        else if (function == L"round") return round(getOneDouble(paramList, "round"));
+        if (function == "sqrt") return sqrt(getOneDouble(paramList, "sqrt"));
+        if (function == "ceil") return ceil(getOneDouble(paramList, "ceil"));
+        if (function == "floor") return floor(getOneDouble(paramList, "floor"));
+        if (function == "round") return round(getOneDouble(paramList, "round"));
 
-        else if (function == L"exp") return exp(getOneDouble(paramList, "exp"));
-        else if (function == L"log") return log(getOneDouble(paramList, "log"));
-        else if (function == L"log2") return log2(getOneDouble(paramList, "log2"));
-        else if (function == L"log10") return log10(getOneDouble(paramList, "log10"));
+        if (function == "exp") return exp(getOneDouble(paramList, "exp"));
+        if (function == "log") return log(getOneDouble(paramList, "log"));
+        if (function == "log2") return log2(getOneDouble(paramList, "log2"));
+        if (function == "log10") return log10(getOneDouble(paramList, "log10"));
 
-        else if (function == L"sin") return sin(getOneDouble(paramList, "sin"));
-        else if (function == L"cos") return cos(getOneDouble(paramList, "cos"));
-        else if (function == L"tan") return tan(getOneDouble(paramList, "tan"));
+        if (function == "sin") return sin(getOneDouble(paramList, "sin"));
+        if (function == "cos") return cos(getOneDouble(paramList, "cos"));
+        if (function == "tan") return tan(getOneDouble(paramList, "tan"));
 
-        else if (function == L"asin") return asin(getOneDouble(paramList, "asin"));
-        else if (function == L"acos") return acos(getOneDouble(paramList, "acos"));
-        else if (function == L"atan") return atan(getOneDouble(paramList, "atan"));
+        if (function == "asin") return asin(getOneDouble(paramList, "asin"));
+        if (function == "acos") return acos(getOneDouble(paramList, "acos"));
+        if (function == "atan") return atan(getOneDouble(paramList, "atan"));
 
-        else if (function == L"sinh") return sinh(getOneDouble(paramList, "sinh"));
-        else if (function == L"cosh") return cosh(getOneDouble(paramList, "cosh"));
-        else if (function == L"tanh") return tanh(getOneDouble(paramList, "tanh"));
+        if (function == "sinh") return sinh(getOneDouble(paramList, "sinh"));
+        if (function == "cosh") return cosh(getOneDouble(paramList, "cosh"));
+        if (function == "tanh") return tanh(getOneDouble(paramList, "tanh"));
 
-        if (function == L"getType")
+        if (function == "getType")
         {
             if (paramList.size() != 1)
                 raiseError("getType() takes one parameter");
             return toWideStr(first.getTypeName(first.type()));
         }
 
-        if (function == L"number")
+        if (function == "number")
         {
             if (paramList.size() != 1)
                 raiseError("number() takes one parameter");
             return first.toNumber();
         }
 
-        if (function == L"string")
+        if (function == "string")
         {
             if (paramList.size() != 1)
                 raiseError("string() takes one parameter");
             return first.toString();
         }
 
-        if (function == L"length")
+        if (function == "length")
         {
             if (paramList.size() != 1)
                 raiseError("length() takes one parameter");
             return double(first.toLength());
         }
 
-        if (function == L"list")
+        if (function == "list")
             return object::list(paramList);
 
-        if (function == L"index")
+        if (function == "index")
         {
             if ((paramList.size() % 2) != 0)
                 raiseError("index() parameters must be an even count, key-value pairs");
@@ -558,571 +563,451 @@ namespace mscript
             return newIndex;
         }
 
-        case "add": // only function that has side-effects -> quasi-functional
-            if (first is list)
+        if (function == "add")
+        {
+            if (first.type() == object::LIST)
             {
-                list l = (list)first;
-                for (int v = 1; v < paramList.Count; ++v)
-                    l.Add(paramList[v]);
-                return l;
+                auto& list = first.listVal();
+                for (int v = 1; v < paramList.size(); ++v)
+                    list.push_back(paramList[v]);
+                return first;
             }
-            else if (first is index)
+            else if (first.type() == object::INDEX)
             {
-                if (((paramList.Count - 1) % 2) != 0)
-                    throw new ScriptException("add parameters for index must be an even count: " + paramList.Count);
-                index i = (index)first;
-                for (int a = 1; a < paramList.Count; a += 2)
+                if (((paramList.size() - 1) % 2) != 0)
+                    raiseError("add() parameters for index must be an even count");
+
+                auto& index = first.indexVal();
+                for (int a = 1; a < paramList.size(); a += 2)
                 {
-                    if (i.ContainsKey(paramList[a]))
-                        throw new ScriptException("add function index key repeated: " + paramList[a]);
-                    i.Add(paramList[a], paramList[a + 1]);
+                    if (index.contains(paramList[a]))
+                        raiseWError(L"add() index key repeated");
+                    index.insert(paramList[a], paramList[a + 1]);
                 }
-                return i;
+                return first;
             }
             else
-                throw new ScriptException("add function works only with list and index");
+                raiseError("add() only works with list and index");
+        }
 
-        case "get":
+        if (function == "get")
         {
-            if (paramList.Count != 2)
-                throw new ScriptException("get function takes item to get from, and key to use");
-            if (first is string)
-            {
-                if (!(paramList[1] is double))
-                    throw new ScriptException("get function parameter is not a number");
-                string s = (string)first;
-                int idx = (int)(double)paramList[1];
-                if (idx < 0 || idx >= s.Length)
-                    throw new ScriptException("get function index is out of range: " + idx + " - length: " + s.Length);
-                return s[idx].ToString();
-            }
-            else if (first is list)
-            {
-                if (!(paramList[1] is double))
-                    throw new ScriptException("get function parameter is not a number");
-                list l = (list)first;
-                int idx = Convert.ToInt32(paramList[1]);
-                if (idx < 0 || idx >= l.Count)
-                    throw new ScriptException("get function index is out of range: " + idx + " - length: " + l.Count);
-                return l[idx];
-            }
-            else if (first is index)
+            if (paramList.size() != 2)
+                raiseError("get() invalid argument count");
+            
+            if (first.type() == object::INDEX)
             {
                 object key = paramList[1];
-                index i = (index)first;
-                if (!i.ContainsKey(key))
-                    throw new ScriptException("get function key not found in index: " + key);
-                return i[key];
+                auto& index = first.indexVal();
+                if (!index.contains(key))
+                    raiseError("get() key not found");
+                return index.get(key);
             }
-            else
-                throw new ScriptException("get function only works with string, list, and index");
+
+            if (paramList[1].type() == object::NUMBER)
+                raiseError("get() parameter is not a number");
+
+            size_t idx = size_t(paramList[1].numberVal());
+
+            if (idx < 0 || idx >= first.toLength())
+                raiseError("get() index is out of range");
+            
+            switch (first.type())
+            {
+            case object::STRING: return std::wstring{ first.stringVal()[idx] };
+            case object::LIST: return first.listVal()[idx];
+            default: raiseError("get() function only works with string, list, and index");
+            }
         }
 
-        case "has":
+        if (function == "has")
         {
-            if (paramList.Count != 2)
-                throw new ScriptException("has function takes collection to look in, and value to look for");
-            if (first is string)
-                return ((string)first).Contains(Utils.ToString(paramList[1]));
-            else if (first is list)
-                return ((list)first).Contains(paramList[1]);
-            else if (first is index)
-                return ((index)first).ContainsKey(paramList[1]);
+            if (paramList.size() != 2)
+                raiseError("has() invalid parameter count");
+            if (first.type() == object::STRING)
+                return first.stringVal().find(paramList[1].toString()) != std::wstring::npos;
+            else if (first.type() == object::LIST)
+                return std::find(first.listVal().begin(), first.listVal().end(), paramList[1]) != first.listVal().end();
+            else if (first.type() == object::INDEX)
+                return first.indexVal().contains(paramList[1]);
             else
-                throw new ScriptException("has function only works with string, list, and index");
+                raiseError("has() only works with string, list, and index");
         }
 
-        case "keys":
-            if (paramList.Count != 1)
-                throw new ScriptException("keys function takes index to work with");
-            if (first is index)
-            {
-                list keys = new list(((index)first).Keys);
-                return keys;
-            }
-            else
-                throw new ScriptException("keys function only works with index");
-
-        case "values":
-            if (paramList.Count != 1)
-                throw new ScriptException("values function takes index to work with");
-            if (first is index)
-            {
-                list keys = new list(((index)first).Values);
-                return keys;
-            }
-            else
-                throw new ScriptException("values function only works with index");
-
-        case "reversed":
+        if (function == "keys")
         {
-            if (paramList.Count != 1)
-                throw new ScriptException("reversed function only works with one item");
-            if (first is string)
+            if (paramList.size() != 1)
+                raiseError("keys() works with one index");
+            if (first.type() != object::INDEX)
+                raiseError("keys() works with index");
+            return first.indexVal().keys(); // list == vector<object>, types match
+        }
+
+        if (function == "values")
+        {
+            if (paramList.size() != 1)
+                raiseError("values() works with one index");
+            if (first.type() != object::INDEX)
+                raiseError("values() works with index");
+            return first.indexVal().values(); // list == vector<object>, types match
+        }
+
+        if (function == "reversed")
+        {
+            if (paramList.size() != 1)
+                raiseError("reversed() works with one item");
+
+            if (first.type() == object::STRING)
             {
-                var listy = new List<char>(((string)first).ToCharArray());
-                listy.Reverse();
-                return new string(listy.ToArray());
-            }
-            else if (first is list)
-            {
-                list copy = new list((list)first);
-                copy.Reverse();
+                auto copy = first.stringVal();
+                std::reverse(copy.begin(), copy.end());
                 return copy;
             }
-            else if (first is index)
+            else if (first.type() == object::LIST)
             {
-                var entries = new List<KeyValuePair<object, object>>(((index)first).Entries);
-                entries.Reverse();
-                index copy = new index();
-                foreach(var kvp in entries)
-                    copy.Add(kvp.Key, kvp.Value);
+                auto copy = first.listVal();
+                std::reverse(copy.begin(), copy.end());
                 return copy;
             }
+            else if (first.type() == object::INDEX)
+            {
+                auto keys = first.indexVal().keys();
+                std::reverse(keys.begin(), keys.end());
+
+                object::index newIndex;
+                for (const auto& key : keys)
+                    newIndex.insert(key, first.indexVal().get(key));
+                return newIndex;
+            }
             else
-                throw new ScriptException("reversed function only works with string, list, and index");
+                raiseError("reversed() only works with string, list, and index");
         }
 
-        case "sorted":
+        if (function == "sorted")
         {
-            if (paramList.Count != 1)
-                throw new ScriptException("sorted function only works with one item");
-            if (first is string)
+            if (paramList.size() != 1)
+                raiseError("sorted() works with one item");
+            if (first.type() == object::STRING)
             {
-                var chars = ((string)first).ToCharArray().ToList();
-                chars.Sort();
-                return new string(chars.ToArray());
-            }
-            else if (first is list)
-            {
-                list copy = new list((list)first);
-                copy.Sort();
+                auto copy = first.stringVal();
+                std::sort(copy.begin(), copy.end());
                 return copy;
             }
-            else if (first is index)
+            else if (first.type() == object::LIST)
             {
-                index original = (index)first;
-                list sortedKeys = new list(original.Keys);
-                sortedKeys.Sort();
-                index copy = new index();
-                foreach(var key in sortedKeys)
-                    copy.Add(key, original[key]);
+                auto copy = first.listVal();
+                std::sort(copy.begin(), copy.end());
                 return copy;
             }
+            else if (first.type() == object::INDEX)
+            {
+                auto keys = first.indexVal().keys();
+                std::sort(keys.begin(), keys.end());
+
+                object::index newIndex;
+                for (const auto& key : keys)
+                    newIndex.insert(key, first.indexVal().get(key));
+                return newIndex;
+            }
             else
-                throw new ScriptException("sorted function only works with string, list, and index");
+                raiseError("sorted() only works with string, list, and index");
         }
 
-        case "join":
+        if (function == "join")
         {
-            if (paramList.Count > 2)
-                throw new ScriptException("join function takes item to work with, and an optional separator");
+            if (paramList.size() > 2)
+                raiseError("join() takes item to work with, and optional separator");
+            if (first.type() != object::LIST)
+                raiseError("join() only works with list");
 
-            string separator = paramList.Count == 2 ? Utils.ToString(paramList[1]) : "";
-            if (first is list)
-                return string.Join(separator, (list)first);
-            else if (first is index)
-                return string.Join(separator, ((index)first).Keys);
-            else
-                throw new ScriptException("join function only works with list and index");
+            std::wstring separator = paramList.size() == 2 ? paramList[1].toString() : L"";
+            std::vector<std::wstring> strings;
+            strings.reserve(first.listVal().size());
+            for (const auto& obj : first.listVal())
+                strings.push_back(obj.toString());
+            return join(strings, separator.c_str());
         }
 
-        case "split":
+        if (function == "split")
         {
-            if (paramList.Count != 2)
-                throw new ScriptException("split works with an item and separator");
+            if (paramList.size() != 2)
+                raiseError("split() works with an item and separator");
 
-            if (!(first is string))
-                throw new ScriptException("split only works with strings");
+            if (first.type() != object::STRING)
+                raiseError("split() only works with strings");
 
-            string separator = Utils.ToString(paramList[1]);
-
-            var initial = ((string)first).Split(new[] { separator }, StringSplitOptions.None);
-            return initial.Select(val = > (object)val).ToList();
+            std::wstring separator = paramList[1].toString();
+            auto splitted = split(first.stringVal(), separator.c_str());
+            object::list splittedObjs;
+            splittedObjs.reserve(splitted.size());
+            for (const auto& str : splitted)
+                splittedObjs.push_back(str);
+            return splittedObjs;
         }
 
-        case "toUpper":
-            if (paramList.Count != 1)
-                throw new ScriptException("toUpper takes one string parameter");
-            if (!(first is string))
-                throw new ScriptException("toUpper only works with strings");
-            return ((string)first).ToUpper();
+        if (function == "toUpper")
+        {
+            if (paramList.size() != 1)
+                raiseError("toUpper() works with one string");
 
-        case "toLower":
-            if (paramList.Count != 1)
-                throw new ScriptException("toLower takes one string parameter");
-            if (!(first is string))
-                throw new ScriptException("toLower only works with strings");
-            return ((string)first).ToLower();
+            if (first.type() != object::STRING)
+                raiseError("toUpper() only works with string");
 
-        case "replaced":
+            auto str = first.stringVal();
+            for (auto& c : str)
+                c = towupper(c);
+            return str;
+        }
+
+        if (function == "toLower")
+        {
+            if (paramList.size() != 1)
+                raiseError("toLower() works with one string");
+
+            if (first.type() != object::STRING)
+                raiseError("toLower() only works with string");
+
+            auto str = first.stringVal();
+            for (auto& c : str)
+                c = towlower(c);
+            return str;
+        }
+
+        if (function == "replaced")
+        {
             if
-                (
-                    paramList.Count != 3
-                    ||
-                    !(paramList[0] is string)
-                    ||
-                    !(paramList[1] is string)
-                    ||
-                    !(paramList[2] is string)
-                    )
+            (
+                paramList.size() != 3
+                ||
+                (paramList[0].type() != object::STRING)
+                ||
+                (paramList[1].type() != object::STRING)
+                ||
+                (paramList[2].type() != object::STRING)
+            )
             {
-                throw new ScriptException("replaced takes three string parameters");
+                raiseError("replaced() takes a string, a string to find, and a string to replace it with");
             }
-            string input = (string)paramList[0];
-            string toFind = (string)paramList[1];
-            string toReplaceWith = (string)paramList[2];
-            return input.Replace(toFind, toReplaceWith);
 
-        case "random":
+            std::wstring input = paramList[0].stringVal();
+            std::wstring toFind = paramList[1].stringVal();
+            std::wstring toReplaceWith = paramList[2].stringVal();
+            replace(input, toFind, toReplaceWith);
+            return input;
+        }
+
+        if (function == "random")
+        {
             if
-                (
-                    paramList.Count != 2
-                    ||
-                    !(paramList[0] is double)
-                    ||
-                    !(paramList[1] is double)
-                    )
+            (
+                paramList.size() != 2
+                ||
+                paramList[0].type() != object::NUMBER
+                ||
+                paramList[1].type() != object::NUMBER
+            )
             {
-                throw new ScriptException("random takes two number parameters, min and max");
-            }
-            double parm1 = (double)paramList[0];
-            double parm2 = (double)paramList[1];
-            double min = Math.Min(parm1, parm2);
-            double max = Math.Max(parm1, parm2);
-            lock(sm_random)
-            {
-                double rnd = sm_random.NextDouble() * (max - min) + min;
-                return rnd;
+                raiseError("random() takes two number parameters, min and max");
             }
 
-        case "firstLocation":
-            if (paramList.Count != 2)
-                throw new ScriptException("firstLocation works with an item to look in and a key to look for");
-            if (first is string)
+            double parm1 = paramList[0].numberVal();
+            double parm2 = paramList[1].numberVal();
+ 
+            double min = std::min(parm1, parm2);
+            double max = std::max(parm1, parm2);
+            
+            double rnd = (double(rand()) / RAND_MAX) * (max - min) + min;
+            return rnd;
+        }
+
+        if (function == "firstLocation")
+        {
+            if (paramList.size() != 2)
+                raiseError("firstLocation() works with an item to look in and a key to look for");
+
+            if (first.type() == object::STRING)
             {
-                if (!(paramList[1] is string))
-                    throw new ScriptException("Invalid second param for firstLocation, must be string");
-                return (double)first.ToString().IndexOf(Utils.ToString(paramList[1]));
+                if (paramList[1].type() != object::STRING)
+                    raiseError("firstLocation() invalid parameter");
+                size_t idx = first.stringVal().find(paramList[1].stringVal());
+                if (idx == std::wstring::npos)
+                    return double(-1);
+                else
+                    return double(idx);
             }
-            else if (first is list)
+            else if (first.type() == object::LIST)
             {
-                list l = (list)first;
-                for (int i = 0; i < l.Count; ++i)
+                const auto& l = first.listVal();
+                for (size_t i = 0; i < l.size(); ++i)
                 {
-                    if (l[i].Equals(paramList[1]))
-                        return (double)i;
+                    if (l[i] == paramList[1])
+                        return double(i);
                 }
-                return (double)-1;
-            }
-            else if (first is index)
-            {
-                index l = (index)first;
-                for (int i = 0; i < l.Count; ++i)
-                {
-                    if (l.Entries[i].Key.Equals(paramList[1]))
-                        return (double)i;
-                }
-                return (double)-1;
+                return double(-1);
             }
             else
-            {
-                throw new ScriptException("firstLocation only works with string, list, and index");
-            }
+                raiseError("firstLocation() only works with string and list");
+        }
 
-        case "lastLocation":
-            if (paramList.Count != 2)
-                throw new ScriptException("lastLocation works with an item ");
-            if (first is string)
+        if (function == "lastLocation")
+        {
+            if (paramList.size() != 2)
+                raiseError("lastLocation() works with an item to look in and a key to look for");
+
+            if (first.type() == object::STRING)
             {
-                if (!(paramList[1] is string))
-                    throw new ScriptException("Invalid second param for lastLocation, must be string");
-                return (double)first.ToString().LastIndexOf(Utils.ToString(paramList[1]));
+                if (paramList[1].type() != object::STRING)
+                    raiseError("lastLocation() invalid parameter");
+                size_t idx = first.stringVal().rfind(paramList[1].stringVal());
+                if (idx == std::wstring::npos)
+                    return double(-1);
+                else
+                    return double(idx);
             }
-            else if (first is list)
+            else if (first.type() == object::LIST)
             {
-                list l = (list)first;
-                for (int i = l.Count - 1; i >= 0; --i)
+                const auto& l = first.listVal();
+                for (int i = int(l.size()) - 1; i >= 0; --i)
                 {
-                    if (l[i].Equals(paramList[1]))
-                        return (double)i;
+                    if (l[i] == paramList[1])
+                        return double(i);
                 }
-                return (double)-1;
-            }
-            else if (first is index)
-            {
-                index l = (index)first;
-                for (int i = l.Count - 1; i >= 0; --i)
-                {
-                    if (l.Entries[i].Key.Equals(paramList[1]))
-                        return (double)i;
-                }
-                return (double)-1;
+                return double(-1);
             }
             else
-            {
-                throw new ScriptException("lastLocation only works with string, list, or index");
-            }
+                raiseError("lastLocation() only works with string and list");
+        }
 
-        case "subset":
-            if (paramList.Count != 2 && paramList.Count != 3)
-                throw new ScriptException("subset only works with a string and a start index and an optional length");
-            if (!(paramList[1] is double))
-                throw new ScriptException("subset start index must be number");
-            int startIndex = (int)(double)paramList[1];
+        if (function == "subset")
+        {
+            if (paramList.size() != 2 && paramList.size() != 3)
+                raiseError("subset() works with a string and a start index and an optional length");
+            if (paramList[1].type() != object::NUMBER)
+                raiseError("subset() start index must be number");
+
+            int startIndex = int(paramList[1].numberVal());
             if (startIndex < 0)
-                throw new ScriptException("subset start index must be greater than or equal zero");
-            if (paramList.Count == 2)
+                raiseError("subset() start index must be greater than or equal zero");
+
+            if (paramList.size() == 2)
             {
-                if (first is string)
+                if (first.type() == object::STRING)
                 {
-                    string s = (string)first;
-                    if (startIndex >= s.Length)
-                        throw new ScriptException("subset start index must be less than or equal to the length of the string");
-                    return ((string)first).Substring(startIndex);
+                    const auto& s = first.stringVal();
+                    if (startIndex >= s.size())
+                        raiseError("subset() start index must be less than the length of the string");
+                    return s.substr(startIndex);
                 }
-                else if (first is list)
+                else if (first.type() == object::LIST)
                 {
-                    list l = (list)first;
-                    if (startIndex >= l.Count)
-                        throw new ScriptException("subset start index must be less than or equal to the length of the list");
-                    list subset = new list();
-                    for (int i = startIndex; i < l.Count; ++i)
-                        subset.Add(l[i]);
-                    return subset;
-                }
-                else if (first is index)
-                {
-                    index i = (index)first;
-                    if (startIndex >= i.Count)
-                        throw new ScriptException("subset start index must be less than or equal to the length of the index");
-                    index subset = new index();
-                    for (int j = startIndex; j < i.Count; ++j)
-                        subset.Add(i.Entries[j].Key, i.Entries[j].Value);
+                    const auto& list = first.listVal();
+                    if (startIndex >= list.size())
+                        raiseError("subset() start index must be less than the length of the list");
+                    object::list subset;
+                    for (int i = startIndex; i < list.size(); ++i)
+                        subset.push_back(list[i]);
                     return subset;
                 }
                 else
-                {
-                    throw new ScriptException("subset works with string, list, and index");
-                }
+                    raiseError("subset() works with string and list");
             }
             else
             {
-                if (!(paramList[2] is double))
-                    throw new ScriptException("substring third param must be number");
-                int length = (int)(double)paramList[2];
+                if (paramList[2].type() != object::NUMBER)
+                    raiseError("substring() invalid arguments");
+                int length = int(paramList[2].numberVal());
                 if (length < 0)
-                    throw new ScriptException("subset length must be greater than or equal zero");
-                if (first is string)
+                    raiseError("subset() length must be greater than or equal zero");
+                if (first.type() == object::STRING)
                 {
-                    string s = (string)first;
-                    if (startIndex >= s.Length)
-                        throw new ScriptException("subset start index must be less than or equal to the length of the string");
-                    if (startIndex + length > s.Length)
-                        throw new ScriptException("subset must be exceed length of string");
-                    return s.Substring(startIndex, length);
+                    const auto& s = first.stringVal();
+                    if (startIndex >= s.size())
+                        raiseError("subset() start index must be less than the length of the string");
+                    return s.substr(startIndex, length);
                 }
-                else if (first is list)
+                else if (first.type() == object::LIST)
                 {
-                    list l = (list)first;
-                    if (startIndex >= l.Count)
-                        throw new ScriptException("subset start index must be less than or equal to the length of the list");
-                    if (startIndex + length > l.Count)
-                        throw new ScriptException("subset must be exceed length of list");
-                    list subset = new list();
-                    for (int i = startIndex; i < startIndex + length; ++i)
-                        subset.Add(l[i]);
-                    return subset;
-                }
-                else if (first is index)
-                {
-                    index i = (index)first;
-                    if (startIndex >= i.Count)
-                        throw new ScriptException("subset start index must be less than or equal to the length of the index");
-                    if (startIndex + length > i.Count)
-                        throw new ScriptException("subset must be exceed length of list");
-                    index subset = new index();
-                    for (int j = startIndex; j < startIndex + length; ++j)
-                        subset.Add(i.Entries[j].Key, i.Entries[j].Value);
+                    const auto& list = first.listVal();
+                    if (startIndex >= list.size())
+                        raiseError("subset() start index must be less than the length of the list");
+                    object::list subset;
+                    int endIndex = startIndex + length;
+                    if (endIndex >= list.size())
+                        raiseError("subset() end index must be less than the length of the list");
+                    for (int i = startIndex; i <= endIndex; ++i)
+                        subset.push_back(list[i]);
                     return subset;
                 }
                 else
-                {
-                    throw new ScriptException("subset only works with string, list, and index");
-                }
+                    raiseError("subset() works with string and list");
             }
-
-        case "htmlEncode":
-            if (paramList.Count != 1)
-                throw new ScriptException("htmlEncode works with one parameter");
-            if (!(first is string))
-                throw new ScriptException("htmlEncode only works with strings");
-            return System.Web.HttpUtility.HtmlEncode(first);
-
-        case "urlEncode":
-            if (paramList.Count != 1)
-                throw new ScriptException("urlEncode works with one parameter");
-            if (!(first is string))
-                throw new ScriptException("urlEncode only works with strings");
-            return System.Web.HttpUtility.UrlEncode((string)first);
-
-        case "isMatch":
-            if (paramList.Count != 2)
-                throw new ScriptException("isMatch works with two parameters");
-            if (!(paramList[0] is string))
-                throw new ScriptException("isMatch only works with string input");
-            if (!(paramList[1] is string))
-                throw new ScriptException("isMatch only works with string pattern");
-            return Regex.IsMatch((string)paramList[0], (string)paramList[1]);
-
-        case "uniqueId":
-            if (paramList.Count != 0)
-                throw new ScriptException("uniqueId takes no parameters");
-            return Guid.NewGuid().ToString();
-
-        case "today":
-            if (paramList.Count != 0)
-                throw new ScriptException("today takes no parameters");
-            return DateTime.Now.Date.ToString("yyyy/MM/dd");
-
-        case "year":
-        {
-            if (paramList.Count != 1)
-                throw new ScriptException("year takes one parameter");
-            if (!(first is string))
-                throw new ScriptException("year only works with strings");
-
-            DateTime dt;
-            if (!DateTime.TryParse((string)first, out dt))
-                throw new ScriptException("year function cannot parse date: " + first);
-            return (double)dt.Year;
         }
 
-        case "month":
+        if (function == "isMatch")
         {
-            if (paramList.Count != 1)
-                throw new ScriptException("month takes one parameter");
-            if (!(first is string))
-                throw new ScriptException("month only works with strings");
+            if (paramList.size() != 2)
+                raiseError("isMatch() works string to match and pattern");
+            if (paramList[0].type() != object::STRING)
+                raiseError("isMatch() only works with string input");
+            if (paramList[1].type() != object::STRING)
+                raiseError("isMatch() only works with string input");
 
-            DateTime dt;
-            if (!DateTime.TryParse((string)first, out dt))
-                throw new ScriptException("month function cannot parse date: " + first);
-            return (double)dt.Month;
+            std::wregex re(paramList[1].stringVal());
+            return std::regex_match(paramList[0].stringVal(), re);
         }
 
-        case "day":
+        if (function == "getMatches")
         {
-            if (paramList.Count != 1)
-                throw new ScriptException("day takes one parameter");
-            if (!(first is string))
-                throw new ScriptException("day only works with strings");
+            if (paramList.size() != 2)
+                raiseError("getMatches() works string to match and pattern");
+            if (paramList[0].type() != object::STRING)
+                raiseError("getMatches() only works with string input");
+            if (paramList[1].type() != object::STRING)
+                raiseError("getMatches() only works with string input");
+                
+            std::wregex re(paramList[1].stringVal());
 
-            DateTime dt;
-            if (!DateTime.TryParse((string)first, out dt))
-                throw new ScriptException("day function cannot parse date: " + first);
-            return (double)dt.Day;
+            object::list output;
+            std::wsmatch sm;
+            std::regex_match(paramList[0].stringVal(), sm, re);
+            for (const auto& m : sm)
+                output.push_back(m.str());
+            return output;
         }
 
-        case "addDays":
+        if (m_callable.hasFunction(functionW))
         {
+            object answer = m_callable.callFunction(functionW, paramList);
+            return answer;
+        }
+
+        size_t dotIndex = function.find('.');
+        if (dotIndex != std::string::npos)
+        {
+            std::wstring symbol = functionW.substr(0, dotIndex);
+            std::wstring memberFunc = functionW.substr(dotIndex + 1);
+
+            object value;
+            if (m_symbols.tryGet(symbol, value))
             {
-                if (paramList.Count != 2)
-                    throw new ScriptException("addDays takes two parameters");
-                if (!(first is string))
-                    throw new ScriptException("addDays first parameter needs to be a string");
-                if (!(paramList[1] is double))
-                    throw new ScriptException("addDays second parameter needs to be a number of days to add");
-                if ((int)(double)(paramList[1]) != (double)(paramList[1]))
-                    throw new ScriptException("addDays days to add must be a whole number of days: " + paramList[1]);
-
-                DateTime dt;
-                if (!DateTime.TryParse((string)first, out dt))
-                    throw new ScriptException("addDays function cannot parse date: " + first);
-                dt += new TimeSpan((int)(double)paramList[1], 0, 0, 0);
-                return dt.Date.ToString("yyyy/MM/dd");
+                object::list newVals;
+                newVals.push_back(value);
+                newVals.insert(newVals.end(), paramList.begin(), paramList.end());
+                return executeFunction(memberFunc, newVals);
             }
         }
-
-        case "daysBetween":
+        else // someindex("some key") or somelist(14)
         {
+            object value;
+            if (m_symbols.tryGet(functionW, value))
             {
-                if (paramList.Count != 2)
-                    throw new ScriptException("daysBetween takes two parameters");
-                if (!(first is string))
-                    throw new ScriptException("daysBetween first parameter needs to be a date string");
-                if (!(paramList[1] is string))
-                    throw new ScriptException("daysBetween first parameter needs to be a date string");
-
-                DateTime dt1;
-                if (!DateTime.TryParse((string)first, out dt1))
-                    throw new ScriptException("daysBetween function cannot parse first date: " + first);
-
-                DateTime dt2;
-                if (!DateTime.TryParse((string)paramList[1], out dt2))
-                    throw new ScriptException("daysBetween function cannot parse first date: " + first);
-
-                double rawDaysBetween = (dt1 - dt2).TotalDays;
-                int daysBetween;
-                if (rawDaysBetween >= 0.0)
-                    daysBetween = (int)Math.Floor(rawDaysBetween);
-                else
-                    daysBetween = (int)Math.Ceiling(rawDaysBetween);
-                return (double)daysBetween;
+                object::list newVals;
+                newVals.push_back(value);
+                newVals.insert(newVals.end(), paramList.begin(), paramList.end());
+                return executeFunction(L"get", newVals);
             }
         }
 
-        case "toPrettyDate":
-        {
-            if (paramList.Count != 1)
-                throw new ScriptException("toPrettyDate takes one parameter");
-            if (!(first is string))
-                throw new ScriptException("toPrettyDate only works with strings");
-
-            DateTime dt;
-            if (!DateTime.TryParse((string)first, out dt))
-                throw new ScriptException("toPrettyDate function cannot parse date: " + first);
-            return dt.ToLongDateString();
-        }
-
-        default:
-        {
-            if (m_callable != null && m_callable.HasFunction(function))
-            {
-                object answer = await m_callable.CallFunctionAsync(function, paramList);
-                return answer;
-            }
-
-            int dotIndex = function.IndexOf('.');
-            if (dotIndex > 0) // somelist.reversed()
-            {
-                string symbol = function.Substring(0, dotIndex);
-                function = function.Substring(dotIndex + 1);
-
-                object value;
-                if (m_symbols.TryGet(symbol, out value))
-                {
-                    list newVals = new list(paramList.Count + 1);
-                    newVals.Add(value);
-                    newVals.AddRange(paramList);
-                    return await ExecuteFunctionAsync(function, newVals);
-                }
-            }
-            else // someindex("some key") or somelist(14)
-            {
-                object value;
-                if (m_symbols.TryGet(function, out value))
-                {
-                    list newVals = new list(paramList.Count + 1);
-                    newVals.Add(value);
-                    newVals.AddRange(paramList);
-                    return await ExecuteFunctionAsync("get", newVals);
-                }
-            }
-            break;
-        }
-        }
-
-        throw new ScriptException("Function not defined: " + function);
+        raiseError("Function not defined: " + function);
     }
 }

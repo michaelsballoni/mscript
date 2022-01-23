@@ -20,6 +20,8 @@ namespace mscript
 
     std::wstring trim(const std::wstring& str);
 
+    std::vector<std::wstring> split(const std::wstring& str, const wchar_t* seperator);
+
     void replace(std::wstring& str, const std::wstring& from, const std::wstring& to);
 
     bool startsWith(const std::wstring& str, const std::wstring& starter);

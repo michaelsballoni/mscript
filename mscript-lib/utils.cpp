@@ -80,6 +80,9 @@ namespace mscript
 
 void mscript::replace(std::wstring& str, const std::wstring& from, const std::wstring& to)
 {
+    if (str.empty() || from.empty())
+        return;
+
     size_t pos;
     size_t offset = 0;
     const size_t fromSize = from.size();
@@ -107,3 +110,24 @@ bool mscript::startsWith(const std::wstring& str, const std::wstring& starter)
 
     return true;
 }
+
+std::vector<std::wstring> mscript::split(const std::wstring& str, const wchar_t* seperator)
+{
+    std::vector<std::wstring> retVal;
+    if (str.empty() || *seperator == 0)
+        return retVal;
+
+    std::vector<wchar_t> buf;
+    buf.resize((str.size() + 1) * sizeof(wchar_t));
+    memcpy(buf.data(), str.data(), buf.size() * sizeof(wchar_t));
+
+    wchar_t* pt = nullptr;
+    wchar_t* token = wcstok_s(buf.data(), seperator, &pt);
+    while (token != nullptr)
+    {
+        retVal.push_back(token);
+        token = wcstok_s(nullptr, seperator, &pt);
+    }
+    return retVal;
+}
+

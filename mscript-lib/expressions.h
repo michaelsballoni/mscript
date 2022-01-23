@@ -26,7 +26,7 @@ namespace mscript
     class expression
     {
     public:
-        expression(symbol_table& symbols, const callable& callable)
+        expression(symbol_table& symbols, callable& callable)
             : m_symbols(symbols)
             , m_callable(callable)
         {
@@ -40,15 +40,15 @@ namespace mscript
         object evaluate(std::wstring expStr);
 
     private:
-        static bool isOperator(std::wstring expr, std::string op, int n);
-        static int reverseFind(std::wstring source, const std::wstring& search, int start);
+        static bool isOperator(std::wstring expr, const std::string& op, int n);
+        static int reverseFind(const std::wstring& source, const std::wstring& searchW, int start);
         static std::vector<std::wstring> parseParameters(const std::wstring& expStr);
         static double getOneDouble(const object::list& paramList, const std::string& function);
 
-        object::list processParameters(const std::vector<std::wstring> expStrs);
-        object executeFunction(const std::wstring& function, const object::list& paramList);
+        object::list processParameters(const std::vector<std::wstring>& expStrs);
+        object executeFunction(const std::wstring& functionW, const object::list& paramList);
 
         symbol_table& m_symbols;
-        const callable& m_callable;
+        callable& m_callable;
     };
 }

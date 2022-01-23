@@ -97,6 +97,11 @@ namespace mscript
 		}
 		bool operator!=(const object& other) const { return !operator==(other); }
 
+		bool operator<(const object& other) const;
+		bool operator<=(const object& other) const { return *this < other || *this == other; }
+		bool operator>(const object& other) const { return !(*this < other) && *this != other; }
+		bool operator>=(const object& other) const { return *this > other || *this == other; }
+
 		void validateType(object_type shouldBe) const;
 
 	private:

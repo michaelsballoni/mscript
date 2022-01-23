@@ -65,7 +65,7 @@ namespace mscript
 		case STRING: return m_string.length();
 		case LIST: return m_list.size();
 		case INDEX: return m_index.size();
-		default: raiseError(L"Invalid type for getting length: " + getTypeName(type()));
+		default: raiseError("Invalid type for getting length: " + getTypeName(type()));
 		}
 	}
 
@@ -94,5 +94,21 @@ namespace mscript
 	{
 		if (m_type != shouldBe)
 			raiseError("Invalid type access: should be " + getTypeName(shouldBe) + ", is " + getTypeName(m_type));
+	}
+
+	bool object::operator<(const object& other) const
+	{
+		if (m_type != other.m_type)
+			raiseError("Type mismatch for comparison: " + getTypeName(m_type) + " and " + getTypeName(other.m_type));
+
+		switch (m_type)
+		{
+		case NUMBER:
+			return m_number < other.m_number;
+		case STRING:
+			return m_string < other.m_string;
+		default:
+			raiseError("Invalid type for comparison: " + getTypeName(m_type));
+		}
 	}
 }

@@ -91,6 +91,32 @@ namespace mscript
 				Assert::AreEqual(size_t(2), obj.indexVal().size());
 				Assert::AreEqual(toWideStr("foo: bar, blet: monkey"), obj.toString());
 			}
+
+			{
+				object obj;
+				obj = 1.2;
+				Assert::AreEqual(1.2, obj.toNumber());
+
+				obj = toWideStr("1.3");
+				Assert::AreEqual(1.3, obj.toNumber());
+
+				obj = true;
+				Assert::AreEqual(1.0, obj.toNumber());
+			}
+
+			{
+				object obj;
+				obj = toWideStr("foo");
+				Assert::AreEqual(size_t(3), obj.toLength());
+
+				obj = object::list{ 1.0, 2.0, 3.0, 4.0 };
+				Assert::AreEqual(size_t(4), obj.toLength());
+
+				obj = object::index();
+				obj.indexVal().insert(1.0, 2.0);
+				obj.indexVal().insert(3.0, 4.0);
+				Assert::AreEqual(size_t(2), obj.toLength());
+			}
 		}
 	};
 }

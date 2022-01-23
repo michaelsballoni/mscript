@@ -1,32 +1,17 @@
 Port mscript to c++
 mscript-core:	port code and unit tests and get to pass as you go
 	Expression
+		bring over QA tests that cover expression pretty well
 	ScriptProcessor
+		bring over the script file testing system, get all tests to pass
 
-Fix dates to be full timestamps, not just dates
-Add tolocal and toutc functions
-
-bring over the script file testing system, get all tests to pass
+object: turns lists and indexes in shared_ptrs to not be copying all over the place
+object/expression: clone function, deep recursive clone
 
 add system function as a global function
 
 mscript.exe project
-	port mscript-server: scriptcli as a starting point
+	incorporate 4db
 
-===
-
-more goodies
-	file system
-	4db
-		mscript-server: DbScripting
-		4db needs a context, pass it in to all calls
-	libcurl
-
-===
-
-import statement to glue scripts together
-	namespaces are a must
-		allow names to have .'s
-
-modules:
-Figure out how python C/C++ modules work
+import statement { filename } to glue scripts together
+	allow names to have .'s in them, poor man's namespaces

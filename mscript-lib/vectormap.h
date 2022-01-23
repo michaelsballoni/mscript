@@ -89,6 +89,30 @@ namespace mscript
             return true;
         }
 
+        /// <summary>
+        /// Get a list of the keys of this map
+        /// </summary>
+        std::vector<K> keys() const
+        {
+            std::vector<K> retVal;
+            retVal.reserve(m_vec.size());
+            for (size_t k = 0; k < m_vec.size(); ++k)
+                retVal.push_back(m_vec[k].first);
+            return retVal;
+        }
+
+        /// <summary>
+        /// Get a list of the values of this map
+        /// </summary>
+        std::vector<V> values() const
+        {
+            std::vector<V> retVal;
+            retVal.reserve(m_vec.size());
+            for (size_t v = 0; v < m_vec.size(); ++v)
+                retVal.push_back(m_vec[v].second);
+            return retVal;
+        }
+
     private:
         std::unordered_map<K, V> m_map;
         std::vector<std::pair<K, V>> m_vec;
