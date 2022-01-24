@@ -2,6 +2,7 @@
 
 #include "vectormap.h"
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -46,14 +47,13 @@ namespace mscript
 		object(object_type objType = NOTHING)
 			: m_type(objType)
 		{}
-
 		object(double number)
 			: m_type(NUMBER)
 			, m_number(number)
 		{}
 		object(const std::wstring& stringVal)
 			: m_type(STRING)
-			, m_string(stringVal)
+			, m_string(std::make_shared<std::wstring>(stringVal))
 		{}
 		object(bool boolVal)
 			: m_type(BOOL)
@@ -61,14 +61,15 @@ namespace mscript
 		{}
 		object(const list& listVal)
 			: m_type(LIST)
-			, m_list(listVal)
+			, m_list(std::make_shared<list>(listVal))
 		{}
 		object(const index& indexVal)
 			: m_type(INDEX)
-			, m_index(indexVal)
+			, m_index(std::make_shared<index>(indexVal))
 		{}
 
 		object_type type() const { return m_type; }
+		std::string typeStr() const { return getTypeName(m_type); }
 
 		std::wstring toString() const;
 		double toNumber() const;
@@ -80,23 +81,25 @@ namespace mscript
 
 		double numberVal() const { validateType(NUMBER); return m_number; }
 
-		const std::wstring& stringVal() const { validateType(STRING); return m_string; }
-		std::wstring& stringVal() { validateType(STRING); return m_string; }
+		const std::wstring& stringVal() const { validateType(STRING); return *m_string; }
+		std::wstring& stringVal() { validateType(STRING); return *m_string; }
 
 		bool boolVal() const { validateType(BOOL); return m_bool; }
 
-		const list& listVal() const { validateType(LIST); return m_list; }
-		list& listVal() { validateType(LIST); return m_list; }
+		const list& listVal() const { validateType(LIST); return *m_list; }
+		list& listVal() { validateType(LIST); return *m_list; }
 
-		const index& indexVal() const { validateType(INDEX); return m_index; }
-		index& indexVal() { validateType(INDEX); return m_index; }
+		const index& indexVal() const { validateType(INDEX); return *m_index; }
+		index& indexVal() { validateType(INDEX); return *m_index; }
 
+		// unordered...
 		bool operator==(const object& other) const
 		{
 			return m_type == other.m_type && toString() == other.toString();
 		}
 		bool operator!=(const object& other) const { return !operator==(other); }
 
+		// sort
 		bool operator<(const object& other) const;
 		bool operator<=(const object& other) const { return *this < other || *this == other; }
 		bool operator>(const object& other) const { return !(*this < other) && *this != other; }
@@ -108,10 +111,11 @@ namespace mscript
 		object_type m_type = NOTHING;
 
 		double m_number = 0.0;
-		std::wstring m_string;
 		bool m_bool = false;
 
-		list m_list;
-		index m_index;
+		std::shared_ptr<std::wstring> m_string;
+
+		std::shared_ptr<list> m_list;
+		std::shared_ptr<index> m_index;
 	};
 }

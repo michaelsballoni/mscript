@@ -18,7 +18,7 @@ namespace mscript
 			return L"null";
 
 		case STRING:
-			return m_string;
+			return *m_string;
 
 		case NUMBER:
 			return num2wstr(m_number);
@@ -29,7 +29,7 @@ namespace mscript
 		case LIST:
 		{
 			std::vector<std::wstring> listStrs;
-			for (const auto& obj : m_list)
+			for (const auto& obj : *m_list)
 				listStrs.push_back(obj.toString());
 			return join(listStrs, L", ");
 		}
@@ -37,7 +37,7 @@ namespace mscript
 		case INDEX:
 		{
 			std::vector<std::wstring> indexStrs;
-			for (const auto& kvp : m_index.vec())
+			for (const auto& kvp : m_index->vec())
 				indexStrs.push_back(kvp.first.toString() + L": " + kvp.second.toString());
 			return join(indexStrs, L", ");
 		}
@@ -51,10 +51,10 @@ namespace mscript
 	{
 		switch (m_type)
 		{
-		case STRING: return _wtof(m_string.c_str());
+		case STRING: return _wtof(m_string->c_str());
 		case NUMBER: return m_number;
 		case BOOL: return m_bool ? 1.0 : 0.0;
-		default: raiseError("Cannot convert to number: " + getTypeName(type()));
+		default: raiseError("Cannot convert to number: " + typeStr());
 		}
 	}
 
@@ -62,10 +62,10 @@ namespace mscript
 	{
 		switch (m_type)
 		{
-		case STRING: return m_string.length();
-		case LIST: return m_list.size();
-		case INDEX: return m_index.size();
-		default: raiseError("Invalid type for getting length: " + getTypeName(type()));
+		case STRING: return m_string->length();
+		case LIST: return m_list->size();
+		case INDEX: return m_index->size();
+		default: raiseError("Invalid type for getting length: " + typeStr());
 		}
 	}
 
@@ -99,7 +99,7 @@ namespace mscript
 	bool object::operator<(const object& other) const
 	{
 		if (m_type != other.m_type)
-			raiseError("Type mismatch for comparison: " + getTypeName(m_type) + " and " + getTypeName(other.m_type));
+			raiseError("Type mismatch for comparison: " + typeStr() + " and " +other.typeStr());
 
 		switch (m_type)
 		{
@@ -108,7 +108,7 @@ namespace mscript
 		case STRING:
 			return m_string < other.m_string;
 		default:
-			raiseError("Invalid type for comparison: " + getTypeName(m_type));
+			raiseError("Invalid type for comparison: " + typeStr());
 		}
 	}
 }

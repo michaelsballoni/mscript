@@ -51,8 +51,10 @@ namespace mscript
 
         {
             double number;
-            auto result = std::from_chars(narrow.data(), narrow.data() + narrow.size(), number);
-            if (result.ec == std::errc())
+            const char* start = narrow.data();
+            const char* end = start + narrow.size();
+            auto result = std::from_chars(start, end, number);
+            if (result.ptr == end && result.ec == std::errc())
                 return number;
         }
 
@@ -269,7 +271,7 @@ namespace mscript
                                     raiseError("Unrecognized boolean operator: " + op);
                             }
                             else
-                                raiseError("Expression types do not match: " + op);
+                                raiseError("Expression types do not match: " + leftVal.typeStr() + " - " + rightVal.typeStr());
                         }
                         return value;
                     }
@@ -521,7 +523,7 @@ namespace mscript
         {
             if (paramList.size() != 1)
                 raiseError("getType() takes one parameter");
-            return toWideStr(first.getTypeName(first.type()));
+            return toWideStr(first.typeStr());
         }
 
         if (function == "number")
@@ -565,7 +567,13 @@ namespace mscript
 
         if (function == "add")
         {
-            if (first.type() == object::LIST)
+            if (first.type() == object::STRING)
+            {
+                for (int v = 1; v < paramList.size(); ++v)
+                    first.stringVal() += paramList[v].toString();
+                return first;
+            }
+            else if (first.type() == object::LIST)
             {
                 auto& list = first.listVal();
                 for (int v = 1; v < paramList.size(); ++v)
@@ -587,7 +595,7 @@ namespace mscript
                 return first;
             }
             else
-                raiseError("add() only works with list and index");
+                raiseError("add() only works with string, list, and index");
         }
 
         if (function == "get")

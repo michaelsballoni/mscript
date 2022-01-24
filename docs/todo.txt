@@ -1,11 +1,11 @@
 Port mscript to c++
 mscript-core:	port code and unit tests and get to pass as you go
 	Expression
-		bring over QA tests that cover expression pretty well
+		get unit tests to pass!
 	ScriptProcessor
 		bring over the script file testing system, get all tests to pass
+		add test for new regex getMatches function
 
-object: turns lists and indexes in shared_ptrs to not be copying all over the place
 object/expression: clone function, deep recursive clone
 
 add system function as a global function
@@ -13,5 +13,6 @@ add system function as a global function
 mscript.exe project
 	incorporate 4db
 
-import statement { filename } to glue scripts together
+import statement to glue scripts together
+	{ filename }
 	allow names to have .'s in them, poor man's namespaces

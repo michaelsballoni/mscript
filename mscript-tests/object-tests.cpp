@@ -19,7 +19,7 @@ namespace mscript
 				object obj;
 				Assert::IsTrue(obj.type() == object::NOTHING);
 				Assert::AreEqual(toWideStr("null"), obj.toString());
-				Assert::AreEqual(std::string("nothing"), object::getTypeName(obj.type()));
+				Assert::AreEqual(std::string("nothing"), obj.typeStr());
 			}
 
 			{
@@ -27,7 +27,7 @@ namespace mscript
 				Assert::IsTrue(obj.type() == object::NUMBER);
 				Assert::AreEqual(toWideStr("12"), obj.toString());
 				Assert::AreEqual(12.0, obj.numberVal());
-				Assert::AreEqual(std::string("number"), object::getTypeName(obj.type()));
+				Assert::AreEqual(std::string("number"), obj.typeStr());
 
 				object obj2 = 12.0;
 				Assert::IsTrue(obj == obj2);
@@ -41,7 +41,7 @@ namespace mscript
 				Assert::IsTrue(obj.type() == object::STRING);
 				Assert::AreEqual(toWideStr("foo bar"), obj.toString());
 				Assert::AreEqual(toWideStr("foo bar"), obj.stringVal());
-				Assert::AreEqual(std::string("string"), object::getTypeName(obj.type()));
+				Assert::AreEqual(std::string("string"), obj.typeStr());
 
 				object obj2 = toWideStr("foo bar");
 				Assert::IsTrue(obj == obj2);
@@ -55,7 +55,7 @@ namespace mscript
 				Assert::IsTrue(obj.type() == object::BOOL);
 				Assert::AreEqual(toWideStr("true"), obj.toString());
 				Assert::AreEqual(true, obj.boolVal());
-				Assert::AreEqual(std::string("bool"), object::getTypeName(obj.type()));
+				Assert::AreEqual(std::string("bool"), obj.typeStr());
 
 				object obj2 = bool(true);
 				Assert::IsTrue(obj == obj2);
@@ -69,7 +69,7 @@ namespace mscript
 				object obj(list);
 				Assert::IsTrue(obj.type() == object::LIST);
 				Assert::AreEqual(toWideStr(""), obj.toString());
-				Assert::AreEqual(std::string("list"), object::getTypeName(obj.type()));
+				Assert::AreEqual(std::string("list"), obj.typeStr());
 				Assert::AreEqual(size_t(0), obj.listVal().size());
 
 				obj.listVal().push_back(object(toWideStr("foo")));
@@ -83,7 +83,7 @@ namespace mscript
 				object obj(index);
 				Assert::IsTrue(obj.type() == object::INDEX);
 				Assert::AreEqual(toWideStr(""), obj.toString());
-				Assert::AreEqual(std::string("index"), object::getTypeName(obj.type()));
+				Assert::AreEqual(std::string("index"), obj.typeStr());
 				Assert::AreEqual(size_t(0), obj.indexVal().size());
 
 				obj.indexVal().insert(toWideStr("foo"), toWideStr("bar"));

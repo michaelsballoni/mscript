@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="callable.h" />
     <ClInclude Include="expressions.h" />
     <ClInclude Include="includes.h" />
     <ClInclude Include="names.h" />

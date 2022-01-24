@@ -1,5 +1,6 @@
 #pragma once
 
+#include "callable.h"
 #include "object.h"
 #include "symbols.h"
 
@@ -7,18 +8,6 @@
 
 namespace mscript
 {
-    /// <summary>
-    /// Since expressions can involve function calls, 
-    /// expressions need ways of detecting and calling functions
-    /// </summary>
-    class callable
-    {
-    public:
-        virtual ~callable() {}
-        virtual bool hasFunction(const std::wstring& name) = 0;
-        virtual object callFunction(const std::wstring& name, const object::list& parameters) = 0;
-    };
-
     /// <summary>
     /// Expressions take symbols and outside functions
     /// and evaluate expression strings into values
@@ -39,7 +28,7 @@ namespace mscript
         /// <returns>The value from evaluating the expression</returns>
         object evaluate(std::wstring expStr);
 
-    private:
+        // Only public for unit testing...just call evaluate!
         static bool isOperator(std::wstring expr, const std::string& op, int n);
         static int reverseFind(const std::wstring& source, const std::wstring& searchW, int start);
         static std::vector<std::wstring> parseParameters(const std::wstring& expStr);
@@ -48,6 +37,7 @@ namespace mscript
         object::list processParameters(const std::vector<std::wstring>& expStrs);
         object executeFunction(const std::wstring& functionW, const object::list& paramList);
 
+    private:
         symbol_table& m_symbols;
         callable& m_callable;
     };
