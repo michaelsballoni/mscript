@@ -143,13 +143,13 @@ namespace mscript
             symbols.set(toWideStr("q"), true);
             symbols.set(toWideStr("r"), false);
             ValidateExpression("q", true, symbols);
-            ValidateExpression("!q", false, symbols);
+            ValidateExpression("not q", false, symbols);
             ValidateExpression("not q", false, symbols);
             ValidateExpression("r", false, symbols);
-            ValidateExpression("!r", true, symbols);
             ValidateExpression("not r", true, symbols);
-            ValidateExpression("!q || !r", true, symbols);
-            ValidateExpression("not q || not r", true, symbols);
+            ValidateExpression("not r", true, symbols);
+            ValidateExpression("!q or !r", true, symbols);
+            ValidateExpression("not q or not r", true, symbols);
 
             ValidateExpression("5E-2", 5.0e-2, symbols);
             ValidateExpression("5E+2", 5.0e+2, symbols);

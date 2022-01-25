@@ -8,13 +8,8 @@ namespace mscript
     std::vector<std::string> sm_ops
     {
         "or",
-        "||",
-
         "and",
-        "&&",
-
         "not",
-        "!",
 
         "!=",
         "<=",
@@ -24,7 +19,6 @@ namespace mscript
         "=",
 
         "%",
-
         "-",
         "+",
         "/",
@@ -38,16 +32,16 @@ namespace mscript
         std::string narrow = toNarrowStr(expStr);
 
         if (narrow.empty())
-            return object::NOTHING;
+            raiseError("Empty expression");
 
         if (narrow == "null")
             return object::NOTHING;
 
         if (narrow == "true")
-            return bool(true);
+            return true;
 
         if (narrow == "false")
-            return bool(false);
+            return false;
 
         {
             double number;
@@ -94,7 +88,7 @@ namespace mscript
                 }
             }
             if (!foundEnd)
-                raiseError("Unfinished string");
+                raiseWError(L"Unfinished string: " + expStr);
 
             if (foundAtEnd)
             {
@@ -154,7 +148,7 @@ namespace mscript
                         }
                     }
                     else
-                        raiseError("Invalid op length: " + std::to_string(opLen));
+                        raiseWError(L"Invalid operator length: " + expStr);
                 }
                 if (opMatches)
                 {
@@ -187,7 +181,7 @@ namespace mscript
                                 else if (op == "!=")
                                     value = leftVal != rightVal;
                                 else
-                                    raiseError("Invalid operator for null values: " + op);
+                                    raiseWError(L"Invalid operator for null values: " + expStr);
                             }
                             else if (leftVal.type() == object::STRING || rightVal.type() == object::STRING)
                             {
@@ -203,7 +197,7 @@ namespace mscript
                                     case '<': value = _wcsicmp(leftValStr.c_str(), rightValStr.c_str()) < 0; break;
                                     case '>': value = _wcsicmp(leftValStr.c_str(), rightValStr.c_str()) > 0; break;
                                     default:
-                                        raiseError("Unrecognized string operator: " + op);
+                                        raiseWError(L"Unrecognized string operator: " + expStr);
                                     }
                                 }
                                 else
@@ -211,7 +205,7 @@ namespace mscript
                                     if (op == "!=")
                                         value = leftValStr != rightValStr;
                                     else
-                                        raiseError("Unrecognized string operator: " + op);
+                                        raiseWError(L"Unrecognized string operator: " + expStr);
                                 }
                             }
                             else if (leftVal.type() == object::NUMBER && rightVal.type() == object::NUMBER)
@@ -238,7 +232,7 @@ namespace mscript
                                         case '=': value = leftNum == rightNum; break;
                                         case '<': value = leftNum < rightNum; break;
                                         case '>': value = leftNum > rightNum; break;
-                                        default: raiseError("Unrecognized numeric operator: " + op);
+                                        default: raiseWError(L"Unrecognized numeric operator: " + expStr);
                                         }
                                     }
                                     else
@@ -250,7 +244,7 @@ namespace mscript
                                         else if (op == ">=")
                                             value = leftNum >= rightNum;
                                         else
-                                            raiseError("Unrecognized numeric operator: " + op);
+                                            raiseWError(L"Unrecognized numeric operator: " + expStr);
                                     }
                                 }
                             }
@@ -268,10 +262,10 @@ namespace mscript
                                 else if (op == "||")
                                     value = leftBool || rightBool;
                                 else
-                                    raiseError("Unrecognized boolean operator: " + op);
+                                    raiseWError(L"Unrecognized boolean operator: " + expStr);
                             }
                             else
-                                raiseError("Expression types do not match: " + leftVal.typeStr() + " - " + rightVal.typeStr());
+                                raiseWError(L"Expression types do not match: " + expStr);
                         }
                         return value;
                     }
@@ -464,7 +458,7 @@ namespace mscript
             {
                 curExp = trim(curExp);
                 if (curExp.empty())
-                    raiseError("Missing parameter");
+                    raiseWError(L"Missing parameter: " + expStr);
 
                 expStrs.push_back(curExp);
                 curExp.clear();
@@ -484,7 +478,7 @@ namespace mscript
     double expression::getOneDouble(const object::list& paramList, const std::string& function)
     {
         if (paramList.size() != 1 || paramList[0].type() != object::NUMBER)
-            raiseError("Function " + function + " requires one numeric parameter");
+            raiseError(function + "() works with one numeric parameter");
         else
             return paramList[0].numberVal();
     }
@@ -544,7 +538,7 @@ namespace mscript
         {
             if (paramList.size() != 1)
                 raiseError("length() takes one parameter");
-            return double(first.toLength());
+            return double(first.length());
         }
 
         if (function == "list")
@@ -559,7 +553,7 @@ namespace mscript
             for (size_t i = 0; i < paramList.size(); i += 2)
             {
                 if (newIndex.contains(paramList[i]))
-                    raiseWError(L"index() key repeated: " + paramList[i].toString());
+                    raiseError("index() key repeated: " + num2str(double(i)));
                 newIndex.insert(paramList[i], paramList[i + 1]);
             }
             return newIndex;
@@ -589,7 +583,7 @@ namespace mscript
                 for (int a = 1; a < paramList.size(); a += 2)
                 {
                     if (index.contains(paramList[a]))
-                        raiseWError(L"add() index key repeated");
+                        raiseError("add() index key repeated: " + num2str(a));
                     index.insert(paramList[a], paramList[a + 1]);
                 }
                 return first;
@@ -617,7 +611,7 @@ namespace mscript
 
             size_t idx = size_t(paramList[1].numberVal());
 
-            if (idx < 0 || idx >= first.toLength())
+            if (idx < 0 || idx >= first.length())
                 raiseError("get() index is out of range");
             
             switch (first.type())

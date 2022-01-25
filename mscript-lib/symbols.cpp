@@ -56,7 +56,7 @@ namespace mscript
                 return;
             }
         }
-        raiseWError(L"Name not set yet: " + name);
+        raiseWError(L"Name not set: " + name);
     }
 
     bool symbol_table::tryGet(const std::wstring& name, object& answer)
@@ -79,7 +79,7 @@ namespace mscript
     {
         object answer;
         if (!tryGet(name, answer))
-            raiseWError(L"Name has not been assigned a value: " + name);
+            raiseWError(L"Name not assigned a value: " + name);
         return answer;
     }
 }

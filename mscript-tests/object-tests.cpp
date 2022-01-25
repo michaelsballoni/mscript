@@ -51,16 +51,16 @@ namespace mscript
 			}
 
 			{
-				object obj = bool(true);
+				object obj = true;
 				Assert::IsTrue(obj.type() == object::BOOL);
 				Assert::AreEqual(toWideStr("true"), obj.toString());
 				Assert::AreEqual(true, obj.boolVal());
 				Assert::AreEqual(std::string("bool"), obj.typeStr());
 
-				object obj2 = bool(true);
+				object obj2 = true;
 				Assert::IsTrue(obj == obj2);
 
-				object obj3 = bool(false);
+				object obj3 = false;
 				Assert::IsTrue(obj != obj3);
 			}
 
@@ -107,15 +107,15 @@ namespace mscript
 			{
 				object obj;
 				obj = toWideStr("foo");
-				Assert::AreEqual(size_t(3), obj.toLength());
+				Assert::AreEqual(size_t(3), obj.length());
 
 				obj = object::list{ 1.0, 2.0, 3.0, 4.0 };
-				Assert::AreEqual(size_t(4), obj.toLength());
+				Assert::AreEqual(size_t(4), obj.length());
 
 				obj = object::index();
 				obj.indexVal().insert(1.0, 2.0);
 				obj.indexVal().insert(3.0, 4.0);
-				Assert::AreEqual(size_t(2), obj.toLength());
+				Assert::AreEqual(size_t(2), obj.length());
 			}
 		}
 	};

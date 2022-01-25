@@ -1,7 +1,5 @@
 Port mscript to c++
 mscript-core:	port code and unit tests and get to pass as you go
-	Expression
-		get unit tests to pass!
 	ScriptProcessor
 		bring over the script file testing system, get all tests to pass
 		add test for new regex getMatches function

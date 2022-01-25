@@ -53,7 +53,7 @@ namespace mscript
 		{}
 		object(const std::wstring& stringVal)
 			: m_type(STRING)
-			, m_string(std::make_shared<std::wstring>(stringVal))
+			, m_string(stringVal)
 		{}
 		object(bool boolVal)
 			: m_type(BOOL)
@@ -73,7 +73,7 @@ namespace mscript
 
 		std::wstring toString() const;
 		double toNumber() const;
-		size_t toLength() const;
+		size_t length() const;
 
 		static std::string getTypeName(object_type typeVal);
 
@@ -81,8 +81,8 @@ namespace mscript
 
 		double numberVal() const { validateType(NUMBER); return m_number; }
 
-		const std::wstring& stringVal() const { validateType(STRING); return *m_string; }
-		std::wstring& stringVal() { validateType(STRING); return *m_string; }
+		const std::wstring& stringVal() const { validateType(STRING); return m_string; }
+		std::wstring& stringVal() { validateType(STRING); return m_string; }
 
 		bool boolVal() const { validateType(BOOL); return m_bool; }
 
@@ -93,10 +93,7 @@ namespace mscript
 		index& indexVal() { validateType(INDEX); return *m_index; }
 
 		// unordered...
-		bool operator==(const object& other) const
-		{
-			return m_type == other.m_type && toString() == other.toString();
-		}
+		bool operator==(const object& other) const;
 		bool operator!=(const object& other) const { return !operator==(other); }
 
 		// sort
@@ -111,9 +108,8 @@ namespace mscript
 		object_type m_type = NOTHING;
 
 		double m_number = 0.0;
+		std::wstring m_string;
 		bool m_bool = false;
-
-		std::shared_ptr<std::wstring> m_string;
 
 		std::shared_ptr<list> m_list;
 		std::shared_ptr<index> m_index;
