@@ -1,16 +1,28 @@
 Port mscript to c++
 mscript-core:	port code and unit tests and get to pass as you go
+	Expressions
+		get unit tests to pass...again!
 	ScriptProcessor
 		bring over the script file testing system, get all tests to pass
 		add test for new regex getMatches function
+		try to eliminate indentLevel nonsense
+		try to eliminate m_temp... nonsense
+		try changing int's to unsigned's throughout, for correctness
 
-object/expression: clone function, deep recursive clone
+object/expression:
+clone function, deep recursive clone
 
-add system function as a global function
-
-mscript.exe project
-	incorporate 4db
+runtime:
+add system => exec
+add popen  => process
+add file I/O, read + write
+the rest can be done with system and popen and expressions like split
 
 import statement to glue scripts together
-	{ filename }
+	use + symbol, makes sense to add in script
+	script_exception needs filename
 	allow names to have .'s in them, poor man's namespaces
+		have "member function" lookup look from *last* dot in symbol, before that is the variable name
+
+mscript.exe project
+	set cmd line parameters as an object::list into the initial symbol table, call it arguments

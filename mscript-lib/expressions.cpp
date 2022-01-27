@@ -8,8 +8,9 @@ namespace mscript
     std::vector<std::string> sm_ops
     {
         "or",
+        "||"
         "and",
-        "not",
+        "&&",
 
         "!=",
         "<=",
@@ -368,20 +369,6 @@ namespace mscript
                 &&
                 n >= 2 && iswdigit(expr[n - 2]);
             if (expResult)
-                return false;
-        }
-
-        if (op == "!" || op == "not")
-        {
-            if (n <= 0)
-                return false;
-
-            // Get the start up to previous charcater, trim it, then get the last char
-            std::string bang = toNarrowStr(trim(expr.substr(0, n)));
-            bang = bang.substr(bang.length() - 1);
-
-            // If the last char is an operator, then this is a unary ! / not, not an operator
-            if (std::find(sm_ops.begin(), sm_ops.end(), bang) != sm_ops.end())
                 return false;
         }
 

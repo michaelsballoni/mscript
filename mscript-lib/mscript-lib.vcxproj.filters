@@ -42,6 +42,12 @@
     <ClInclude Include="callable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="script_processor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="functions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -60,6 +66,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="expressions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="script_processor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -40,7 +40,8 @@ namespace mscript
             : std::runtime_error(msg.c_str())
         { }
 
+        std::wstring filename;
         std::wstring line;
-        int line_number = -1;
+        size_t lineNumber = 0;
     };
 }
