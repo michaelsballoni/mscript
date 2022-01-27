@@ -1,0 +1,28 @@
+<{head
+	<title index("inner", "great page")
+}
+<{body
+	<h1 index("inner", "Nice Heading")
+	<{form
+		> htmlEncode("Truly, a great <form>")
+		> "<br>"
+		<input index("name", "fred", "value", "barney")
+		<input index("type", "submit", "value", "Do \"It\" To It & Well!")
+	}
+}
+
+===
+
+<head>
+	<title>great page</title>
+</head>
+<body>
+	<h1>Nice Heading</h1>
+	<form action="execute">
+		<input type=hidden name=script value="testScript"/>
+		Truly, a great &lt;form&gt;
+		<br>
+		<input name="fred" value="barney"/>
+		<input type="submit" value="Do &quot;It&quot; To It &amp; Well!"/>
+	</form>
+</body>

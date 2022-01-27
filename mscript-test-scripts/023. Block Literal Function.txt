@@ -1,0 +1,11 @@
+f printBlock()
+{>>
+	test output
+>>}
+}
+
+* printBlock()
+
+===
+
+	test output

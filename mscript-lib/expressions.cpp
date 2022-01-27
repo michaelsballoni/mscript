@@ -8,7 +8,7 @@ namespace mscript
     std::vector<std::string> sm_ops
     {
         "or",
-        "||"
+        "||",
         "and",
         "&&",
 

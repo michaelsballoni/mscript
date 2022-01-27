@@ -1,0 +1,38 @@
+$ str = "foo"
+> "Should be 'foo': " + str
+> "Should be 'o': " + str.get(1)
+>""
+& str = str + "bar"
+> "Should be 'foobar': " + str
+> "Should be 'raboof': " + str.reversed()
+> "Should be 'abfoor': " + str.sorted()
+>""
+> "Should be true: " + string(str.has("oba"))
+>""
+& str = str + " " + "blet" + " " + "monkey"
+> "Should be 'foobar blet monkey': " + str
+>""
+> "Should be 1: " + str.firstLocation("o")
+> "Should be 4: " + str.lastLocation("a")
+>""
+> "Should be 'obar blet monkey': " + str.subset(2)
+> "Should be 'ob': " + str.subset(2, 2)
+
+===
+
+Should be 'foo': foo
+Should be 'o': o
+
+Should be 'foobar': foobar
+Should be 'raboof': raboof
+Should be 'abfoor': abfoor
+
+Should be true: true
+
+Should be 'foobar blet monkey': foobar blet monkey
+
+Should be 1: 1
+Should be 4: 4
+
+Should be 'obar blet monkey': obar blet monkey
+Should be 'ob': ob

@@ -1,13 +1,8 @@
 Port mscript to c++
 mscript-core:	port code and unit tests and get to pass as you go
-	Expressions
-		get unit tests to pass...again!
 	ScriptProcessor
 		bring over the script file testing system, get all tests to pass
 		add test for new regex getMatches function
-		try to eliminate indentLevel nonsense
-		try to eliminate m_temp... nonsense
-		try changing int's to unsigned's throughout, for correctness
 
 object/expression:
 clone function, deep recursive clone

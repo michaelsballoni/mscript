@@ -1,0 +1,9 @@
+$ total2 = 0
+@ val : list(1, 2, 3)
+	& total2 = total2 + val
+}
+> total2
+
+===
+
+6

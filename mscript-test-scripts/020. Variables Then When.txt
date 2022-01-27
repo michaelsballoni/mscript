@@ -1,0 +1,17 @@
+f main ()
+	$ command = "command"
+	? command = "Reset Colors"
+	}
+	
+	$ theColor = "color"
+	
+	? command = "Add Color"
+	}
+	
+	> theColor
+}
+* main()
+
+===
+
+color

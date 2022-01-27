@@ -1,0 +1,6 @@
+$ foo = input("foobar")
+> foo
+
+===
+
+foobar

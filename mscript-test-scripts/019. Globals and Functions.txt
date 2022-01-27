@@ -1,0 +1,25 @@
+$ global = 14
+
+f inner(inc2)
+	$ var = 13
+	> "inner: " + inc2 + " - " + var
+	& global = global + inc2
+	> "inner global: " + global
+}
+
+f outer(inc1)
+	$ var = 10
+	> "outer: " + inc1 + " - " + var
+	& global = global + inc1
+	* inner(inc1 * 2)
+	> "outer global: " + global + " - " + var
+}
+
+* outer(1)
+
+===
+
+outer: 1 - 10
+inner: 2 - 13
+inner global: 17
+outer global: 17 - 10

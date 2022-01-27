@@ -1,0 +1,138 @@
+/*
+in a block comment
+another commented line
+*/
+!
+! line comment
+!
+
+> "Print Set Update"
+> "foobar"
+$ blet = "monkey"
+> blet
+& blet = "barry"
+> blet
+
+> ""
+
+> "Begin"
+$ outer = 75
+{
+	$ inner = outer - 20
+	> inner
+}
+$ inner = "65"
+> inner
+
+> ""
+
+> "Loop"
+$ counter = 0
+O
+	& counter = counter + 1
+	? counter = 4
+		v
+	<>
+		> counter
+	}
+}
+> counter
+
+> ""
+
+> "Tag"
+< img index("src", "great.png")
+< h1 index("inner", "great header")
+
+> ""
+
+> "BlockTag"
+<{head
+	<title index("inner", "Nice Title!")
+}
+
+> ""
+
+> "When"
+$ whenny = 13
+? whenny < 13
+	> "kid"
+? whenny >= 18
+	> "adult"
+<>
+	> "teen"
+}
+
+> ""
+
+> "Every"
+@ cur : list(1, 2, 3)
+	> cur
+}
+
+> ""
+
+> "Count"
+# cur : 4 -> 7
+	> cur
+}
+
+> ""
+
+> "Process Function Continue Break"
+f ranger(low, high)
+	# cur : low -> high
+		? cur < 3
+			^
+		? cur > 5
+			v
+		}
+		> cur
+	}
+}
+* ranger(1, 7)
+
+===
+
+Print Set Update
+foobar
+monkey
+barry
+
+Begin
+55
+65
+
+Loop
+1
+2
+3
+4
+
+Tag
+<img src="great.png"/>
+<h1>great header</h1>
+
+BlockTag
+<head>
+	<title>Nice Title!</title>
+</head>
+
+When
+teen
+
+Every
+1
+2
+3
+
+Count
+4
+5
+6
+7
+
+Process Function Continue Break
+3
+4
+5
