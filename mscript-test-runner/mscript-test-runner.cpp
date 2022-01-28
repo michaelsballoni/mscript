@@ -30,19 +30,60 @@ int main(int argc, char* argv[])
 	std::string testDirPath = argv[1];
 	std::string specificTest = argc >= 3 ? argv[2] : "";
 
-	std::map<std::string, std::wstring> testFiles;
+	std::map<fs::path, std::wstring> testFiles;
 	for (auto path : fs::directory_iterator(testDirPath))
 	{
 		if (path.is_directory())
 			continue;
-		std::string filename = path.path().filename().string();
-		if (specificTest.empty() || filename.find(specificTest) != std::string::npos)
-			testFiles.insert({ filename, readFileIntoString(path.path().string()) });
+
+		fs::path filePath = path.path();
+		if (specificTest.empty() || filePath.filename().string().find(specificTest) != std::string::npos)
+			testFiles.insert({ filePath, readFileIntoString(path.path().string()) });
 	}
 
 	for (auto it : testFiles)
-		printf("%s\n", it.first.c_str());
+	{
+		printf("%s\n", it.first.filename().string().c_str());
+		std::wstring fileText = it.second;
 
+		size_t separatorIdx = fileText.find(L"===");
+		if (separatorIdx == 0 || separatorIdx == std::wstring::npos)
+		{
+			printf("ERROR: Test lacks == divider\n");
+			return 1;
+		}
+
+		std::wstring script = trim(fileText.substr(0, separatorIdx));
+		std::wstring expected = trim(fileText.substr(separatorIdx + strlen("===")));
+		replace(expected, L"\r\n", L"\n");
+		expected = trim(expected);
+
+		std::wstring output;
+		{
+			symbol_table symbols;
+			std::unordered_map<std::wstring, std::shared_ptr<script_function>> functions;
+			script_processor
+				processor
+				(
+					it.first.filename().wstring(),
+					[script](const std::wstring&) { return split(script, L"\n"); },
+					symbols,
+					functions,
+					[&output](const std::wstring& text) { output += text + L"\n"; }
+				);
+			processor.process();
+			output = trim(output);
+		}
+
+		if (expected != output)
+		{
+			printf("\nERROR: Test fails!\n");
+			printf(" - Output:\n%S\n", output.c_str());
+			printf(" - Expected:\n%S\n", expected.c_str());
+			return 1;
+		}
+	}
+
+	printf("\nSUCCESS: All done. Tests pass!\n");
 	return 0;
 }
-

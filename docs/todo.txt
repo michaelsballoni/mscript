@@ -1,13 +1,15 @@
 Port mscript to c++
 mscript-core:	port code and unit tests and get to pass as you go
 	ScriptProcessor
-		bring over the script file testing system, get all tests to pass
 		add test for new regex getMatches function
 
 object/expression:
 clone function, deep recursive clone
+	add unit test
+	add script test
 
 runtime:
+add input function, getline sort of thing
 add system => exec
 add popen  => process
 add file I/O, read + write
@@ -18,6 +20,10 @@ import statement to glue scripts together
 	script_exception needs filename
 	allow names to have .'s in them, poor man's namespaces
 		have "member function" lookup look from *last* dot in symbol, before that is the variable name
+
+create new set of test scripts, more of that "Should be..." stuff
+
+why is fibonacci so slow?
 
 mscript.exe project
 	set cmd line parameters as an object::list into the initial symbol table, call it arguments

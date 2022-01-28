@@ -170,6 +170,7 @@
     <ClInclude Include="names.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="script_exception.h" />
     <ClInclude Include="script_processor.h" />
     <ClInclude Include="symbols.h" />
     <ClInclude Include="utils.h" />

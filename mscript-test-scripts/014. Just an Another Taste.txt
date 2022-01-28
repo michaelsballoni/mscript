@@ -40,19 +40,6 @@ O
 
 > ""
 
-> "Tag"
-< img index("src", "great.png")
-< h1 index("inner", "great header")
-
-> ""
-
-> "BlockTag"
-<{head
-	<title index("inner", "Nice Title!")
-}
-
-> ""
-
 > "When"
 $ whenny = 13
 ? whenny < 13
@@ -80,7 +67,7 @@ $ whenny = 13
 > ""
 
 > "Process Function Continue Break"
-f ranger(low, high)
+~ ranger(low, high)
 	# cur : low -> high
 		? cur < 3
 			^
@@ -108,15 +95,6 @@ Loop
 2
 3
 4
-
-Tag
-<img src="great.png"/>
-<h1>great header</h1>
-
-BlockTag
-<head>
-	<title>Nice Title!</title>
-</head>
 
 When
 teen

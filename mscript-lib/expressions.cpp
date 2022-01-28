@@ -312,7 +312,8 @@ namespace mscript
         }
         else if (startsWith(expStr, L"not "))
         {
-            object answer = evaluate(expStr.substr(strlen("not ")));
+            static size_t notLen = strlen("not ");
+            object answer = evaluate(expStr.substr(notLen));
             return !answer.boolVal();
         }
 
@@ -593,10 +594,10 @@ namespace mscript
                 return index.get(key);
             }
 
-            if (paramList[1].type() == object::NUMBER)
+            if (paramList[1].type() != object::NUMBER)
                 raiseError("get() parameter is not a number");
 
-            size_t idx = size_t(paramList[1].numberVal());
+            int idx = int(paramList[1].numberVal());
 
             if (idx < 0 || idx >= first.length())
                 raiseError("get() index is out of range");
@@ -870,13 +871,16 @@ namespace mscript
         if (function == "subset")
         {
             if (paramList.size() != 2 && paramList.size() != 3)
-                raiseError("subset() works with a string and a start index and an optional length");
-            if (paramList[1].type() != object::NUMBER)
-                raiseError("subset() start index must be number");
-
-            int startIndex = int(paramList[1].numberVal());
-            if (startIndex < 0)
-                raiseError("subset() start index must be greater than or equal zero");
+                raiseError("subset() works with an item and a start index and an optional length");
+            
+            int startIndex;
+            {
+                if (paramList[1].type() != object::NUMBER)
+                    raiseError("subset() start index must be number");
+                startIndex = int(paramList[1].numberVal());
+                if (startIndex < 0)
+                    raiseError("subset() start index must be greater than or equal zero");
+            }
 
             if (paramList.size() == 2)
             {
@@ -902,11 +906,15 @@ namespace mscript
             }
             else
             {
-                if (paramList[2].type() != object::NUMBER)
-                    raiseError("substring() invalid arguments");
-                int length = int(paramList[2].numberVal());
-                if (length < 0)
-                    raiseError("subset() length must be greater than or equal zero");
+                int length;
+                {
+                    if (paramList[2].type() != object::NUMBER)
+                        raiseError("substring() invalid arguments");
+                    length = int(paramList[2].numberVal());
+                    if (length < 0)
+                        raiseError("subset() length must be greater than or equal zero");
+                }
+
                 if (first.type() == object::STRING)
                 {
                     const auto& s = first.stringVal();
@@ -920,7 +928,7 @@ namespace mscript
                     if (startIndex >= list.size())
                         raiseError("subset() start index must be less than the length of the list");
                     object::list subset;
-                    int endIndex = startIndex + length;
+                    int endIndex = std::min(int(list.size()) - 1, startIndex + length - 1);
                     if (endIndex >= list.size())
                         raiseError("subset() end index must be less than the length of the list");
                     for (int i = startIndex; i <= endIndex; ++i)

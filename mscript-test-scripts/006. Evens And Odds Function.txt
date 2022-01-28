@@ -1,4 +1,4 @@
-f iseven2(val)
+~ iseven2(val)
 	<- (val % 2) = 0
 }
 

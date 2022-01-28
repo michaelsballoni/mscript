@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "script_processor.h"
 #include "names.h"
+#include "script_exception.h"
 
 namespace mscript
 {
@@ -8,17 +9,17 @@ namespace mscript
     {
         preprocessFunctions();
         process_outcome outcome;
-        return process(0U, m_lines.size() - 1, outcome, 0U);
+        return process(0U, int(m_lines.size()) - 1, outcome, 0U);
     }
 
     void script_processor::preprocessFunctions()
     {
-        for (size_t l = 0; l < m_lines.size(); ++l)
+        for (int l = 0; l < int(m_lines.size()); ++l)
         {
             std::wstring line = trim(m_lines[l]);
             if (line.empty())
                 continue;
-#if !DEBUG
+#ifndef _DEBUG
             try
 #endif
             {
@@ -33,7 +34,7 @@ namespace mscript
                     }
                 }
 
-                if (line[0] != 'f')
+                if (line[0] != '~')
                     continue;
 
                 size_t firstSpace = line.find(' ');
@@ -68,8 +69,8 @@ namespace mscript
                         validateName(param);
                 }
 
-                size_t loopEnd = findMatchingEnd(m_lines, l, m_lines.size() - 1);
-                size_t loopStart = l;
+                int loopEnd = findMatchingEnd(m_lines, l, int(m_lines.size()) - 1);
+                int loopStart = l;
                 l = loopEnd;
 
                 script_function function;
@@ -80,7 +81,7 @@ namespace mscript
 
                 m_functions.insert({ name, std::make_shared<script_function>(function) });
             }
-#if !DEBUG
+#ifndef _DEBUG
             catch (const std::exception& exp)
             {
                 handleException(exp, line, l);
@@ -92,20 +93,20 @@ namespace mscript
     object 
     script_processor::process
     (
-        size_t startLine, 
-        size_t endLine, 
+        int startLine, 
+        int endLine, 
         process_outcome& outcome, 
         unsigned callDepth
     )
     {
-        for (size_t l = startLine; l <= endLine; ++l)
+        for (int l = startLine; l <= endLine; ++l)
         {
             std::wstring line = trim(m_lines[l]);
             if (line.empty()) // skip blank lines
                 continue;
 
             auto first = line[0];
-#if !DEBUG
+#ifndef _DEBUG
             try
 #endif
             {
@@ -136,7 +137,8 @@ namespace mscript
                 }
                 else if (startsWith(line, L">>")) // single line verbatim print
                 {
-                    std::wstring valueStr = trim(line.substr(2));
+                    static size_t verbLen = strlen(">>");
+                    std::wstring valueStr = trim(line.substr(verbLen));
                     m_output(valueStr);
                 }
                 else if (first == '>') // single line expression print
@@ -175,8 +177,8 @@ namespace mscript
                 }
                 else if (first == 'O') // infinite loop
                 {
-                    size_t loopEnd = findMatchingEnd(m_lines, l, endLine);
-                    size_t loopStart = l;
+                    int loopEnd = findMatchingEnd(m_lines, l, endLine);
+                    int loopStart = l;
                     l = loopEnd;
 
                     symbol_stacker stacker(m_symbols);
@@ -198,8 +200,8 @@ namespace mscript
                 }
                 else if (first == '{') // braced scope, for variable declaration containment
                 {
-                    size_t loopEnd = findMatchingEnd(m_lines, l, endLine);
-                    size_t loopStart = l;
+                    int loopEnd = findMatchingEnd(m_lines, l, endLine);
+                    int loopStart = l;
                     l = loopEnd;
 
                     symbol_stacker stacker(m_symbols);
@@ -247,13 +249,13 @@ namespace mscript
                     
                     auto markers = findElses(m_lines, l, endLine);
 
-                    size_t endMarker = markers.back();
+                    int endMarker = markers.back();
                     l = endMarker;
 
-                    for (size_t m = 0; m < markers.size(); ++m)
+                    for (int m = 0; m < int(markers.size()); ++m)
                     {
-                        size_t marker = markers[m];
-                        size_t nextMarker = markers[std::min(m + 1, markers.size() - 1)];
+                        int marker = markers[m];
+                        int nextMarker = markers[std::min(m + 1, int(markers.size()) - 1)];
                         std::wstring markerLine = trim(m_lines[marker]);
 
                         object answer;
@@ -316,8 +318,8 @@ namespace mscript
                     std::wstring label = trim(line.substr(firstSpace, nextSpace - firstSpace));
                     validateName(label);
 
-                    size_t loopEnd = findMatchingEnd(m_lines, l, endLine);
-                    size_t loopStart = l;
+                    int loopEnd = findMatchingEnd(m_lines, l, endLine);
+                    int loopStart = l;
                     l = loopEnd;
 
                     std::wstring expression = line.substr(thirdSpace + 1);
@@ -363,7 +365,7 @@ namespace mscript
                 {
                     size_t firstSpace = line.find(' ');
                     if (firstSpace == std::wstring::npos)
-                        raiseError("# statement missing space");
+                        raiseError("# statement missing first space");
 
                     size_t nextSpace = line.find(' ', firstSpace + 1);
                     if (nextSpace == std::wstring::npos)
@@ -376,15 +378,16 @@ namespace mscript
                     if (thirdSpace == std::wstring::npos)
                         raiseError("# statement lacks from part");
 
-                    std::wstring from = line.substr(nextSpace, thirdSpace - nextSpace);
+                    std::wstring from = trim(line.substr(nextSpace, thirdSpace - nextSpace));
                     if (from != L":")
                         raiseError("# statement invalid : part");
 
                     std::wstring theRest = line.substr(thirdSpace + 1);
                     std::wstring fromExpStr, toExpStr;
-                    size_t parenCount = 0;
+                    int parenCount = 0;
                     bool inString = false;
-                    for (size_t f = 0; f < theRest.size() - std::string(" -> ").size(); ++f)
+                    static size_t arrowLen = strlen(" -> ");
+                    for (int f = 0; f < theRest.size() - arrowLen; ++f)
                     {
                         auto c = theRest[f];
                         if (c == '\"' && (f == 0 || theRest[f - 1] != '\\'))
@@ -403,7 +406,7 @@ namespace mscript
                             if (startsWith(theRest.substr(f), L" -> "))
                             {
                                 fromExpStr = trim(theRest.substr(0, f));
-                                toExpStr = trim(theRest.substr(f + std::string(" -> ").size()));
+                                toExpStr = trim(theRest.substr(f + arrowLen));
                                 break;
                             }
                         }
@@ -420,8 +423,8 @@ namespace mscript
                     auto fromIdx = static_cast<int64_t>(fromValue.numberVal());
                     auto toIdx = static_cast<int64_t>(toValue.numberVal());
 
-                    size_t loopEnd = findMatchingEnd(m_lines, l, endLine);
-                    size_t loopStart = l;
+                    int loopEnd = findMatchingEnd(m_lines, l, endLine);
+                    int loopStart = l;
                     l = loopEnd;
 
                     {
@@ -468,11 +471,13 @@ namespace mscript
                         }
                     }
                 }
-                else if (first == 'f') // function declaration, just here to catch the statement beginning
+                else if (first == '~') // function declaration, just here to catch the statement beginning
                 {
                     if (callDepth != 0)
                         raiseError("Functions cannot defined within anything else");
-                    // already pre-processed
+                    
+                    // function has already been processed, just skip past it
+                    l = findMatchingEnd(m_lines, l, endLine);
                 }
                 else if (first == '^') // continue
                 {
@@ -495,7 +500,7 @@ namespace mscript
                     raiseWError(L"Invalid statement: " + line);
                 }
             }
-#if !DEBUG
+#ifndef _DEBUG
             catch (const std::exception& exp)
             {
                 handleException(exp, line, l);
@@ -505,7 +510,7 @@ namespace mscript
         return object();
     }
 
-    void script_processor::handleException(const std::exception& exp, const std::wstring& line, size_t l)
+    void script_processor::handleException(const std::exception& exp, const std::wstring& line, int l)
     {
         script_exception toThrow(std::string(exp.what()));
         toThrow.line = line;
@@ -522,29 +527,29 @@ namespace mscript
         return answer;
     }
 
-    bool script_processor::hasFunction(const std::wstring& name)
+    bool script_processor::hasFunction(const std::wstring& name) const
     {
         return m_functions.find(name) != m_functions.end();
     }
 
-    object script_processor::callFunction(const std::wstring& name, const object::list paramList)
+    object script_processor::callFunction(const std::wstring& name, const object::list& parameters)
     {
         auto funcIt = m_functions.find(name);
         if (funcIt == m_functions.end())
             raiseWError(L"Unknown function: " + name);
 
         auto func = funcIt->second;
-        if (paramList.size() != func->paramNames.size())
+        if (parameters.size() != func->paramNames.size())
             raiseWError(L"Function " + name + L" takes " + num2wstr(double(func->paramNames.size())) + L" parameters");
 
         symbol_smacker smacker(m_symbols);
         {
             symbol_stacker stacker(m_symbols);
             for (size_t p = 0; p < func->paramNames.size(); ++p)
-                m_symbols.set(func->paramNames[p], paramList[p]);
+                m_symbols.set(func->paramNames[p], parameters[p]);
 
             // FORNOW - Consider imported scripts
-            //          m_functions should have them, but we need to call them here
+            //          m_functions should have them, but we need to process them here
             process_outcome outcome;
             object returnValue =
                 process
@@ -558,11 +563,11 @@ namespace mscript
         }
     }
 
-    size_t script_processor::findMatchingEnd(const std::vector<std::wstring>& lines, size_t startIndex, size_t endIndex)
+    int script_processor::findMatchingEnd(const std::vector<std::wstring>& lines, int startIndex, int endIndex)
     {
-        size_t blockCount = 0;
+        int blockCount = 0;
         bool lastBlockBeginWasWhen = false;
-        for (size_t i = startIndex; i <= endIndex; ++i)
+        for (int i = startIndex; i <= endIndex; ++i)
         {
             std::wstring line = trim(lines[i]);
             if (line == L"}")
@@ -590,12 +595,12 @@ namespace mscript
         raiseError("End of statement not found");
     }
 
-    std::vector<size_t> script_processor::findElses(const std::vector<std::wstring>& lines, size_t startIndex, size_t endIndex)
+    std::vector<int> script_processor::findElses(const std::vector<std::wstring>& lines, int startIndex, int endIndex)
     {
-        std::vector<size_t> retVal;
+        std::vector<int> retVal;
 
         std::vector<std::wstring> blockingLines;
-        for (size_t i = startIndex; i <= endIndex; ++i)
+        for (int i = startIndex; i <= endIndex; ++i)
         {
             std::wstring line = trim(lines[i]);
             bool isWhenBegin =
@@ -648,7 +653,7 @@ namespace mscript
         if (line == L"O" || line == L"{")
             return true;
 
-        static std::vector<std::wstring> blockBeginnings{ L"?", L"@", L"#", L"f" };
+        static std::vector<std::wstring> blockBeginnings{ L"?", L"@", L"#", L"~" };
         for (const auto& begin : blockBeginnings)
         {
             if (startsWith(line, begin))

@@ -49,8 +49,11 @@ namespace mscript
 
         // Good, bad, and ugly
         std::wstring Error;
-        size_t ErrorLineNumber = 0;
+        int ErrorLineNumber = -1;
         std::wstring ErrorLine;
+
+        virtual bool hasFunction(const std::wstring& name) const;
+        virtual object callFunction(const std::wstring& name, const object::list& parameters);
 
     private:
         /// <summary>
@@ -74,8 +77,8 @@ namespace mscript
         /// <returns>Return value from a function call, or null</returns>
         object process
         (
-            size_t startLine, 
-            size_t endLine, 
+            int startLine, 
+            int endLine, 
             process_outcome& outcome, 
             unsigned callDepth
         );
@@ -86,13 +89,11 @@ namespace mscript
         // ...not functions in some unknown later script
         void preprocessFunctions();
 
-        void handleException(const std::exception& exp, const std::wstring& line, size_t l);
+        void handleException(const std::exception& exp, const std::wstring& line, int l);
         object evaluate(const std::wstring& valueStr, unsigned callDepth);
-        bool hasFunction(const std::wstring& name);
-        object callFunction(const std::wstring& name, const object::list paramList);
 
-        static size_t findMatchingEnd(const std::vector<std::wstring>& lines, size_t startIndex, size_t endIndex);
-        static std::vector<size_t> findElses(const std::vector<std::wstring>& lines, size_t startIndex, size_t endIndex);
+        static int findMatchingEnd(const std::vector<std::wstring>& lines, int startIndex, int endIndex);
+        static std::vector<int> findElses(const std::vector<std::wstring>& lines, int startIndex, int endIndex);
         static bool isLineBlockBegin(std::wstring line);
 
     private:

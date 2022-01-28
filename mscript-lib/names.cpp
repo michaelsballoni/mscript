@@ -19,7 +19,7 @@ bool mscript::isName(const std::wstring& name)
     if (!iswalpha(name[0]))
         return false;
 
-    for (size_t c = 1; c < name.length(); ++c)
+    for (size_t c = 1; c < name.size(); ++c)
     {
         if (!iswalnum(name[c]) && name[c] != '_')
             return false;
@@ -32,7 +32,6 @@ bool mscript::isReserved(const std::wstring& name)
 {
     static std::unordered_set<std::wstring> ReservedWords
     {
-        L"nothing",
         L"null",
         L"true",
         L"false",

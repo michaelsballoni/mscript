@@ -1,7 +1,9 @@
-f addone2(toAddTo)
+~ addone2(toAddTo)
 	<- toAddTo + 1
 }
+
 $ addedTo2 = addone2(10)
+
 > addedTo2
 
 ===

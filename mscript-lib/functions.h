@@ -16,7 +16,7 @@ namespace mscript
         std::vector<std::wstring> paramNames;
 
         std::wstring filename;
-        size_t startIndex = 0;
-        size_t endIndex = 0;
+        int startIndex = -1;
+        int endIndex = -1;
     };
 }
