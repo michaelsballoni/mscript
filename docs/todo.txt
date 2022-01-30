@@ -1,24 +1,4 @@
 Port mscript to c++
-mscript-core: port code and unit tests and get to pass as you go
-	ScriptProcessor
-		don't allow assigning a new value of a different type than when declared...
-			...unless null, and can assign to nulls multiple times...
-			...but once has a variable has a non-null value...
-			...it can only ever be assiged to values of that type
-            - test using expression tester, exception handler
-		why is fibonacci so slow?
-
-object/expression:
-clone function, deep recursive clone
-	add unit test
-	add script test
-
-runtime:
-add input function, getline sort of thing
-add system => exec
-add popen  => process
-add file I/O, read + write
-the rest can be done with system and popen and expressions like split
 
 import statement to glue scripts together
 	use + symbol, makes sense to add in script
@@ -26,13 +6,12 @@ import statement to glue scripts together
 	allow names to have .'s in them, poor man's namespaces
 		have "member function" lookup look from *last* dot in symbol, before that is the variable name
 
-error handling
-	new statement: [file, line, msg]
-	processor looks for statement following error
-	if found, runs the code in that statement
-	otherwise re-throws, eventually exiting the processor...if callDepth == 0
-
-expressions: try having []'s get handled like ()'s are, so some_list[idx] could work
+runtime:
+add input function, getline sort of thing
+add system => exec
+add popen  => process
+add file I/O, read + write
+the rest can be done with system and popen and expressions like split
 
 mscript.exe project
 	set cmd line parameters as an object::list into the initial symbol table, call it arguments

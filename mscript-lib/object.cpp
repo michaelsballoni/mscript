@@ -10,6 +10,44 @@ std::size_t std::hash<mscript::object>::operator()(const mscript::object& obj) c
 
 namespace mscript
 {
+	object object::clone() const
+	{
+		switch (m_type)
+		{
+		case NOTHING:
+			return object();
+
+		case STRING:
+			return m_string;
+
+		case NUMBER:
+			return m_number;
+
+		case BOOL:
+			return m_bool;
+
+		case LIST:
+		{
+			object::list retVal;
+			retVal.reserve(m_list->size());
+			for (const auto& obj : *m_list)
+				retVal.push_back(obj.clone());
+			return retVal;
+		}
+
+		case INDEX:
+		{
+			object::index retVal;
+			for (const auto& kvp : m_index->vec())
+				retVal.insert(kvp.first.clone(), kvp.second.clone());
+			return retVal;
+		}
+
+		default:
+			raiseError("Invalid object type for clone(): " + num2str(int(m_type)));
+		}
+	}
+
 	std::wstring object::toString() const
 	{
 		switch (m_type)
@@ -43,7 +81,7 @@ namespace mscript
 		}
 
 		default:
-			raiseError("Invalid object type: " + num2str(int(m_type)));
+			raiseError("Invalid object type for toString(): " + num2str(int(m_type)));
 		}
 	}
 

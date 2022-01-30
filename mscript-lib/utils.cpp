@@ -20,12 +20,48 @@ namespace mscript
 
     std::string mscript::toNarrowStr(const std::wstring& str)
     {
+        bool allAscii = true;
+        for (wchar_t c : str)
+        {
+            if (c < 0 || c > 127)
+            {
+                allAscii = false;
+                break;
+            }
+        }
+
+        if (allAscii)
+        {
+            std::string retVal;
+            for (auto c : str)
+                retVal += char(c);
+            return retVal;
+        }
+
         std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
         return converter.to_bytes(str);
     }
 
     std::wstring mscript::toWideStr(const std::string& str)
     {
+        bool allNarrow = true;
+        for (char c : str)
+        {
+            if (c < 0 || c > 127)
+            {
+                allNarrow = false;
+                break;
+            }
+        }
+
+        if (allNarrow)
+        {
+            std::wstring retVal;
+            for (auto c : str)
+                retVal += char(c);
+            return retVal;
+        }
+
         std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
         return converter.from_bytes(str);
     }

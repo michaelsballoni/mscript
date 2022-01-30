@@ -38,6 +38,32 @@ namespace mscript
             Assert::IsTrue(!table.contains(L"blet"));
             Assert::IsTrue(table.contains(L"bar"));
             Assert::AreEqual(10.0, table.get(L"bar").numberVal());
+
+            try
+            {
+                table.assign(L"bar", toWideStr("foobar"));
+                Assert::Fail();
+            }
+            catch (const std::exception&) {}
+
+            table.set(L"startsNull", object(object::NOTHING));
+            Assert::IsTrue(table.get(L"startsNull").isNull());
+
+            table.assign(L"startsNull", object(object::NOTHING));
+            Assert::IsTrue(table.get(L"startsNull").isNull());
+
+            table.assign(L"startsNull", 13.0);
+            Assert::AreEqual(13.0, table.get(L"startsNull").numberVal());
+
+            try
+            {
+                table.assign(L"startsNull", toWideStr("foobar"));
+                Assert::Fail();
+            }
+            catch (const std::exception&) {}
+
+            table.assign(L"startsNull", 11.0);
+            Assert::AreEqual(11.0, table.get(L"startsNull").numberVal());
         }
 
         TEST_METHOD(SymbolStackerTests)

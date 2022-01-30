@@ -68,6 +68,8 @@ namespace mscript
 			, m_index(std::make_shared<index>(indexVal))
 		{}
 
+		object clone() const;
+
 		object_type type() const { return m_type; }
 		std::string typeStr() const { return getTypeName(m_type); }
 
@@ -102,6 +104,7 @@ namespace mscript
 		bool operator>(const object& other) const { return !(*this < other) && *this != other; }
 		bool operator>=(const object& other) const { return *this > other || *this == other; }
 
+	private:
 		void validateType(object_type shouldBe) const;
 
 	private:

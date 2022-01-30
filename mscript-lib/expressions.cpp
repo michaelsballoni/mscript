@@ -529,6 +529,13 @@ namespace mscript
             return double(first.length());
         }
 
+        if (function == "clone")
+        {
+            if (paramList.size() != 1)
+                raiseError("clone() takes one parameter");
+            return first.clone();
+        }
+
         if (function == "list")
             return object::list(paramList);
 

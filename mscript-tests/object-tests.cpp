@@ -117,6 +117,51 @@ namespace mscript
 				obj.indexVal().insert(3.0, 4.0);
 				Assert::AreEqual(size_t(2), obj.length());
 			}
+
+			{
+				object nullVal;
+				Assert::AreEqual(nullVal.clone().isNull(), nullVal.isNull());
+
+				object boolVal = true;
+				Assert::AreEqual(boolVal.clone().boolVal(), boolVal.boolVal());
+
+				object num = 13.0;
+				Assert::AreEqual(num.clone().numberVal(), num.numberVal());
+
+				object str = toWideStr("foo");
+				Assert::AreEqual(str.clone().stringVal(), str.stringVal());
+
+				object::list innerList;
+				innerList.push_back(15.0);
+
+				object::list listVal;
+				listVal.push_back(innerList);
+				
+				object list0 = listVal;
+				object list1 = list0.clone();
+
+				std::wstring originalListStr = list0.toString();
+
+				Assert::AreEqual(originalListStr, list1.toString());
+
+				list0.listVal().push_back(17.0);
+
+				Assert::AreEqual(originalListStr, list1.toString());
+
+				object::index indexVal;
+				indexVal.insert(1.0, 2.0);
+
+				object index0 = indexVal;
+				object index1 = index0.clone();
+
+				std::wstring originalIndexStr = index0.toString();
+
+				Assert::AreEqual(originalIndexStr, index1.toString());
+
+				index0.indexVal().insert(3.0, 4.0);
+
+				Assert::AreEqual(originalIndexStr, index1.toString());
+			}
 		}
 	};
 }
