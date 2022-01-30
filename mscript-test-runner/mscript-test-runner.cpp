@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 		}
 
 		std::wstring script = trim(fileText.substr(0, separatorIdx));
-		std::wstring expected = trim(fileText.substr(separatorIdx + strlen("===")));
+		std::wstring expected = fileText.substr(separatorIdx + strlen("==="));
 		replace(expected, L"\r\n", L"\n");
 		expected = trim(expected);
 
@@ -75,9 +75,34 @@ int main(int argc, char* argv[])
 			output = trim(output);
 		}
 
-		if (expected != output)
+		if (output != expected)
 		{
 			printf("\nERROR: Test fails!\n");
+
+			auto expectedLines = split(expected, L"\n");
+			auto outputLines = split(output, L"\n");
+
+			size_t lineCount = std::min(expectedLines.size(), outputLines.size());
+			for (size_t idx = 0; idx < lineCount; ++idx)
+			{
+				std::wstring currOutputLine = outputLines[idx];
+				std::wstring currExpectedLine = expectedLines[idx];
+				if (currOutputLine != currExpectedLine)
+				{
+					printf("Line %d differs:\n"
+						"Expected: %S\n"
+						"Got:      %S\n",
+						(int)idx + 1, currExpectedLine.c_str(), currOutputLine.c_str());
+					return 1;
+				}
+			}
+			if (expectedLines.size() != outputLines.size())
+			{
+				printf("Line counts differ: expected: %d - got: %d\n", 
+					   int(expectedLines.size()), int(outputLines.size()));
+				return 1;
+			}
+
 			printf(" - Output:\n%S\n", output.c_str());
 			printf(" - Expected:\n%S\n", expected.c_str());
 			return 1;

@@ -1,7 +1,12 @@
 Port mscript to c++
-mscript-core:	port code and unit tests and get to pass as you go
+mscript-core: port code and unit tests and get to pass as you go
 	ScriptProcessor
-		add test for new regex getMatches function
+		don't allow assigning a new value of a different type than when declared...
+			...unless null, and can assign to nulls multiple times...
+			...but once has a variable has a non-null value...
+			...it can only ever be assiged to values of that type
+            - test using expression tester, exception handler
+		why is fibonacci so slow?
 
 object/expression:
 clone function, deep recursive clone
@@ -21,9 +26,13 @@ import statement to glue scripts together
 	allow names to have .'s in them, poor man's namespaces
 		have "member function" lookup look from *last* dot in symbol, before that is the variable name
 
-create new set of test scripts, more of that "Should be..." stuff
+error handling
+	new statement: [file, line, msg]
+	processor looks for statement following error
+	if found, runs the code in that statement
+	otherwise re-throws, eventually exiting the processor...if callDepth == 0
 
-why is fibonacci so slow?
+expressions: try having []'s get handled like ()'s are, so some_list[idx] could work
 
 mscript.exe project
 	set cmd line parameters as an object::list into the initial symbol table, call it arguments

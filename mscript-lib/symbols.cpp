@@ -52,8 +52,16 @@ namespace mscript
             auto& curMap = m_symbols[s];
             if (curMap.find(name) != curMap.end())
             {
-                curMap[name] = value;
-                return;
+                stack_entry& entry = curMap[name];
+                if (entry.everType == object::NOTHING || entry.value.type() == value.type())
+                {
+                    entry.value = value;
+                    if (value.type() != object::NOTHING)
+                        entry.everType = value.type();
+                    return;
+                }
+                else
+                    raiseWError(L"Invalid assignment, type mismatch: " + name);
             }
         }
         raiseWError(L"Name not set: " + name);
@@ -68,7 +76,7 @@ namespace mscript
             const auto& it = curMap.find(name);
             if (it != curMap.end())
             {
-                answer = it->second;
+                answer = it->second.value;
                 return true;
             }
         }

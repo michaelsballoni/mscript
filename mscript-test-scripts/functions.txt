@@ -1,0 +1,189 @@
+/*
+Function Definitions
+*/
+~ addone2(toAddTo)
+	<- toAddTo + 1
+}
+
+~ iseven2(val)
+	<- (val % 2) = 0
+}
+
+~ fib(n)
+	? n <= 0
+		<- 0
+	? n = 1
+		<- 1
+	? n = 2
+		<- 1
+	<>
+		<- fib(n - 2) + fib(n - 1)
+	}
+}
+
+~ ranger(low, high)
+	# cur : low -> high
+		? cur < 3
+			^
+		? cur > 5
+			v
+		}
+		> cur
+	}
+}
+
+~ ager(whenny)
+	? whenny < 13
+		> "kid"
+	? whenny >= 18
+		> "adult"
+	<>
+		> "teen"
+	}
+}
+
+~ printBlock()
+{>>
+	test output
+>>}
+}
+
+~ colors ()
+	$ command = "command"
+	? command = "Reset Colors"
+	}
+	
+	$ theColor = "color"
+	
+	? command = "Add Color"
+	}
+	
+	> theColor
+}
+
+$ global = 14
+~ inner(inc2)
+	$ var = 13
+	> "inner: " + inc2 + " - " + var
+	& global = global + inc2
+	> "inner global: " + global
+}
+~ outer(inc1)
+	$ var = 10
+	> "outer: " + inc1 + " - " + var
+	& global = global + inc1
+	* inner(inc1 * 2)
+	> "outer global: " + global + " - " + var
+}
+
+
+/*
+Test Blocks
+*/
+{
+	$ addedTo2 = addone2(10)
+	> "addedTo2 should be 11: " + addedTo2
+}
+>>
+{
+	>> Evens and Odds
+	@ val in list(5, 6, 7, 8)
+		$ str = val + ": "
+		? iseven2(val)
+			& str = str + "even"
+		<>
+			& str = str + "odd"
+		}
+		> str
+	}
+}
+>>
+{
+	>> Fib
+	# n : 1 -> 10
+		> fib(n)
+	}
+}
+>>
+{
+	>> Process Function Continue Break
+	* ranger(1, 7)
+}
+>>
+{
+	>> Ager
+	* ager(1)
+	* ager(12)
+	* ager(13)
+	* ager(16)
+	* ager(17)
+	* ager(18)
+	* ager(19)
+	* ager(20)
+	* ager(70)
+}
+>>
+{
+	>> Print Block
+	* printBlock()
+}
+>>
+{
+	>> Color Function
+	* colors()
+}
+>>
+{
+	>> Inner Outer
+	* outer(1)
+}
+
+===
+
+addedTo2 should be 11: 11
+
+Evens and Odds
+5: odd
+6: even
+7: odd
+8: even
+
+Fib
+1
+1
+2
+3
+5
+8
+13
+21
+34
+55
+
+Process Function Continue Break
+3
+4
+5
+
+Ager
+kid
+kid
+teen
+teen
+teen
+adult
+adult
+adult
+adult
+
+Print Block
+	test output
+
+Color Function
+color
+
+Inner Outer
+outer: 1 - 10
+inner: 2 - 13
+inner global: 17
+outer global: 17 - 10

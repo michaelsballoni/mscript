@@ -1,0 +1,81 @@
+/*
+in a block comment
+another commented line
+*/
+!
+! line comment
+!
+
+{
+	$ flowValue = null
+	? 14 > 17
+		& flowValue = "false"
+	<>
+		& flowValue = "true"
+	}
+	> "flowValue should be 'true': " + flowValue
+}
+>>
+{
+	>> Print Set Update
+	> "foobar"
+	$ blet = "monkey"
+	> blet
+	& blet = "barry"
+	> blet
+}
+>>
+{
+	>> Begin
+	$ outer = 75
+	{
+		$ inner = outer - 20
+		> inner
+	}
+	$ inner = "65"
+	> inner
+}
+>>
+{
+	>> When
+	$ whenny = 13
+	? whenny < 13
+		> "kid"
+	? whenny >= 18
+		> "adult"
+	<>
+		> "teen"
+	}
+}
+>>
+{
+	>> Printing
+{>>
+one
+>>}
+
+{>>
+	printed
+	deep
+>>}
+}
+===
+
+flowValue should be 'true': true
+
+Print Set Update
+foobar
+monkey
+barry
+
+Begin
+55
+65
+
+When
+teen
+
+Printing
+one
+	printed
+	deep

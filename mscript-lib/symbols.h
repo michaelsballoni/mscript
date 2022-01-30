@@ -11,7 +11,17 @@ namespace mscript
 	class symbol_table
 	{
     public:
-        typedef std::unordered_map<std::wstring, object> stack_frame;
+        struct stack_entry
+        {
+            stack_entry(object _value = object()) 
+                : value(_value)
+                , everType(value.type()) 
+            {}
+
+            object value;
+            object::object_type everType;
+        };
+        typedef std::unordered_map<std::wstring, stack_entry> stack_frame;
         typedef std::vector<stack_frame> stack;
 
         symbol_table()

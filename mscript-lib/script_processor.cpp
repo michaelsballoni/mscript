@@ -105,12 +105,13 @@ namespace mscript
             if (line.empty()) // skip blank lines
                 continue;
 
+            std::string narrow = toNarrowStr(line);
             auto first = line[0];
 #ifndef _DEBUG
             try
 #endif
             {
-                if (line == L"/*") // block comment
+                if (narrow == "/*") // block comment
                 {
                     ++l;
                     while (trim(m_lines[l]) != L"*/")
@@ -124,7 +125,7 @@ namespace mscript
                 {
                     // No op
                 }
-                else if (line == L"{>>") // block verbatim print
+                else if (narrow == "{>>") // block verbatim print
                 {
                     ++l;
                     while (trim(m_lines[l]) != L">>}")
@@ -175,7 +176,7 @@ namespace mscript
 
                     m_symbols.assign(nameStr, answer);
                 }
-                else if (first == 'O') // infinite loop
+                else if (narrow == "O") // infinite loop
                 {
                     int loopEnd = findMatchingEnd(m_lines, l, endLine);
                     int loopStart = l;
@@ -224,7 +225,7 @@ namespace mscript
                         return object();
                     }
                 }
-                else if (line == L"<-") // void return statement
+                else if (narrow == "<-") // void return statement
                 {
                     outcome.Return = true;
                     return object();

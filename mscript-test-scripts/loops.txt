@@ -1,0 +1,73 @@
+{
+	$ counter2 = 0
+	O
+		& counter2 = counter2 + 1
+		? counter2 >= 10
+			v
+		}
+	}
+	> "counter2 should be '10': " + counter2
+}
+>>
+{
+	$ total2 = 0
+	@ val : list(1, 2, 3)
+		& total2 = total2 + val
+	}
+	> "total2 should be '6': " + total2
+}
+>>
+{
+	>> Even Odds
+	@ val : list(5, 6, 7, 8)
+		$ str = val + ": "
+		? (val % 2) = 0
+			& str = str + "even"
+		<>
+			& str = str + "odd"
+		}
+		> str
+	}
+}
+>>
+{
+	>> One to Three
+	# i : 1 -> 3
+		> i
+	}
+}
+>>
+{
+	>> Ten to Five
+	$ top2 = 10
+	$ bottom2 = 5
+
+	# step : top2 -> bottom2
+		> step
+	}
+}
+
+===
+
+counter2 should be '10': 10
+
+total2 should be '6': 6
+
+Even Odds
+5: odd
+6: even
+7: odd
+8: even
+
+One to Three
+1
+2
+3
+
+Ten to Five
+10
+9
+8
+7
+6
+5

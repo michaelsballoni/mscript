@@ -104,19 +104,7 @@ namespace mscript
 		if (m_type != other.m_type)
 			raiseError("Type mismatch for equality comparison: " + typeStr() + " and " + other.typeStr());
 		
-		switch (m_type)
-		{
-		case NOTHING:
-			return other.m_type == NOTHING;
-		case NUMBER:
-			return m_number == other.m_number;
-		case STRING:
-			return m_string == other.m_string;
-		case BOOL:
-			return m_bool == other.m_bool;
-		default:
-			return toString() == other.toString(); // LIST and INDEX
-		}
+		return toString() == other.toString();
 	}
 
 	bool object::operator<(const object& other) const
