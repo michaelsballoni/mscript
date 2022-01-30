@@ -89,7 +89,7 @@ namespace mscript
 	{
 		switch (m_type)
 		{
-		case STRING: return _wtof(m_string.c_str());
+		case STRING: return std::stod(m_string.c_str());
 		case NUMBER: return m_number;
 		case BOOL: return m_bool ? 1.0 : 0.0;
 		default: raiseError("Cannot convert to number: " + typeStr());
@@ -131,7 +131,7 @@ namespace mscript
 	void object::validateType(object_type shouldBe) const
 	{
 		if (m_type != shouldBe)
-			raiseError("Invalid type access: should be " + getTypeName(shouldBe) + ", is " + getTypeName(m_type));
+			raiseError("Invalid type access: " + getTypeName(shouldBe) + ", should be " + getTypeName(m_type));
 	}
 
 	bool object::operator==(const object& other) const

@@ -55,8 +55,7 @@ int main(int argc, char* argv[])
 
 		std::wstring script = trim(fileText.substr(0, separatorIdx));
 		std::wstring expected = fileText.substr(separatorIdx + strlen("==="));
-		replace(expected, L"\r\n", L"\n");
-		expected = trim(expected);
+		expected = trim(replace(expected, L"\r\n", L"\n"));
 
 		std::wstring output;
 		{
@@ -65,13 +64,13 @@ int main(int argc, char* argv[])
 			script_processor
 				processor
 				(
-					it.first.filename().wstring(),
 					[script](const std::wstring&) { return split(script, L"\n"); },
 					symbols,
 					functions,
+					[](){ return L"input"; },
 					[&output](const std::wstring& text) { output += text + L"\n"; }
 				);
-			processor.process();
+			processor.process(it.first.filename().wstring());
 			output = trim(output);
 		}
 

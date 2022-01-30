@@ -8,9 +8,16 @@
 
 namespace mscript
 {
+	/// <summary>
+	/// symbol_table manages the name->value mappings at each call stack level
+	/// </summary>
 	class symbol_table
 	{
     public:
+        /// <summary>
+        /// Each stack entry has a value, and what non-null type of value
+        /// this variable has ever had
+        /// </summary>
         struct stack_entry
         {
             stack_entry(object _value = object()) 

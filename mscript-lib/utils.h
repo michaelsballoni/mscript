@@ -5,8 +5,8 @@
 #include <vector>
 
 // Use macros for exception raising helpers to not pollute the stack trace
-#define raiseError(msg) throw std::runtime_error(std::string((msg)).c_str())
-#define raiseWError(msg) throw std::runtime_error(toNarrowStr(std::wstring(((msg)))).c_str())
+#define raiseError(msg) throw std::runtime_error(std::string(msg).c_str())
+#define raiseWError(msg) throw std::runtime_error(toNarrowStr(msg).c_str())
 
 namespace mscript
 {
@@ -22,7 +22,7 @@ namespace mscript
 
     std::vector<std::wstring> split(std::wstring str, const wchar_t* seperator);
 
-    void replace(std::wstring& str, const std::wstring& from, const std::wstring& to);
+    std::wstring replace(const std::wstring& str, const std::wstring& from, const std::wstring& to);
 
     bool startsWith(const std::wstring& str, const std::wstring& starter);
 }

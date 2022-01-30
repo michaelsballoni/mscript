@@ -8,14 +8,16 @@
 namespace mscript
 {
     /// <summary>
-    /// What do user-defined functions look like?
+    /// User-defined functions have a filename, name, parameter names,
+    /// and where in the source the function body is found
     /// </summary>
     struct script_function
     {
+        std::wstring filename;
+
         std::wstring name;
         std::vector<std::wstring> paramNames;
 
-        std::wstring filename;
         int startIndex = -1;
         int endIndex = -1;
     };

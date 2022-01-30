@@ -5,6 +5,10 @@
 
 namespace mscript
 {
+    /// <summary>
+    /// These are the binary operators supported by the expression processor
+    /// They are in operator precedence order, least to most
+    /// </summary>
     std::vector<std::string> sm_ops
     {
         "or",
@@ -32,6 +36,7 @@ namespace mscript
         expStr = trim(expStr);
         std::string narrow = toNarrowStr(expStr);
 
+        // Check for easy stuff
         if (narrow.empty())
             raiseError("Empty expression");
 
@@ -45,6 +50,7 @@ namespace mscript
             return false;
 
         {
+            // Do an exact parsing of a number from the full expression string
             double number;
             const char* start = narrow.data();
             const char* end = start + narrow.size();
@@ -62,6 +68,7 @@ namespace mscript
         if (isName(expStr)) // should have been found in symbol table
             raiseWError(L"Unknown variable name: " + expStr);
 
+        // Stay out of string constants
         if (expStr[0] == '\"')
         {
             std::wstring str;
@@ -91,19 +98,21 @@ namespace mscript
             if (!foundEnd)
                 raiseWError(L"Unfinished string: " + expStr);
 
+            // Implement escaped characters, \n, etc.
             if (foundAtEnd)
             {
-                replace(str, L"\\\\", L"\\");
-                replace(str, L"\\\"", L"\"");
-                replace(str, L"\\\"", L"\"");
-                replace(str, L"\\'", L"\'");
-                replace(str, L"\\t", L"\t");
-                replace(str, L"\\n", L"\n");
-                replace(str, L"\\r", L"\r");
+                str = replace(str, L"\\\\", L"\\");
+                str = replace(str, L"\\\"", L"\"");
+                str = replace(str, L"\\\"", L"\"");
+                str = replace(str, L"\\'", L"\'");
+                str = replace(str, L"\\t", L"\t");
+                str = replace(str, L"\\n", L"\n");
+                str = replace(str, L"\\r", L"\r");
                 return str;
             }
         }
 
+        // Walk the operators, least to most precedenced
         for (size_t opdx = 0; opdx < sm_ops.size(); ++opdx)
         {
             const std::string& op = sm_ops[opdx];
@@ -112,15 +121,19 @@ namespace mscript
             size_t parenCount = 0;
             bool inString = false;
 
+            // Walk the exception from the end, so that we bind to
+            // the right-side of the expression
             for (int idx = int(expStr.size()) - 1; idx >= 0; --idx)
             {
                 wchar_t c = expStr[idx];
 
+                // Stay out of strings
                 if (c == '\"' && (idx == 0 || expStr[idx - 1] != '\\'))
                     inString = !inString;
                 if (inString)
                     continue;
 
+                // Stay out of parens
                 if (c == '(')
                     ++parenCount;
                 else if (c == ')')
@@ -144,8 +157,10 @@ namespace mscript
                     {
                         if (idx < expStr.size() - 2)
                         {
-                            opMatches = expStr[idx + 1] == op[1]
-                                && expStr[idx + 2] == op[2];
+                            opMatches = 
+                                expStr[idx + 1] == op[1]
+                                && 
+                                expStr[idx + 2] == op[2];
                         }
                     }
                     else
@@ -153,13 +168,16 @@ namespace mscript
                 }
                 if (opMatches)
                 {
+                    // Make sure our operator isn't some 5E+5 nonsense
                     if (isOperator(expStr, op, idx))
                     {
                         object value;
 
+                        // Split the string into left and right parts
                         std::wstring leftStr = expStr.substr(0, idx);
                         std::wstring rightStr = expStr.substr(idx + opLen);
 
+                        // Evaluate the left part
                         object leftVal = evaluate(leftStr);
 
                         // Short circuitry
@@ -173,8 +191,10 @@ namespace mscript
                         }
                         else
                         {
+                            // Evaluate the right part
                             object rightVal = evaluate(rightStr);
 
+                            // Handle nulls with equivalent checks
                             if (leftVal.isNull() || rightVal.isNull())
                             {
                                 if (op == "=")
@@ -184,6 +204,7 @@ namespace mscript
                                 else
                                     raiseWError(L"Invalid operator for null values: " + expStr);
                             }
+                            // Handle string on either side, string promotion
                             else if (leftVal.type() == object::STRING || rightVal.type() == object::STRING)
                             {
                                 std::wstring leftValStr = leftVal.toString();
@@ -209,6 +230,7 @@ namespace mscript
                                         raiseWError(L"Unrecognized string operator: " + expStr);
                                 }
                             }
+                            // Numbers are easy
                             else if (leftVal.type() == object::NUMBER && rightVal.type() == object::NUMBER)
                             {
                                 double leftNum = leftVal.numberVal();
@@ -249,6 +271,7 @@ namespace mscript
                                     }
                                 }
                             }
+                            // Bools are easy
                             else if (leftVal.type() == object::BOOL && rightVal.type() == object::BOOL)
                             {
                                 bool leftBool = leftVal.boolVal();
@@ -270,7 +293,7 @@ namespace mscript
                         }
                         return value;
                     }
-                    else
+                    else // not an operator after all, so look for the next op
                     {
                         if (idx > 0)
                             idx = reverseFind(expStr, toWideStr(op), idx);
@@ -279,6 +302,7 @@ namespace mscript
             }
         }
 
+        // Deal with parens, including function calls
         size_t leftParen = expStr.find('(');
         if (expStr.size() > 2 && leftParen != std::wstring::npos && expStr.back() == ')')
         {
@@ -300,6 +324,7 @@ namespace mscript
                 return values[0];
         }
 
+        // Deal with unary operators
         if (expStr[0] == '-')
         {
             object answer = evaluate(expStr.substr(1));
@@ -317,6 +342,7 @@ namespace mscript
             return !answer.boolVal();
         }
 
+        // Oh well, not processed, must not be a valid expression
         raiseWError(L"Expression not evaluated: " + expStr);
     }
 
@@ -789,7 +815,7 @@ namespace mscript
             std::wstring input = paramList[0].stringVal();
             std::wstring toFind = paramList[1].stringVal();
             std::wstring toReplaceWith = paramList[2].stringVal();
-            replace(input, toFind, toReplaceWith);
+            input = replace(input, toFind, toReplaceWith);
             return input;
         }
 
@@ -985,6 +1011,7 @@ namespace mscript
             return answer;
         }
 
+        // Do object-like member function-ish expression processing
         size_t dotIndex = function.find('.');
         if (dotIndex != std::string::npos)
         {
@@ -1012,6 +1039,7 @@ namespace mscript
             }
         }
 
+        // Not a function we know about after all
         raiseError("Function not defined: " + function);
     }
 }

@@ -53,7 +53,15 @@ namespace mscript
             if (curMap.find(name) != curMap.end())
             {
                 stack_entry& entry = curMap[name];
-                if (entry.everType == object::NOTHING || entry.value.type() == value.type())
+                // Implement type-safe assignment
+                // If it ever had a non-null value, subsequent assignments
+                // have to be to values of the same type
+                if 
+                (
+                    entry.everType == object::NOTHING 
+                    || 
+                    entry.value.type() == value.type()
+                )
                 {
                     entry.value = value;
                     if (value.type() != object::NOTHING)

@@ -17,7 +17,7 @@ namespace mscript
     {
     public:
         /// <summary>
-        /// Access the vector directly.
+        /// Access the vector directly
         /// </summary>
         const std::vector<std::pair<K, V>>& vec() const
         {
@@ -25,7 +25,7 @@ namespace mscript
         }
 
         /// <summary>
-        /// Access the map directly.
+        /// Access the map directly
         /// </summary>
         const std::unordered_map<K, V>& map() const
         {
@@ -63,7 +63,7 @@ namespace mscript
         }
 
         /// <summary>
-        /// Add a key-value pair to this.
+        /// Add a key-value pair to this
         /// </summary>
         void insert(const K& key, const V& val)
         {
@@ -74,7 +74,7 @@ namespace mscript
         }
 
         /// <summary>
-        /// Get a value, checking if it exists first.
+        /// Get a value, checking if it exists first
         /// </summary>
         /// <param name="key">Key value to look up</param>
         /// <param name="val">Value to populate</param>

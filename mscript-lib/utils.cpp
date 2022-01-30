@@ -114,20 +114,22 @@ namespace mscript
     }
 }
 
-void mscript::replace(std::wstring& str, const std::wstring& from, const std::wstring& to)
+std::wstring mscript::replace(const std::wstring& str, const std::wstring& from, const std::wstring& to)
 {
-    if (str.empty() || from.empty())
-        return;
+    if (str.empty() || str.empty())
+        return std::wstring();
 
+    std::wstring retVal = str;
     size_t pos;
     size_t offset = 0;
     const size_t fromSize = from.size();
     const size_t increment = to.size();
-    while ((pos = str.find(from, offset)) != std::wstring::npos)
+    while ((pos = retVal.find(from, offset)) != std::wstring::npos)
     {
-        str.replace(pos, fromSize, to);
+        retVal.replace(pos, fromSize, to);
         offset = pos + increment;
     }
+    return retVal;
 }
 
 bool mscript::startsWith(const std::wstring& str, const std::wstring& starter)

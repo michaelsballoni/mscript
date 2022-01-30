@@ -1,3 +1,6 @@
+// Typical PCH stuff here, and pch.h includes this
+// The reason this isn't in pch.h directly is for other projects 
+// to include this in their PCH's
 #pragma once
 
 #define _USE_MATH_DEFINES
@@ -11,6 +14,7 @@
 #include <codecvt>
 #include <locale>
 #include <memory>
+#include <optional>
 #include <regex>
 #include <stdexcept>
 #include <sstream>

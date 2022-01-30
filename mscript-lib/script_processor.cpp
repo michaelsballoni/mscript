@@ -5,18 +5,25 @@
 
 namespace mscript
 {
-    object script_processor::script_processor::process()
+    object script_processor::process(const std::wstring& filename)
     {
-        preprocessFunctions();
+        // Don't process scripts more than once
+        if (m_linesDb.find(filename) != m_linesDb.end())
+            return object();
+
+        m_linesDb.insert({ filename, m_fileLoader(filename) });
+
+        preprocessFunctions(filename); // scan the whole script for functions first
         process_outcome outcome;
-        return process(0U, int(m_lines.size()) - 1, outcome, 0U);
+        return process(filename, 0, int(lines.size()) - 1, outcome, 0U);
     }
 
-    void script_processor::preprocessFunctions()
+    void script_processor::preprocessFunctions(const std::wstring& filename)
     {
-        for (int l = 0; l < int(m_lines.size()); ++l)
+        const std::vector<std::wstring>& lines = m_linesDb[filename];
+        for (int l = 0; l < int(lines.size()); ++l)
         {
-            std::wstring line = trim(m_lines[l]);
+            std::wstring line = trim(lines[l]);
             if (line.empty())
                 continue;
 #ifndef _DEBUG
@@ -26,10 +33,10 @@ namespace mscript
                 if (line == L"/*")
                 {
                     ++l;
-                    while (trim(m_lines[l]) != L"*/")
+                    while (trim(lines[l]) != L"*/")
                     {
                         ++l;
-                        if (l >= m_lines.size())
+                        if (l >= lines.size())
                             raiseError("Unfinished block comment");
                     }
                 }
@@ -54,8 +61,8 @@ namespace mscript
                     raiseWError(L"function already defined: " + name);
 
                 std::wstring paramListStr = line.substr(openParen);
-                replace(paramListStr, L"(", L"");
-                replace(paramListStr, L")", L"");
+                paramListStr = replace(paramListStr, L"(", L"");
+                paramListStr = replace(paramListStr, L")", L"");
                 auto paramList = split(paramListStr, L",");
                 for (auto& param : paramList)
                     param = trim(param);
@@ -69,11 +76,12 @@ namespace mscript
                         validateName(param);
                 }
 
-                int loopEnd = findMatchingEnd(m_lines, l, int(m_lines.size()) - 1);
+                int loopEnd = findMatchingEnd(lines, l, int(lines.size()) - 1);
                 int loopStart = l;
                 l = loopEnd;
 
                 script_function function;
+                function.filename = filename;
                 function.name = name;
                 function.paramNames = paramList;
                 function.startIndex = loopStart + 1;
@@ -84,7 +92,7 @@ namespace mscript
 #ifndef _DEBUG
             catch (const std::exception& exp)
             {
-                handleException(exp, line, l);
+                handleException(exp, filename, line, l);
             }
 #endif
         }
@@ -93,31 +101,32 @@ namespace mscript
     object 
     script_processor::process
     (
+        const std::wstring& filename,
         int startLine, 
         int endLine, 
         process_outcome& outcome, 
         unsigned callDepth
     )
     {
+        const std::vector<std::wstring>& lines = m_linesDb[filename];
         for (int l = startLine; l <= endLine; ++l)
         {
-            std::wstring line = trim(m_lines[l]);
+            std::wstring line = trim(lines[l]);
             if (line.empty()) // skip blank lines
                 continue;
 
-            std::string narrow = toNarrowStr(line);
             auto first = line[0];
 #ifndef _DEBUG
             try
 #endif
             {
-                if (narrow == "/*") // block comment
+                if (line == L"/*") // block comment
                 {
                     ++l;
-                    while (trim(m_lines[l]) != L"*/")
+                    while (trim(lines[l]) != L"*/")
                     {
                         ++l;
-                        if (l >= m_lines.size())
+                        if (l >= lines.size())
                             raiseError("Unfinished block comment");
                     }
                 }
@@ -125,14 +134,14 @@ namespace mscript
                 {
                     // No op
                 }
-                else if (narrow == "{>>") // block verbatim print
+                else if (line == L"{>>") // block verbatim print
                 {
                     ++l;
-                    while (trim(m_lines[l]) != L">>}")
+                    while (trim(lines[l]) != L">>}")
                     {
-                        m_output(m_lines[l]);
+                        m_output(lines[l]);
                         ++l;
-                        if (l >= m_lines.size())
+                        if (l >= lines.size())
                             raiseError("Unfinished block print");
                     }
                 }
@@ -176,9 +185,9 @@ namespace mscript
 
                     m_symbols.assign(nameStr, answer);
                 }
-                else if (narrow == "O") // infinite loop
+                else if (line == L"O") // infinite loop
                 {
-                    int loopEnd = findMatchingEnd(m_lines, l, endLine);
+                    int loopEnd = findMatchingEnd(lines, l, endLine);
                     int loopStart = l;
                     l = loopEnd;
 
@@ -186,7 +195,7 @@ namespace mscript
                     while (true)
                     {
                         process_outcome ourOutcome;
-                        process(loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
+                        process(filename, loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
                         if (ourOutcome.Return)
                         {
                             outcome.Return = true;
@@ -201,13 +210,13 @@ namespace mscript
                 }
                 else if (first == '{') // braced scope, for variable declaration containment
                 {
-                    int loopEnd = findMatchingEnd(m_lines, l, endLine);
+                    int loopEnd = findMatchingEnd(lines, l, endLine);
                     int loopStart = l;
                     l = loopEnd;
 
                     symbol_stacker stacker(m_symbols);
                     process_outcome ourOutcome;
-                    process(loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
+                    process(filename, loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
                     if (ourOutcome.Return)
                     {
                         outcome.Return = true;
@@ -225,7 +234,7 @@ namespace mscript
                         return object();
                     }
                 }
-                else if (narrow == "<-") // void return statement
+                else if (line == L"<-") // void return statement
                 {
                     outcome.Return = true;
                     return object();
@@ -248,7 +257,7 @@ namespace mscript
                     bool seenQuestion = false;
                     bool seenPlainElse = false;
                     
-                    auto markers = findElses(m_lines, l, endLine);
+                    auto markers = findElses(lines, l, endLine);
 
                     int endMarker = markers.back();
                     l = endMarker;
@@ -257,7 +266,7 @@ namespace mscript
                     {
                         int marker = markers[m];
                         int nextMarker = markers[std::min(m + 1, int(markers.size()) - 1)];
-                        std::wstring markerLine = trim(m_lines[marker]);
+                        std::wstring markerLine = trim(lines[marker]);
 
                         object answer;
                         size_t spaceIndex = markerLine.find(' ');
@@ -290,7 +299,7 @@ namespace mscript
 
                         symbol_stacker stacker(m_symbols);
                         process_outcome ourOutcome;
-                        process(marker + 1, nextMarker - 1, ourOutcome, callDepth + 1);
+                        process(filename, marker + 1, nextMarker - 1, ourOutcome, callDepth + 1);
                         
                         outcome = ourOutcome;
                         if (ourOutcome.Return)
@@ -319,7 +328,7 @@ namespace mscript
                     std::wstring label = trim(line.substr(firstSpace, nextSpace - firstSpace));
                     validateName(label);
 
-                    int loopEnd = findMatchingEnd(m_lines, l, endLine);
+                    int loopEnd = findMatchingEnd(lines, l, endLine);
                     int loopStart = l;
                     l = loopEnd;
 
@@ -349,7 +358,7 @@ namespace mscript
                             m_symbols.assign(label, val);
 
                             process_outcome ourOutcome;
-                            process(loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
+                            process(filename, loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
                             if (ourOutcome.Return)
                             {
                                 outcome = ourOutcome;
@@ -424,7 +433,7 @@ namespace mscript
                     auto fromIdx = static_cast<int64_t>(fromValue.numberVal());
                     auto toIdx = static_cast<int64_t>(toValue.numberVal());
 
-                    int loopEnd = findMatchingEnd(m_lines, l, endLine);
+                    int loopEnd = findMatchingEnd(lines, l, endLine);
                     int loopStart = l;
                     l = loopEnd;
 
@@ -439,7 +448,7 @@ namespace mscript
                                 m_symbols.assign(label, double(i));
                                 symbol_stacker innerStacker(m_symbols);
                                 process_outcome ourOutcome;
-                                process(loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
+                                process(filename, loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
                                 if (ourOutcome.Return)
                                 {
                                     outcome = ourOutcome;
@@ -458,7 +467,7 @@ namespace mscript
                                 m_symbols.assign(label, double(i));
                                 symbol_stacker innerStacker(m_symbols);
                                 process_outcome ourOutcome;
-                                process(loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
+                                process(filename, loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
                                 if (ourOutcome.Return)
                                 {
                                     outcome = ourOutcome;
@@ -478,7 +487,7 @@ namespace mscript
                         raiseError("Functions cannot defined within anything else");
                     
                     // function has already been processed, just skip past it
-                    l = findMatchingEnd(m_lines, l, endLine);
+                    l = findMatchingEnd(lines, l, endLine);
                 }
                 else if (first == '^') // continue
                 {
@@ -504,19 +513,16 @@ namespace mscript
 #ifndef _DEBUG
             catch (const std::exception& exp)
             {
-                handleException(exp, line, l);
+                handleException(exp, filename, line, l);
             }
 #endif
         }
         return object();
     }
 
-    void script_processor::handleException(const std::exception& exp, const std::wstring& line, int l)
+    void script_processor::handleException(const std::exception& exp, const std::wstring& filename, const std::wstring& line, int l)
     {
-        script_exception toThrow(std::string(exp.what()));
-        toThrow.line = line;
-        toThrow.lineNumber = l + 1;
-        throw toThrow;
+        throw script_exception(exp.what(), filename, l + 1, line);
     }
 
     object script_processor::evaluate(const std::wstring& valueStr, unsigned callDepth)
@@ -530,11 +536,20 @@ namespace mscript
 
     bool script_processor::hasFunction(const std::wstring& name) const
     {
-        return m_functions.find(name) != m_functions.end();
+        return name == L"input" ||m_functions.find(name) != m_functions.end();
     }
 
     object script_processor::callFunction(const std::wstring& name, const object::list& parameters)
     {
+        if (name == L"input")
+        {
+            auto input = m_input();
+            if (input.has_value())
+                return *input;
+            else
+                return object();
+        }
+
         auto funcIt = m_functions.find(name);
         if (funcIt == m_functions.end())
             raiseWError(L"Unknown function: " + name);
@@ -555,6 +570,7 @@ namespace mscript
             object returnValue =
                 process
                 (
+                    func->filename,
                     func->startIndex,
                     func->endIndex,
                     outcome,

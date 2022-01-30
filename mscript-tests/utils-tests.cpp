@@ -62,23 +62,23 @@ namespace mscript
 			std::wstring str;
 
 			str = L"";
-			replace(str, L"", L"");
+			str = replace(str, L"", L"");
 			Assert::AreEqual(toWideStr(""), str);
 
 			str = L"";
-			replace(str, L"foo", L"bar");
+			str = replace(str, L"foo", L"bar");
 			Assert::AreEqual(toWideStr(""), str);
 
 			str = L"blet";
-			replace(str, L"foo", L"bar");
+			str = replace(str, L"foo", L"bar");
 			Assert::AreEqual(toWideStr("blet"), str);
 
 			str = L"foobar";
-			replace(str, L"foo", L"bar");
+			str = replace(str, L"foo", L"bar");
 			Assert::AreEqual(toWideStr("barbar"), str);
 
 			str = L"foobletfoo";
-			replace(str, L"foo", L"bar");
+			str = replace(str, L"foo", L"bar");
 			Assert::AreEqual(toWideStr("barbletbar"), str);
 		}
 

@@ -7,13 +7,14 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
 namespace mscript
 {
     /// <summary>
-    /// Central function for taking a script and processing it.
+    /// Central class for taking a script and processing it
     /// </summary>
     class script_processor : public callable
 	{
@@ -21,37 +22,39 @@ namespace mscript
         /// <summary>
         /// Create a script processor
         /// </summary>
-        /// <param name="filename">Name of the script being processed</param>
-        /// <param name="expStr">Script to process</param>
-        /// <param name="symbols">Symbols </param>
+        /// <param name="filename">Name of the script to process</param>
+        /// <param name="fileLoader">Function for loading scripts</param>
+        /// <param name="symbols">Symbol table</param>
+        /// <param name="functions">Function table</param>
+        /// <param name="input">Function for reading from the input</param>
+        /// <param name="output">Function for writing to the output</param>
         script_processor
         (
-            const std::wstring& filename,
             std::function<std::vector<std::wstring>(const std::wstring& filename)> fileLoader,
             symbol_table& symbols,
             std::unordered_map<std::wstring, std::shared_ptr<script_function>>& functions,
+            std::function<std::optional<std::wstring>()> input,
             std::function<void (const std::wstring& text)> output
         )
-        : m_filename(filename)
-        , m_fileLoader(fileLoader)
+        : m_fileLoader(fileLoader)
         , m_symbols(symbols)
         , m_functions(functions)
+        , m_input(input)
         , m_output(output)
-        {
-            m_lines = m_fileLoader(m_filename);
-        }
+        {}
 
         /// <summary>
-        /// Process the entire script
+        /// Process an entire script
         /// </summary>
         /// <returns>Return value from the overall script</returns>
-        object process();
+        object process(const std::wstring& filename);
 
-        // Good, bad, and ugly
+        // The good, the bad, the ugly
         std::wstring Error;
         int ErrorLineNumber = -1;
         std::wstring ErrorLine;
 
+        // Callable implementation
         virtual bool hasFunction(const std::wstring& name) const;
         virtual object callFunction(const std::wstring& name, const object::list& parameters);
 
@@ -77,19 +80,16 @@ namespace mscript
         /// <returns>Return value from a function call, or null</returns>
         object process
         (
-            int startLine, 
+            const std::wstring& filename,
+            int startLine,
             int endLine, 
             process_outcome& outcome, 
             unsigned callDepth
         );
         
-        // Scan the script looking for function declarations
-        // You can only call functions already loaded from another script
-        // or functions declared in this script...
-        // ...not functions in some unknown later script
-        void preprocessFunctions();
+        void preprocessFunctions(const std::wstring& filename);
 
-        void handleException(const std::exception& exp, const std::wstring& line, int l);
+        void handleException(const std::exception& exp, const std::wstring& filename, const std::wstring& line, int l);
         object evaluate(const std::wstring& valueStr, unsigned callDepth);
 
         static int findMatchingEnd(const std::vector<std::wstring>& lines, int startIndex, int endIndex);
@@ -97,17 +97,16 @@ namespace mscript
         static bool isLineBlockBegin(std::wstring line);
 
     private:
-        const std::wstring m_filename;
         std::function<std::vector<std::wstring>(const std::wstring& filename)> m_fileLoader;
 
-        std::vector<std::wstring> m_lines;
+        std::unordered_map<std::wstring, std::vector<std::wstring>> m_linesDb;
 
         symbol_table& m_symbols;
+        std::unordered_map<std::wstring, std::shared_ptr<script_function>>& m_functions;
 
         unsigned m_tempCallDepth = 0;
 
-        std::unordered_map<std::wstring, std::shared_ptr<script_function>>& m_functions;
-
+        std::function<std::optional<std::wstring>()> m_input;
         std::function<void(const std::wstring& text)> m_output;
     };
 }

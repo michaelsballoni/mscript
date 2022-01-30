@@ -26,6 +26,10 @@ namespace std
 
 namespace mscript
 {
+	/// <summary>
+	/// An object is the variant type used throughout the expression and
+	/// script processing
+	/// </summary>
 	class object
 	{
 	public:
@@ -33,7 +37,7 @@ namespace mscript
 		typedef std::vector<object> list;
 		typedef vectormap<object, object> index;
 
-		// Who needs more the five kinds of things?
+		// Who needs more than five kinds of things...and nulls?
 		enum object_type
 		{
 			NOTHING,
@@ -44,6 +48,7 @@ namespace mscript
 			INDEX
 		};
 
+		// A constructor for each type of object
 		object(object_type objType = NOTHING)
 			: m_type(objType)
 		{}
@@ -68,6 +73,9 @@ namespace mscript
 			, m_index(std::make_shared<index>(indexVal))
 		{}
 
+		/// <summary>
+		/// clone() creates a deep copy of this
+		/// </summary>
 		object clone() const;
 
 		object_type type() const { return m_type; }
@@ -111,9 +119,10 @@ namespace mscript
 		object_type m_type = NOTHING;
 
 		double m_number = 0.0;
-		std::wstring m_string;
+		std::wstring m_string; // copied by value
 		bool m_bool = false;
 
+		// copied by reference
 		std::shared_ptr<list> m_list;
 		std::shared_ptr<index> m_index;
 	};

@@ -5,21 +5,26 @@
 namespace mscript
 {
     /// <summary>
-    /// script_exception has the line number and text of the line where the exception occurred
+    /// script_exception has the message, filename, and line info
     /// </summary>
     class script_exception : public std::runtime_error
     {
     public:
-        script_exception(const std::wstring& msg)
-            : script_exception(toNarrowStr(msg))
-        { }
-
-        script_exception(const std::string& msg)
-            : std::runtime_error(msg.c_str())
-        { }
+        script_exception
+        (
+            const std::string& msg, 
+            const std::wstring& filename, 
+            int lineNumber, 
+            const std::wstring& line
+        )
+        : std::runtime_error(msg.c_str())
+        , filename(filename)
+        , lineNumber(lineNumber)
+        , line(line)
+        {}
 
         std::wstring filename;
-        std::wstring line;
         int lineNumber = -1;
+        std::wstring line;
     };
 }
