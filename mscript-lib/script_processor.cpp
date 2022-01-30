@@ -15,7 +15,7 @@ namespace mscript
 
         preprocessFunctions(filename); // scan the whole script for functions first
         process_outcome outcome;
-        return process(filename, 0, int(lines.size()) - 1, outcome, 0U);
+        return process(filename, 0, int(m_linesDb[filename].size()) - 1, outcome, 0U);
     }
 
     void script_processor::preprocessFunctions(const std::wstring& filename)
@@ -251,6 +251,15 @@ namespace mscript
                     outcome.ReturnValue = returnValue;
                     outcome.Return = true;
                     return outcome.ReturnValue;
+                }
+                else if (first == '+')
+                {
+                    std::wstring newFilename = trim(line.substr(1));
+                    if (newFilename.empty())
+                        raiseError("import statement has no file name");
+
+                    object newFilenameValue = evaluate(newFilename, callDepth);
+                    process(newFilenameValue.stringVal());
                 }
                 else if (first == '?') // if else
                 {

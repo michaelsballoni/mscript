@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	std::string testDirPath = argv[1];
+	std::wstring testDirPath = toWideStr(argv[1]);
 	std::string specificTest = argc >= 3 ? argv[2] : "";
 
 	std::map<fs::path, std::wstring> testFiles;
@@ -49,6 +49,9 @@ int main(int argc, char* argv[])
 		size_t separatorIdx = fileText.find(L"===");
 		if (separatorIdx == 0 || separatorIdx == std::wstring::npos)
 		{
+			if (it.first.filename().extension() == ".ms")
+				continue;
+
 			printf("ERROR: Test lacks == divider\n");
 			return 1;
 		}
@@ -64,7 +67,18 @@ int main(int argc, char* argv[])
 			script_processor
 				processor
 				(
-					[script](const std::wstring&) { return split(script, L"\n"); },
+					[&](const std::wstring& filename) 
+					{
+						bool isExternal = fs::path(filename).extension() == ".ms";
+						if (isExternal)
+						{
+							std::string externalFilePath = toNarrowStr(fs::path(testDirPath).append(filename));
+							std::wstring externalScript = trim(replace(readFileIntoString(externalFilePath), L"\r\n", L"\n"));
+							return split(externalScript, L"\n");
+						}
+						else
+							return split(script, L"\n"); 
+					},
 					symbols,
 					functions,
 					[](){ return L"input"; },
