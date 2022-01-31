@@ -1005,19 +1005,39 @@ namespace mscript
             return output;
         }
 
-        if (function == "execResult")
+        if (function == "exec")
         {
             if (paramList.size() != 1 || paramList[0].type() != object::STRING)
-                raiseError("execResult() works with one command string");
+                raiseError("exec() works with one command string");
             int result = _wsystem(paramList[0].stringVal().c_str());
             return double(result);
         }
 
-        if (function == "execOutput")
+        if (function == "process")
         {
             if (paramList.size() != 1 || paramList[0].type() != object::STRING)
-                raiseError("execOutput() works with one command string");
-            // FORNOW - Finish this - FILE* popen()
+                raiseError("process() works with one command string");
+
+            FILE* file = _wpopen(paramList[0].stringVal().c_str(), L"rt");
+            if (file == nullptr)
+                raiseError("process() running command failed");
+
+            char buffer[1024];
+            std::string output;
+            while (fgets(buffer, sizeof(buffer), file))
+                output.append(buffer);
+
+            if (!feof(file))
+            {
+                int result = _pclose(file);
+                file = nullptr;
+                raiseError("process() reading program output failed: " + num2str(result));
+            }
+
+            _pclose(file);
+            file = nullptr;
+
+            return toWideStr(output);
         }
 
         if (m_callable.hasFunction(functionW))

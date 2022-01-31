@@ -219,8 +219,11 @@ namespace mscript
 
             ValidateExpression("join(list(1,2,3,4))", toWideStr("1234"), symbols);
             ValidateExpression("join(list(1,2,3,4), \", \")", toWideStr("1, 2, 3, 4"), symbols);
-
             ValidateExpression("join(split(\"foo bar\", \" \"), \" blet \")", toWideStr("foo blet bar"), symbols);
+
+            ValidateExpression("exec(\"echo foobar\")", 0.0, symbols);
+
+            ValidateExpression("process(\"echo foobar\")", toWideStr("foobar\n"), symbols);
         }
     };
 }

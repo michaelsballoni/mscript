@@ -1,0 +1,8 @@
+> exec("echo foobar")
+
+> process("echo foobar")
+
+===
+
+0
+foobar
