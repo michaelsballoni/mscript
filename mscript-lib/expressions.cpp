@@ -1005,6 +1005,21 @@ namespace mscript
             return output;
         }
 
+        if (function == "execResult")
+        {
+            if (paramList.size() != 1 || paramList[0].type() != object::STRING)
+                raiseError("execResult() works with one command string");
+            int result = _wsystem(paramList[0].stringVal().c_str());
+            return double(result);
+        }
+
+        if (function == "execOutput")
+        {
+            if (paramList.size() != 1 || paramList[0].type() != object::STRING)
+                raiseError("execOutput() works with one command string");
+            // FORNOW - Finish this - FILE* popen()
+        }
+
         if (m_callable.hasFunction(functionW))
         {
             object answer = m_callable.callFunction(functionW, paramList);

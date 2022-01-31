@@ -1,17 +1,20 @@
 Port mscript to c++
 
-import statement to glue scripts together
-	use + symbol, makes sense to add in script
-	script_exception needs filename
-	allow names to have .'s in them, poor man's namespaces
-		have "member function" lookup look from *last* dot in symbol, before that is the variable name
-
 runtime:
 add input function, getline sort of thing
-add system => exec
-add popen  => process
+	- test
+add system => runResult
+	- test
+add popen  => runOutput
+	- finish
 add file I/O, read + write
-the rest can be done with system and popen and expressions like split
+	readFile(path, [encoding])
+	writeFile(path, text, [encoding])
 
 mscript.exe project
 	set cmd line parameters as an object::list into the initial symbol table, call it arguments
+
+import statement, part deux
+	track the full path of each filename, and make imports relative to the full paths of the script being inserted
+	allow names to have .'s in them, poor man's namespaces
+		have "member function" lookup look from *last* dot in symbol, before that is the variable name
