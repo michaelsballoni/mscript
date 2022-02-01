@@ -13,6 +13,7 @@ namespace mscript
     /// </summary>
     struct script_function
     {
+        std::wstring previousFilename;
         std::wstring filename;
 
         std::wstring name;

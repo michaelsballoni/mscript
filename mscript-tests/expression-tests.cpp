@@ -209,6 +209,9 @@ namespace mscript
             ValidateExpression("replaced(\"foo2bar\", \"o2b\", \"y3z\")", toWideStr("foy3zar"), symbols);
             ValidateExpression("replaced(\"foo2bar\", \"Z\", \"y3b\")", toWideStr("foo2bar"), symbols);
 
+            ValidateExpression("trim(\"foobar\")", toWideStr("foobar"), symbols);
+            ValidateExpression("trim(\" foobar \")", toWideStr("foobar"), symbols);
+
             ValidateExpression("random(0, 1) >= 0 and random(0, 1) <= 1", true, symbols);
             ValidateExpression("random(0, 1) != random(0, 1)", true, symbols);
 
@@ -222,8 +225,16 @@ namespace mscript
             ValidateExpression("join(split(\"foo bar\", \" \"), \" blet \")", toWideStr("foo blet bar"), symbols);
 
             ValidateExpression("exec(\"echo foobar\")", 0.0, symbols);
-
             ValidateExpression("process(\"echo foobar\")", toWideStr("foobar\n"), symbols);
+
+            ValidateExpression("writeFile(\"test.txt\", \"testy test\", \"ascii\")", true, symbols);
+            ValidateExpression("readFile(\"test.txt\", \"ascii\")", toWideStr("testy test"), symbols);
+
+            ValidateExpression("writeFile(\"test.txt\", \"testy test\", \"utf-8\")", true, symbols);
+            ValidateExpression("readFile(\"test.txt\", \"utf-8\")", toWideStr("testy test"), symbols);
+
+            ValidateExpression("writeFile(\"test.txt\", \"testy test\", \"utf-16\")", true, symbols);
+            ValidateExpression("readFile(\"test.txt\", \"utf-16\")", toWideStr("testy test"), symbols);
         }
     };
 }

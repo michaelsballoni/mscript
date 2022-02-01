@@ -768,6 +768,13 @@ namespace mscript
             return splittedObjs;
         }
 
+        if (function == "trim")
+        {
+            if (paramList.size() != 1 || first.type() != object::STRING)
+                raiseError("trim() works one string");
+            return trim(first.stringVal());
+        }
+
         if (function == "toUpper")
         {
             if (paramList.size() != 1)
@@ -1038,6 +1045,89 @@ namespace mscript
             file = nullptr;
 
             return toWideStr(output);
+        }
+
+        if (function == "readFile")
+        {
+            if (paramList.size() != 2
+                || paramList[0].type() != object::STRING
+                || paramList[1].type() != object::STRING)
+            {
+                raiseError("readFile() works with a file path string and an encoding string");
+            }
+
+            std::wstring filePath = paramList[0].stringVal();
+            std::wstring encoding = paramList[1].stringVal();
+
+            if (encoding == L"ascii")
+            {
+                std::ifstream file(filePath);
+                if (!file)
+                    return object();
+
+                std::stringstream stream;
+                stream << file.rdbuf();
+                
+                std::string output = stream.str();
+                return toWideStr(output);
+            }
+
+            if (encoding == L"utf-8" || encoding == L"utf-16")
+            {
+                std::wifstream file(filePath);
+                if (encoding == L"utf-8")
+                    file.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
+                if (!file)
+                    return object();
+
+                std::wstringstream stream;
+                stream << file.rdbuf();
+
+                std::wstring output = stream.str();
+                return output;
+            }
+
+            raiseError("Unsupported readFile() encoding: must be ascii, utf-8, or utf-16");
+        }
+
+        if (function == "writeFile")
+        {
+            if (paramList.size() != 3
+                || paramList[0].type() != object::STRING
+                || paramList[1].type() != object::STRING
+                || paramList[2].type() != object::STRING)
+            {
+                raiseError("writeFile() works with a file path string, file contents string, and an encoding string");
+            }
+
+            std::wstring filePath = paramList[0].stringVal();
+            std::wstring contents = paramList[1].stringVal();
+            std::wstring encoding = paramList[2].stringVal();
+
+            if (encoding == L"ascii")
+            {
+                std::ofstream file(filePath, std::ofstream::trunc);
+                if (!file)
+                    return false;
+
+                std::string narrow = toNarrowStr(contents);
+                file.write(narrow.c_str(), narrow.size());
+                return true;
+            }
+
+            if (encoding == L"utf-8" || encoding == L"utf-16")
+            {
+                std::wofstream file(filePath, std::wofstream::trunc);
+                if (encoding == L"utf-8")
+                    file.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
+                if (!file)
+                    return false;
+                file.write(contents.c_str(), contents.size());
+                file.close();
+                return true;
+            }
+
+            raiseError("Unsupported writeFile() encoding: must be ascii, utf-8, or utf-16");
         }
 
         if (m_callable.hasFunction(functionW))

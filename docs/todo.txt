@@ -1,17 +1,1 @@
-Port mscript to c++
-
-runtime:
-add input function, getline sort of thing
-	- test
-add file I/O, read + write
-	readFile(path, [encoding])
-	writeFile(path, text, [encoding])
-
-import statement, part deux
-	track the full path of each filename, and make imports relative to the full paths of the script being inserted
-	allow names to have .'s in them, poor man's namespaces
-		have "member function" lookup look from *last* dot in symbol, before that is the variable name
-
-mscript.exe project
-	set cmd line parameters as an object::list into the initial symbol table, call it arguments
-
+Test it all out using mscript.exe

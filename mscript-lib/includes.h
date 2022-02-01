@@ -12,6 +12,7 @@
 #include <charconv>
 #include <cmath>
 #include <codecvt>
+#include <fstream>
 #include <locale>
 #include <memory>
 #include <optional>

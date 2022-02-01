@@ -5,20 +5,21 @@
 
 namespace mscript
 {
-    object script_processor::process(const std::wstring& filename)
+    object script_processor::process(const std::wstring& currentFilename, const std::wstring& newFilename)
     {
         // Don't process scripts more than once
-        if (m_linesDb.find(filename) != m_linesDb.end())
+        if (m_linesDb.find(newFilename) != m_linesDb.end())
             return object();
 
-        m_linesDb.insert({ filename, m_fileLoader(filename) });
+        m_linesDb.insert({ newFilename, m_fileLoader(currentFilename, newFilename) });
 
-        preprocessFunctions(filename); // scan the whole script for functions first
+        preprocessFunctions(currentFilename, newFilename); // scan for functions first
+
         process_outcome outcome;
-        return process(filename, 0, int(m_linesDb[filename].size()) - 1, outcome, 0U);
+        return process(currentFilename, newFilename, 0, int(m_linesDb[newFilename].size()) - 1, outcome, 0U);
     }
 
-    void script_processor::preprocessFunctions(const std::wstring& filename)
+    void script_processor::preprocessFunctions(const std::wstring& previousFilename, const std::wstring& filename)
     {
         const std::vector<std::wstring>& lines = m_linesDb[filename];
         for (int l = 0; l < int(lines.size()); ++l)
@@ -81,6 +82,7 @@ namespace mscript
                 l = loopEnd;
 
                 script_function function;
+                function.previousFilename = previousFilename;
                 function.filename = filename;
                 function.name = name;
                 function.paramNames = paramList;
@@ -101,6 +103,7 @@ namespace mscript
     object 
     script_processor::process
     (
+        const std::wstring& previousFilename, 
         const std::wstring& filename,
         int startLine, 
         int endLine, 
@@ -195,7 +198,15 @@ namespace mscript
                     while (true)
                     {
                         process_outcome ourOutcome;
-                        process(filename, loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
+                        process
+                        (
+                            previousFilename, 
+                            filename, 
+                            loopStart + 1, 
+                            loopEnd - 1, 
+                            ourOutcome, 
+                            callDepth + 1
+                        );
                         if (ourOutcome.Return)
                         {
                             outcome.Return = true;
@@ -216,7 +227,15 @@ namespace mscript
 
                     symbol_stacker stacker(m_symbols);
                     process_outcome ourOutcome;
-                    process(filename, loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
+                    process
+                    (
+                        previousFilename,
+                        filename,
+                        loopStart + 1,
+                        loopEnd - 1,
+                        ourOutcome,
+                        callDepth + 1
+                    );
                     if (ourOutcome.Return)
                     {
                         outcome.Return = true;
@@ -259,7 +278,7 @@ namespace mscript
                         raiseError("import statement has no file name");
 
                     object newFilenameValue = evaluate(newFilename, callDepth);
-                    process(newFilenameValue.stringVal());
+                    process(filename, newFilenameValue.stringVal());
                 }
                 else if (first == '?') // if else
                 {
@@ -308,8 +327,15 @@ namespace mscript
 
                         symbol_stacker stacker(m_symbols);
                         process_outcome ourOutcome;
-                        process(filename, marker + 1, nextMarker - 1, ourOutcome, callDepth + 1);
-                        
+                        process
+                        (
+                            previousFilename,
+                            filename,
+                            marker + 1,
+                            nextMarker - 1,
+                            ourOutcome,
+                            callDepth + 1
+                        );
                         outcome = ourOutcome;
                         if (ourOutcome.Return)
                             return ourOutcome.ReturnValue;
@@ -367,7 +393,15 @@ namespace mscript
                             m_symbols.assign(label, val);
 
                             process_outcome ourOutcome;
-                            process(filename, loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
+                            process
+                            (
+                                previousFilename,
+                                filename,
+                                loopStart + 1,
+                                loopEnd - 1,
+                                ourOutcome,
+                                callDepth + 1
+                            );
                             if (ourOutcome.Return)
                             {
                                 outcome = ourOutcome;
@@ -457,7 +491,15 @@ namespace mscript
                                 m_symbols.assign(label, double(i));
                                 symbol_stacker innerStacker(m_symbols);
                                 process_outcome ourOutcome;
-                                process(filename, loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
+                                process
+                                (
+                                    previousFilename,
+                                    filename,
+                                    loopStart + 1,
+                                    loopEnd - 1,
+                                    ourOutcome,
+                                    callDepth + 1
+                                );
                                 if (ourOutcome.Return)
                                 {
                                     outcome = ourOutcome;
@@ -476,7 +518,15 @@ namespace mscript
                                 m_symbols.assign(label, double(i));
                                 symbol_stacker innerStacker(m_symbols);
                                 process_outcome ourOutcome;
-                                process(filename, loopStart + 1, loopEnd - 1, ourOutcome, callDepth + 1);
+                                process
+                                (
+                                    previousFilename,
+                                    filename,
+                                    loopStart + 1,
+                                    loopEnd - 1,
+                                    ourOutcome,
+                                    callDepth + 1
+                                );
                                 if (ourOutcome.Return)
                                 {
                                     outcome = ourOutcome;
@@ -579,6 +629,7 @@ namespace mscript
             object returnValue =
                 process
                 (
+                    func->previousFilename,
                     func->filename,
                     func->startIndex,
                     func->endIndex,

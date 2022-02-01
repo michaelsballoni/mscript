@@ -30,15 +30,13 @@ namespace mscript
         /// <param name="output">Function for writing to the output</param>
         script_processor
         (
-            std::function<std::vector<std::wstring>(const std::wstring& filename)> fileLoader,
+            std::function<std::vector<std::wstring>(const std::wstring& current, const std::wstring& filename)> fileLoader,
             symbol_table& symbols,
-            std::unordered_map<std::wstring, std::shared_ptr<script_function>>& functions,
             std::function<std::optional<std::wstring>()> input,
             std::function<void (const std::wstring& text)> output
         )
         : m_fileLoader(fileLoader)
         , m_symbols(symbols)
-        , m_functions(functions)
         , m_input(input)
         , m_output(output)
         {}
@@ -47,7 +45,7 @@ namespace mscript
         /// Process an entire script
         /// </summary>
         /// <returns>Return value from the overall script</returns>
-        object process(const std::wstring& filename);
+        object process(const std::wstring& currentFilename, const std::wstring& newFilename);
 
         // The good, the bad, the ugly
         std::wstring Error;
@@ -80,6 +78,7 @@ namespace mscript
         /// <returns>Return value from a function call, or null</returns>
         object process
         (
+            const std::wstring& previousFilename,
             const std::wstring& filename,
             int startLine,
             int endLine, 
@@ -87,7 +86,7 @@ namespace mscript
             unsigned callDepth
         );
         
-        void preprocessFunctions(const std::wstring& filename);
+        void preprocessFunctions(const std::wstring& previousFilename, const std::wstring& filename);
 
         void handleException(const std::exception& exp, const std::wstring& filename, const std::wstring& line, int l);
         object evaluate(const std::wstring& valueStr, unsigned callDepth);
@@ -97,12 +96,12 @@ namespace mscript
         static bool isLineBlockBegin(std::wstring line);
 
     private:
-        std::function<std::vector<std::wstring>(const std::wstring& filename)> m_fileLoader;
+        std::function<std::vector<std::wstring>(const std::wstring& current, const std::wstring& filename)> m_fileLoader;
 
         std::unordered_map<std::wstring, std::vector<std::wstring>> m_linesDb;
 
         symbol_table& m_symbols;
-        std::unordered_map<std::wstring, std::shared_ptr<script_function>>& m_functions;
+        std::unordered_map<std::wstring, std::shared_ptr<script_function>> m_functions;
 
         unsigned m_tempCallDepth = 0;
 

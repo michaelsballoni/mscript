@@ -63,11 +63,10 @@ int main(int argc, char* argv[])
 		std::wstring output;
 		{
 			symbol_table symbols;
-			std::unordered_map<std::wstring, std::shared_ptr<script_function>> functions;
 			script_processor
 				processor
 				(
-					[&](const std::wstring& filename) 
+					[&](const std::wstring&, const std::wstring& filename) 
 					{
 						bool isExternal = fs::path(filename).extension() == ".ms";
 						if (isExternal)
@@ -80,11 +79,10 @@ int main(int argc, char* argv[])
 							return split(script, L"\n"); 
 					},
 					symbols,
-					functions,
 					[](){ return L"input"; },
 					[&output](const std::wstring& text) { output += text + L"\n"; }
 				);
-			processor.process(it.first.filename().wstring());
+			processor.process(std::wstring(), it.first.filename().wstring());
 			output = trim(output);
 		}
 

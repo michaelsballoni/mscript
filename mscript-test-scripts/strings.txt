@@ -20,6 +20,9 @@ $ str = "foo"
 >""
 & str = "foo bar"
 > "Should be 'foo bar': " + str.clone()
+>""
+& str = input()
+> "Should be 'input': " + str
 
 ===
 
@@ -41,3 +44,5 @@ Should be 'obar blet monkey': obar blet monkey
 Should be 'ob': ob
 
 Should be 'foo bar': foo bar
+
+Should be 'input': input
