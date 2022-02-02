@@ -2,6 +2,8 @@
 #include "utils.h"
 #include "includes.h"
 
+#include <Windows.h>
+
 namespace mscript
 {
     std::wstring mscript::num2wstr(double num)
@@ -16,30 +18,6 @@ namespace mscript
         std::stringstream ss;
         ss << num;
         return ss.str();
-    }
-
-    std::string mscript::toNarrowStr(const std::wstring& str)
-    {
-        bool allAscii = true;
-        for (wchar_t c : str)
-        {
-            if (c < 0 || c > 127)
-            {
-                allAscii = false;
-                break;
-            }
-        }
-
-        if (allAscii)
-        {
-            std::string retVal;
-            for (auto c : str)
-                retVal += char(c);
-            return retVal;
-        }
-
-        std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-        return converter.to_bytes(str);
     }
 
     std::wstring mscript::toWideStr(const std::string& str)
@@ -62,8 +40,45 @@ namespace mscript
             return retVal;
         }
 
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        return converter.from_bytes(str);
+        int needed = MultiByteToWideChar(CP_UTF8, 0, str.data(), int(str.size()), nullptr, 0);
+        if (needed <= 0)
+            raiseError("MultiByteToWideChar failed");
+
+        std::wstring result(needed, 0);
+        MultiByteToWideChar(CP_UTF8, 0, str.data(), int(str.size()), result.data(), needed);
+        return result;
+    }
+
+    std::string toNarrowStr(const std::wstring& str)
+    {
+        if (str.empty())
+            return std::string();
+
+        bool allAscii = true;
+        for (wchar_t c : str)
+        {
+            if (c < 0 || c > 127)
+            {
+                allAscii = false;
+                break;
+            }
+        }
+
+        if (allAscii)
+        {
+            std::string retVal;
+            for (auto c : str)
+                retVal += char(c);
+            return retVal;
+        }
+
+        int needed = WideCharToMultiByte(CP_UTF8, 0, str.data(), int(str.size()), nullptr, 0, nullptr, nullptr);
+        if (needed <= 0)
+            raiseError("WideCharToMultiByte failed");
+
+        std::string output(needed, 0);
+        WideCharToMultiByte(CP_UTF8, 0, str.data(), int(str.size()), output.data(), needed, nullptr, nullptr);
+        return output;
     }
 
     std::wstring mscript::join(const std::vector<std::wstring>& strs, const wchar_t* seperator)

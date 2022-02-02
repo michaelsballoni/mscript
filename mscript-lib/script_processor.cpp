@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "script_processor.h"
 #include "names.h"
-#include "script_exception.h"
 
 namespace mscript
 {
@@ -92,6 +91,10 @@ namespace mscript
                 m_functions.insert({ name, std::make_shared<script_function>(function) });
             }
 #ifndef _DEBUG
+            catch (const script_exception& exp)
+            {
+                throw exp;
+            }
             catch (const std::exception& exp)
             {
                 handleException(exp, filename, line, l);
@@ -258,7 +261,7 @@ namespace mscript
                     outcome.Return = true;
                     return object();
                 }
-                else if (startsWith(line, L"<- "))
+                else if (startsWith(line, L"<- ")) // valued return statement
                 {
                     size_t space = line.find(' ');
                     if (space == std::wstring::npos)
@@ -540,7 +543,7 @@ namespace mscript
                         }
                     }
                 }
-                else if (first == '~') // function declaration, just here to catch the statement beginning
+                else if (first == '~') // function declaration, just here to skip it
                 {
                     if (callDepth != 0)
                         raiseError("Functions cannot defined within anything else");
@@ -558,7 +561,7 @@ namespace mscript
                     outcome.Leave = true;
                     return object();
                 }
-                // a side-effect perhaps?  like some list.add or msdb.define...?
+                // execute code with a side-effect, some_list.add("something")
                 else if (first == '*')
                 {
                     std::wstring valueStr = trim(line.substr(1));
@@ -570,6 +573,10 @@ namespace mscript
                 }
             }
 #ifndef _DEBUG
+            catch (const script_exception& exp)
+            {
+                throw exp;
+            }
             catch (const std::exception& exp)
             {
                 handleException(exp, filename, line, l);

@@ -16,6 +16,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mscript-test-runner", "mscr
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mscript", "mscript\mscript.vcxproj", "{17F11CE7-E2D8-44D5-83CC-700FDDD4A2C6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BFAB6023-E2F9-4B7D-9384-5090E1034092} = {BFAB6023-E2F9-4B7D-9384-5090E1034092}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

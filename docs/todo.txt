@@ -1,1 +1,4 @@
+There's something wrong with parsing "\\" as \ so that split(something, "\\") would split by \'s
+
 Test it all out using mscript.exe
+	How about a music library artist -> song filenames parser

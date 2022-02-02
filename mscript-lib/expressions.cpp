@@ -503,6 +503,9 @@ namespace mscript
 
         object first = paramList.size() == 0 ? object::NOTHING : paramList[0];
 
+        //
+        // Math
+        //
         if (function == "abs") return abs(getOneDouble(paramList, "abs"));
 
         if (function == "sqrt") return sqrt(getOneDouble(paramList, "sqrt"));
@@ -527,6 +530,9 @@ namespace mscript
         if (function == "cosh") return cosh(getOneDouble(paramList, "cosh"));
         if (function == "tanh") return tanh(getOneDouble(paramList, "tanh"));
 
+        //
+        // Type Operations
+        //
         if (function == "getType")
         {
             if (paramList.size() != 1)
@@ -546,13 +552,6 @@ namespace mscript
             if (paramList.size() != 1)
                 raiseError("string() takes one parameter");
             return first.toString();
-        }
-
-        if (function == "length")
-        {
-            if (paramList.size() != 1)
-                raiseError("length() takes one parameter");
-            return double(first.length());
         }
 
         if (function == "clone")
@@ -578,6 +577,16 @@ namespace mscript
                 newIndex.insert(paramList[i], paramList[i + 1]);
             }
             return newIndex;
+        }
+
+        //
+        // Collection Operations
+        //
+        if (function == "length")
+        {
+            if (paramList.size() != 1)
+                raiseError("length() takes one parameter");
+            return double(first.length());
         }
 
         if (function == "add")
@@ -736,6 +745,9 @@ namespace mscript
                 raiseError("sorted() only works with string, list, and index");
         }
 
+        //
+        // Strings
+        //
         if (function == "join")
         {
             if (paramList.size() > 2)
@@ -850,6 +862,9 @@ namespace mscript
             return rnd;
         }
 
+        //
+        // Searching and Slicing
+        //
         if (function == "firstLocation")
         {
             if (paramList.size() != 2)
@@ -980,6 +995,9 @@ namespace mscript
             }
         }
 
+        //
+        // Regular Expressions
+        //
         if (function == "isMatch")
         {
             if (paramList.size() != 2)
@@ -1012,6 +1030,9 @@ namespace mscript
             return output;
         }
 
+        //
+        // Process Control
+        //
         if (function == "exec")
         {
             if (paramList.size() != 1 || paramList[0].type() != object::STRING)
@@ -1047,6 +1068,16 @@ namespace mscript
             return toWideStr(output);
         }
 
+        if (function == "exit")
+        {
+            if (paramList.size() != 1 || paramList[0].type() != object::NUMBER)
+                raiseError("exit() works with one exit code number");
+            exit(int(paramList[0].numberVal()));
+        }
+
+        //
+        // File I/O
+        //
         if (function == "readFile")
         {
             if (paramList.size() != 2
@@ -1150,17 +1181,6 @@ namespace mscript
                 newVals.push_back(value);
                 newVals.insert(newVals.end(), paramList.begin(), paramList.end());
                 return executeFunction(memberFunc, newVals);
-            }
-        }
-        else // someindex("some key") or somelist(14)
-        {
-            object value;
-            if (m_symbols.tryGet(functionW, value))
-            {
-                object::list newVals;
-                newVals.push_back(value);
-                newVals.insert(newVals.end(), paramList.begin(), paramList.end());
-                return executeFunction(L"get", newVals);
             }
         }
 

@@ -65,8 +65,9 @@ int wmain(int argc, wchar_t* argv[])
 		printf("Usage: mscript <script path> ...\n");
 		return 0;
 	}
-
+#ifndef _DEBUG
 	try
+#endif
 	{
 		std::wstring scriptPath = argv[1];
 
@@ -85,23 +86,33 @@ int wmain(int argc, wchar_t* argv[])
 					return loadScript(currentFilename, filename);
 				},
 				symbols,
-				[]() // input
+				[]() -> std::optional<std::wstring> // input
 				{
 					std::wstring line;
+					if (!std::wcin)
+						return std::nullopt;
 					std::getline(std::wcin, line);
-					return std::optional<std::wstring>(line);
+					return line;
 				},
 				[](const std::wstring& text) // output
 				{ 
-					printf("%S", text.c_str()); 
+					printf("%S\n", text.c_str()); 
 				}
 			);
 		processor.process(std::wstring(), scriptPath);
 	}
-	catch (const std::exception& exp)
+#ifndef _DEBUG
+	catch (const script_exception& exp)
 	{
-		printf("ERROR: %s\n", exp.what());
+		printf("Script ERROR: %s - %S - line: %d - %S\n", 
+			   exp.what(), exp.filename.c_str(), exp.lineNumber, exp.line.c_str());
 		return 1;
 	}
+	catch (const std::exception& exp)
+	{
+		printf("Runtime ERROR: %s\n", exp.what());
+		return 1;
+	}
+#endif
 	return 0;
 }

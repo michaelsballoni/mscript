@@ -4,6 +4,7 @@
 #include "functions.h"
 #include "object.h"
 #include "symbols.h"
+#include "script_exception.h"
 
 #include <functional>
 #include <memory>

@@ -109,6 +109,8 @@ namespace mscript
         {
             symbol_table symbols;
 
+            ValidateExpression("\\", L"\\", symbols);
+
             ValidateExpression("3<=4", true, symbols);
             ValidateExpression("3<=4 and 3<4", true, symbols);
             ValidateExpression("3<4 and 5 <= 4 or 12<=50 and 6 <= 13", true, symbols);
@@ -211,6 +213,10 @@ namespace mscript
 
             ValidateExpression("trim(\"foobar\")", toWideStr("foobar"), symbols);
             ValidateExpression("trim(\" foobar \")", toWideStr("foobar"), symbols);
+
+            ValidateExpression("length(trim(\" foobar \"))", 6.0, symbols);
+
+            ValidateExpression("length(replaced(trim(\" foobar \"), \"oo\", \"o\"))", 5.0, symbols);
 
             ValidateExpression("random(0, 1) >= 0 and random(0, 1) <= 1", true, symbols);
             ValidateExpression("random(0, 1) != random(0, 1)", true, symbols);
