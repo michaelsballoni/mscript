@@ -1,4 +1,8 @@
-There's something wrong with parsing "\\" as \ so that split(something, "\\") would split by \'s
+Use / for comments
+
+Allow for lower or mixed case crlf, etc.
 
 Test it all out using mscript.exe
-	How about a music library artist -> song filenames parser
+	Music library: artist -> albums -> tracks parser
+	add case-insensitive keyword-based artist name lookup
+	

@@ -16,6 +16,8 @@ namespace mscript
     std::string toNarrowStr(const std::wstring& str);
     std::wstring toWideStr(const std::string& str);
 
+    std::wstring toLower(const std::wstring& str);
+
     std::wstring join(const std::vector<std::wstring>& strs, const wchar_t* seperator);
 
     std::wstring trim(const std::wstring& str);

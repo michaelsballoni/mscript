@@ -81,6 +81,14 @@ namespace mscript
         return output;
     }
 
+    std::wstring mscript::toLower(const std::wstring& str)
+    {
+        std::wstring retVal;
+        for (auto c : str)
+            retVal += towlower(c);
+        return retVal;
+    }
+
     std::wstring mscript::join(const std::vector<std::wstring>& strs, const wchar_t* seperator)
     {
         std::wstring retVal;

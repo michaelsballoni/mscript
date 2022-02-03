@@ -49,8 +49,9 @@ namespace mscript
         if (narrow == "false")
             return false;
 
+        // Do an exact parsing of a number from the full expression string
+        if (narrow[0] == '-' || isdigit(narrow[0]))
         {
-            // Do an exact parsing of a number from the full expression string
             double number;
             const char* start = narrow.data();
             const char* end = start + narrow.size();
@@ -58,15 +59,6 @@ namespace mscript
             if (result.ptr == end && result.ec == std::errc())
                 return number;
         }
-
-        {
-            object symvalue;
-            if (m_symbols.tryGet(expStr, symvalue))
-                return symvalue;
-        }
-
-        if (isName(expStr)) // should have been found in symbol table
-            raiseWError(L"Unknown variable name: " + expStr);
 
         // Stay out of string constants
         if (expStr[0] == '\"')
@@ -79,38 +71,47 @@ namespace mscript
                 wchar_t c = expStr[s];
                 if (c == '\"')
                 {
-                    if (s > 0 && expStr[s - 1] == '\\')
-                    {
-                        str += L"\\\"";
-                    }
-                    else
-                    {
-                        foundEnd = true;
-                        foundAtEnd = s == expStr.size() - 1;
-                        break;
-                    }
+                    foundEnd = true;
+                    foundAtEnd = s == expStr.size() - 1;
+                    break;
                 }
                 else
-                {
                     str += c;
-                }
             }
             if (!foundEnd)
                 raiseWError(L"Unfinished string: " + expStr);
-
-            // Implement escaped characters, \n, etc.
-            if (foundAtEnd)
-            {
-                str = replace(str, L"\\\\", L"\\");
-                str = replace(str, L"\\\"", L"\"");
-                str = replace(str, L"\\\"", L"\"");
-                str = replace(str, L"\\'", L"\'");
-                str = replace(str, L"\\t", L"\t");
-                str = replace(str, L"\\n", L"\n");
-                str = replace(str, L"\\r", L"\r");
+            else if (foundAtEnd)
                 return str;
-            }
+            // else it's a string at the start of an expression, like "foo" + QUOTE
+            // It will get handled by the recursive evaluate of the two sides of the op
         }
+
+		if (narrow == "QUOTE")
+            return toWideStr("\"");
+
+        if (narrow == "TAB")
+            return toWideStr("\t");
+
+        if (narrow == "LF")
+            return toWideStr("\n");
+
+        if (narrow == "CRLF")
+            return toWideStr("\r\n");
+
+        if (narrow == "pi")
+            return M_PI;
+
+        if (narrow == "e")
+            return M_E;
+
+        {
+            object symvalue;
+            if (m_symbols.tryGet(expStr, symvalue))
+                return symvalue;
+        }
+
+        if (isName(expStr)) // should have been found in symbol table
+            raiseWError(L"Unknown variable name: " + expStr);
 
         // Walk the operators, least to most precedenced
         for (size_t opdx = 0; opdx < sm_ops.size(); ++opdx)
@@ -128,7 +129,7 @@ namespace mscript
                 wchar_t c = expStr[idx];
 
                 // Stay out of strings
-                if (c == '\"' && (idx == 0 || expStr[idx - 1] != '\\'))
+                if (c == '\"')
                     inString = !inString;
                 if (inString)
                     continue;
@@ -415,7 +416,7 @@ namespace mscript
 
         for (int p = start; p >= 0; --p)
         {
-            if (source[p] == '\"' && (p == 0 || source[p - 1] != '\\'))
+            if (source[p] == '\"')
                 inString = !inString;
             if (inString)
                 continue;
@@ -457,7 +458,7 @@ namespace mscript
         for (size_t idx = 0; idx < expStr.size(); ++idx)
         {
             wchar_t c = expStr[idx];
-            if (c == '\"' && (idx == 0 || expStr[idx - 1] != '\\'))
+            if (c == '\"')
                 inString = !inString;
 
             if (!inString)

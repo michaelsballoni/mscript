@@ -109,8 +109,6 @@ namespace mscript
         {
             symbol_table symbols;
 
-            ValidateExpression("\\", L"\\", symbols);
-
             ValidateExpression("3<=4", true, symbols);
             ValidateExpression("3<=4 and 3<4", true, symbols);
             ValidateExpression("3<4 and 5 <= 4 or 12<=50 and 6 <= 13", true, symbols);
@@ -131,6 +129,11 @@ namespace mscript
             ValidateExpression("b", 5.0, symbols);
 
             ValidateExpression("a + b + 10", 25.0, symbols);
+
+            ValidateExpression("QUOTE", toWideStr("\""), symbols);
+            ValidateExpression("a + QUOTE + TAB", toWideStr("10\"\t"), symbols);
+            ValidateExpression("a + CRLF", toWideStr("10\r\n"), symbols);
+            ValidateExpression("a + LF", toWideStr("10\n"), symbols);
 
             ValidateExpression("5 + -4", 1.0, symbols);
             ValidateExpression("5 * -4", -20.0, symbols);
@@ -167,7 +170,6 @@ namespace mscript
 
             ValidateExpression("(3 * 2) + (9 - 2)", 13.0, symbols);
 
-            symbols.set(toWideStr("pi"), M_PI);
             ValidateExpression("sin(pi / 4)^2 + cos(pi / 4)^2", 1.0, symbols);
 
             ValidateExpression("\"foo\"", toWideStr("foo"), symbols);

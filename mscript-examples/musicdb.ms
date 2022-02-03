@@ -1,6 +1,3 @@
-! FORNOW
-$ test = "\\"
-
 >> Loading music files...
 $ lines = loadLines()
 > "Music Files: " + lines.length()
@@ -37,8 +34,8 @@ O
 }
 
 ~ loadLines()
-	$ text = process("dir /B /S C:\\Users\\%USERNAME%\\Music")
-	$ clean = text.replaced("\r\n", "\n")
+	$ text = process("dir /B /S C:\Users\%USERNAME%\Music")
+	$ clean = text.replaced(CRLF, LF)
 	$ lines = clean.split("\n")
 	<- lines
 }
@@ -61,7 +58,7 @@ O
 
 ~ processLine(db, line)
 	& line = line.trim()
-	$ parts = line.split("\\")
+	$ parts = line.split("\")
 	? parts.length() < 3
 		<- false
 	}

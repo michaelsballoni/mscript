@@ -446,7 +446,7 @@ namespace mscript
                     for (int f = 0; f < theRest.size() - arrowLen; ++f)
                     {
                         auto c = theRest[f];
-                        if (c == '\"' && (f == 0 || theRest[f - 1] != '\\'))
+                        if (c == '\"')
                             inString = !inString;
 
                         if (!inString)

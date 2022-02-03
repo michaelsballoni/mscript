@@ -14,6 +14,16 @@ namespace mscript
 	TEST_CLASS(TestUtils)
 	{
 	public:
+		TEST_METHOD(UtilsTests)
+		{
+			Assert::AreEqual(toWideStr(""), toLower(L""));
+			Assert::AreEqual(toWideStr("a"), toLower(L"a"));
+			Assert::AreEqual(toWideStr("a"), toLower(L"A"));
+			Assert::AreEqual(toWideStr("ab"), toLower(L"Ab"));
+			Assert::AreEqual(toWideStr("ab"), toLower(L"AB"));
+			Assert::AreEqual(toWideStr("ab"), toLower(L"aB"));
+		}
+
 		TEST_METHOD(NameTests)
 		{
 			Assert::IsTrue(!isName(L""));
