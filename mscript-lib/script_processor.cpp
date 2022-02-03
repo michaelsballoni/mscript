@@ -126,7 +126,7 @@ namespace mscript
             try
 #endif
             {
-                if (line == L"/*") // block comment
+                if (startsWith(line, L"/*")) // block comment
                 {
                     ++l;
                     while (trim(lines[l]) != L"*/")
@@ -177,7 +177,7 @@ namespace mscript
 
                     m_symbols.set(nameStr, answer);
                 }
-                else if (first == '&') // post-initialization assignment
+                else if (first == '&') // variable assignment
                 {
                     line = line.substr(1);
                     size_t equalsIndex = line.find('=');
@@ -197,9 +197,9 @@ namespace mscript
                     int loopStart = l;
                     l = loopEnd;
 
-                    symbol_stacker stacker(m_symbols);
                     while (true)
                     {
+                        symbol_stacker stacker(m_symbols);
                         process_outcome ourOutcome;
                         process
                         (
@@ -561,11 +561,14 @@ namespace mscript
                     outcome.Leave = true;
                     return object();
                 }
-                // execute code with a side-effect, some_list.add("something")
+                // execute code with a side-effect, like some_list.add("something")
                 else if (first == '*')
                 {
-                    std::wstring valueStr = trim(line.substr(1));
-                    evaluate(valueStr, callDepth);
+                    if (line != L"*/") // weird block comment ending at end of loop
+                    {
+                        std::wstring valueStr = trim(line.substr(1));
+                        evaluate(valueStr, callDepth);
+                    }
                 }
                 else
                 {

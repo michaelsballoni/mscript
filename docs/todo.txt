@@ -1,8 +1,6 @@
 Use / for comments
 
-Allow for lower or mixed case crlf, etc.
+Allow for lower or mixed case quote, crlf, etc.
 
-Test it all out using mscript.exe
-	Music library: artist -> albums -> tracks parser
+test project: music query: artist -> albums -> tracks parser
 	add case-insensitive keyword-based artist name lookup
-	

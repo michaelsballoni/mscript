@@ -1,4 +1,3 @@
-$ fib_cache = index()
 ~ fib(n)
 	? fib_cache.has(n)
 		<- fib_cache.get(n)
@@ -16,3 +15,4 @@ $ fib_cache = index()
 	* fib_cache.add(n, fib_result)
 	<- fib_result
 }
+$ fib_cache = index()

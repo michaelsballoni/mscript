@@ -86,16 +86,16 @@ namespace mscript
             // It will get handled by the recursive evaluate of the two sides of the op
         }
 
-		if (narrow == "QUOTE")
+		if (narrow == "quote")
             return toWideStr("\"");
 
-        if (narrow == "TAB")
+        if (narrow == "tab")
             return toWideStr("\t");
 
-        if (narrow == "LF")
+        if (narrow == "lf")
             return toWideStr("\n");
 
-        if (narrow == "CRLF")
+        if (narrow == "crlf")
             return toWideStr("\r\n");
 
         if (narrow == "pi")
@@ -303,6 +303,24 @@ namespace mscript
             }
         }
 
+        // Deal with unary operators
+        if (expStr[0] == '-')
+        {
+            object answer = evaluate(expStr.substr(1));
+            return -answer.numberVal();
+        }
+        else if (expStr[0] == '!')
+        {
+            object answer = evaluate(expStr.substr(1));
+            return !answer.boolVal();
+        }
+        else if (startsWith(expStr, L"not "))
+        {
+            static size_t notLen = strlen("not ");
+            object answer = evaluate(expStr.substr(notLen));
+            return !answer.boolVal();
+        }
+
         // Deal with parens, including function calls
         size_t leftParen = expStr.find('(');
         if (expStr.size() > 2 && leftParen != std::wstring::npos && expStr.back() == ')')
@@ -323,24 +341,6 @@ namespace mscript
             }
             else
                 return values[0];
-        }
-
-        // Deal with unary operators
-        if (expStr[0] == '-')
-        {
-            object answer = evaluate(expStr.substr(1));
-            return -answer.numberVal();
-        }
-        else if (expStr[0] == '!')
-        {
-            object answer = evaluate(expStr.substr(1));
-            return !answer.boolVal();
-        }
-        else if (startsWith(expStr, L"not "))
-        {
-            static size_t notLen = strlen("not ");
-            object answer = evaluate(expStr.substr(notLen));
-            return !answer.boolVal();
         }
 
         // Oh well, not processed, must not be a valid expression
@@ -766,13 +766,19 @@ namespace mscript
 
         if (function == "split")
         {
-            if (paramList.size() != 2)
+            if
+            (
+                paramList.size() != 2 
+                || 
+                first.type() != object::STRING 
+                || 
+                paramList[1].type() != object::STRING
+            )
+            {
                 raiseError("split() works with an item and separator");
+            }
 
-            if (first.type() != object::STRING)
-                raiseError("split() only works with strings");
-
-            std::wstring separator = paramList[1].toString();
+            std::wstring separator = paramList[1].stringVal();
             auto splitted = split(first.stringVal(), separator.c_str());
             object::list splittedObjs;
             splittedObjs.reserve(splitted.size());
@@ -790,12 +796,8 @@ namespace mscript
 
         if (function == "toUpper")
         {
-            if (paramList.size() != 1)
+            if (paramList.size() != 1 || first.type() != object::STRING)
                 raiseError("toUpper() works with one string");
-
-            if (first.type() != object::STRING)
-                raiseError("toUpper() only works with string");
-
             auto str = first.stringVal();
             for (auto& c : str)
                 c = towupper(c);
@@ -804,12 +806,8 @@ namespace mscript
 
         if (function == "toLower")
         {
-            if (paramList.size() != 1)
+            if (paramList.size() != 1 || first.type() != object::STRING)
                 raiseError("toLower() works with one string");
-
-            if (first.type() != object::STRING)
-                raiseError("toLower() only works with string");
-
             auto str = first.stringVal();
             for (auto& c : str)
                 c = towlower(c);

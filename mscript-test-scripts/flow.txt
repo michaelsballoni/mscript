@@ -6,6 +6,14 @@ another commented line
 ! line comment
 !
 
+$ beforeBlockComment = 1
+/*
+foobar
+*/
+$ afterBlockComment = 2
+> "Should be 3: " + (beforeBlockComment + afterBlockComment)
+>>
+
 {
 	$ flowValue = null
 	? 14 > 17
@@ -60,6 +68,8 @@ one
 >>}
 }
 ===
+
+Should be 3: 3
 
 flowValue should be 'true': true
 

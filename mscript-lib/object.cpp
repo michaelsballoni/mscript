@@ -142,7 +142,46 @@ namespace mscript
 		if (m_type != other.m_type)
 			raiseError("Type mismatch for equality comparison: " + typeStr() + " and " + other.typeStr());
 		
-		return toString() == other.toString();
+		switch (m_type)
+		{
+		case NUMBER:
+			return m_number == other.m_number;
+		case STRING:
+			return m_string == other.m_string;
+		case BOOL:
+			return m_bool == other.m_bool;
+		case LIST:
+		{
+			const auto& list1 = *m_list;
+			const auto& list2 = *other.m_list;
+			if (list1.size() != list2.size())
+				return false;
+			for (size_t i = 0; i < list1.size(); ++i)
+			{
+				if (list1[i] != list2[i])
+					return false;
+			}
+			return true;
+		}
+		case INDEX:
+		{
+			const auto& keys1 = m_index->vec();
+			const auto& keys2 = other.m_index->vec();
+			if (keys1.size() != keys2.size())
+				return false;
+			for (size_t i = 0; i < keys1.size(); ++i)
+			{
+				if (keys1[i].first != keys2[i].first)
+					return false;
+
+				if (keys1[i].second != keys2[i].second)
+					return false;
+			}
+			return true;
+		}
+		default:
+			raiseError("Invalid type: " + num2str(int(m_type)));
+		}
 	}
 
 	bool object::operator<(const object& other) const
