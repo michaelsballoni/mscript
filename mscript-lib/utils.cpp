@@ -139,7 +139,7 @@ namespace mscript
 
 std::wstring mscript::replace(const std::wstring& str, const std::wstring& from, const std::wstring& to)
 {
-    if (str.empty() || str.empty())
+    if (str.empty() || from.empty())
         return std::wstring();
 
     std::wstring retVal = str;

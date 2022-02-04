@@ -167,15 +167,17 @@ namespace mscript
                 {
                     line = line.substr(1);
                     size_t equalsIndex = line.find('=');
-                    if (equalsIndex == std::wstring::npos)
-                        raiseError("Variable declaraion lacks initial value");
+                    if (equalsIndex != std::wstring::npos)
+                    {
+                        std::wstring nameStr = trim(line.substr(0, equalsIndex));
+                        std::wstring valueStr = trim(line.substr(equalsIndex + 1));
 
-                    std::wstring nameStr = trim(line.substr(0, equalsIndex));
-                    std::wstring valueStr = trim(line.substr(equalsIndex + 1));
+                        object answer = evaluate(valueStr, callDepth);
 
-                    object answer = evaluate(valueStr, callDepth);
-
-                    m_symbols.set(nameStr, answer);
+                        m_symbols.set(nameStr, answer);
+                    }
+                    else
+                        m_symbols.set(trim(line), object());
                 }
                 else if (first == '&') // variable assignment
                 {

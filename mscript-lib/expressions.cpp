@@ -512,7 +512,6 @@ namespace mscript
         if (function == "sqrt") return sqrt(getOneDouble(paramList, "sqrt"));
         if (function == "ceil") return ceil(getOneDouble(paramList, "ceil"));
         if (function == "floor") return floor(getOneDouble(paramList, "floor"));
-        if (function == "round") return round(getOneDouble(paramList, "round"));
 
         if (function == "exp") return exp(getOneDouble(paramList, "exp"));
         if (function == "log") return log(getOneDouble(paramList, "log"));
@@ -530,6 +529,17 @@ namespace mscript
         if (function == "sinh") return sinh(getOneDouble(paramList, "sinh"));
         if (function == "cosh") return cosh(getOneDouble(paramList, "cosh"));
         if (function == "tanh") return tanh(getOneDouble(paramList, "tanh"));
+
+        if (function == "round")
+        {
+            if (paramList.size() == 1)
+                return round(getOneDouble(paramList, "round"));
+            if (paramList.size() != 2 || paramList[0].type() != object::NUMBER || paramList[1].type() != object::NUMBER)
+                raiseError("round() works with a number and a number of places to round to");
+            
+            int slider = int(pow(10, int(paramList[1].numberVal())));
+            return floor(paramList[0].numberVal() * slider) / slider;
+        }
 
         //
         // Type Operations
@@ -575,7 +585,7 @@ namespace mscript
             {
                 if (newIndex.contains(paramList[i]))
                     raiseError("index() key repeated: " + num2str(double(i)));
-                newIndex.insert(paramList[i], paramList[i + 1]);
+                newIndex.set(paramList[i], paramList[i + 1]);
             }
             return newIndex;
         }
@@ -615,12 +625,45 @@ namespace mscript
                 {
                     if (index.contains(paramList[a]))
                         raiseError("add() index key repeated: " + num2str(a));
-                    index.insert(paramList[a], paramList[a + 1]);
+                    index.set(paramList[a], paramList[a + 1]);
                 }
                 return first;
             }
             else
                 raiseError("add() only works with string, list, and index");
+        }
+
+        if (function == "set")
+        {
+            if (paramList.size() != 3)
+                raiseError("set() works with an item, a key, and a value");
+
+            if (first.type() != object::INDEX && paramList[1].type() != object::NUMBER)
+                raiseError("set() key must be a numeric index");
+
+            if (first.type() == object::STRING)
+            {
+                size_t idx = size_t(paramList[1].numberVal());
+                if (idx >= first.stringVal().size())
+                    raiseError("set() out of range");
+                if (paramList[2].type() != object::STRING || paramList[2].stringVal().size() > 1)
+                    raiseError("set() value must be a single character");
+                first.stringVal()[idx] = paramList[2].stringVal()[0];
+            }
+            else if (first.type() == object::LIST)
+            {
+                size_t idx = size_t(paramList[1].numberVal());
+                if (idx >= first.listVal().size())
+                    raiseError("set() out of range");
+                first.listVal()[idx] = paramList[2];
+            }
+            else if (first.type() == object::INDEX)
+            {
+                first.indexVal().set(paramList[1], paramList[2]);
+            }
+            else
+                raiseError("set() only works with string, list, and index");
+            return first;
         }
 
         if (function == "get")
@@ -709,7 +752,7 @@ namespace mscript
 
                 object::index newIndex;
                 for (const auto& key : keys)
-                    newIndex.insert(key, first.indexVal().get(key));
+                    newIndex.set(key, first.indexVal().get(key));
                 return newIndex;
             }
             else
@@ -739,7 +782,7 @@ namespace mscript
 
                 object::index newIndex;
                 for (const auto& key : keys)
-                    newIndex.insert(key, first.indexVal().get(key));
+                    newIndex.set(key, first.indexVal().get(key));
                 return newIndex;
             }
             else
@@ -1035,36 +1078,30 @@ namespace mscript
         if (function == "exec")
         {
             if (paramList.size() != 1 || paramList[0].type() != object::STRING)
-                raiseError("exec() works with one command string");
-            int result = _wsystem(paramList[0].stringVal().c_str());
-            return double(result);
-        }
-
-        if (function == "process")
-        {
-            if (paramList.size() != 1 || paramList[0].type() != object::STRING)
                 raiseError("process() works with one command string");
+
+            object::index retVal;
+            retVal.set(toWideStr("success"), false);
+            retVal.set(toWideStr("exit_code"), -1.0);
+            retVal.set(toWideStr("output"), toWideStr(""));
 
             FILE* file = _wpopen(paramList[0].stringVal().c_str(), L"rt");
             if (file == nullptr)
-                raiseError("process() running command failed");
+                return retVal;
 
-            char buffer[1024];
+            char buffer[4096];
             std::string output;
             while (fgets(buffer, sizeof(buffer), file))
                 output.append(buffer);
+            retVal.set(toWideStr("output"), toWideStr(output));
 
-            if (!feof(file))
-            {
-                int result = _pclose(file);
-                file = nullptr;
-                raiseError("process() reading program output failed: " + num2str(result));
-            }
+            retVal.set(toWideStr("success"), bool(feof(file)));
 
-            _pclose(file);
+            int result = _pclose(file);
+            retVal.set(toWideStr("exit_code"), double(result));
             file = nullptr;
 
-            return toWideStr(output);
+            return retVal;
         }
 
         if (function == "exit")
@@ -1164,6 +1201,15 @@ namespace mscript
         {
             object answer = m_callable.callFunction(functionW, paramList);
             return answer;
+        }
+
+        if (m_symbols.contains(functionW)) // function name ~= function pointer
+        {
+            object resolvedFunctionObj = m_symbols.get(functionW);
+            if (resolvedFunctionObj.type() != object::STRING)
+                raiseWError(L"Function name not a string: " + resolvedFunctionObj.toString());
+            std::wstring resolvedFunction = resolvedFunctionObj.stringVal();
+            return executeFunction(resolvedFunction, paramList);
         }
 
         // Do object-like member function-ish expression processing

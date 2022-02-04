@@ -39,7 +39,7 @@ namespace mscript
 		{
 			object::index retVal;
 			for (const auto& kvp : m_index->vec())
-				retVal.insert(kvp.first.clone(), kvp.second.clone());
+				retVal.set(kvp.first.clone(), kvp.second.clone());
 			return retVal;
 		}
 

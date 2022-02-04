@@ -86,8 +86,8 @@ namespace mscript
 				Assert::AreEqual(std::string("index"), obj.typeStr());
 				Assert::AreEqual(size_t(0), obj.indexVal().size());
 
-				obj.indexVal().insert(toWideStr("foo"), toWideStr("bar"));
-				obj.indexVal().insert(toWideStr("blet"), toWideStr("monkey"));
+				obj.indexVal().set(toWideStr("foo"), toWideStr("bar"));
+				obj.indexVal().set(toWideStr("blet"), toWideStr("monkey"));
 				Assert::AreEqual(size_t(2), obj.indexVal().size());
 				Assert::AreEqual(toWideStr("foo: bar, blet: monkey"), obj.toString());
 			}
@@ -113,8 +113,8 @@ namespace mscript
 				Assert::AreEqual(size_t(4), obj.length());
 
 				obj = object::index();
-				obj.indexVal().insert(1.0, 2.0);
-				obj.indexVal().insert(3.0, 4.0);
+				obj.indexVal().set(1.0, 2.0);
+				obj.indexVal().set(3.0, 4.0);
 				Assert::AreEqual(size_t(2), obj.length());
 			}
 
@@ -149,7 +149,7 @@ namespace mscript
 				Assert::AreEqual(originalListStr, list1.toString());
 
 				object::index indexVal;
-				indexVal.insert(1.0, 2.0);
+				indexVal.set(1.0, 2.0);
 
 				object index0 = indexVal;
 				object index1 = index0.clone();
@@ -158,7 +158,7 @@ namespace mscript
 
 				Assert::AreEqual(originalIndexStr, index1.toString());
 
-				index0.indexVal().insert(3.0, 4.0);
+				index0.indexVal().set(3.0, 4.0);
 
 				Assert::AreEqual(originalIndexStr, index1.toString());
 			}

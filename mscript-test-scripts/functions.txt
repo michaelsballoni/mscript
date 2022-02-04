@@ -138,6 +138,20 @@ Test Blocks
 	* outer(1)
 }
 
+~ returnOne()
+	<- 1
+}
+
+~ returnTwo()
+	<- 2
+}
+
+>>
+$ funcName = "returnOne"
+> "Should be 1: " + funcName()
+& funcName = "returnTwo"
+> "Should be 2: " + funcName()
+
 ===
 
 addedTo2 should be 11: 11
@@ -187,3 +201,6 @@ outer: 1 - 10
 inner: 2 - 13
 inner global: 17
 outer global: 17 - 10
+
+Should be 1: 1
+Should be 2: 2

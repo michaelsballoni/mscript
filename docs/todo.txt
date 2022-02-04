@@ -1,6 +1,6 @@
-Use / for comments
-
-Allow for lower or mixed case quote, crlf, etc.
-
 test project: music query: artist -> albums -> tracks parser
-	add case-insensitive keyword-based artist name lookup
+	get interactive mode working again
+		nothing output at all now
+		might be a problem with nested ?'s and @'s with <>'s
+	test out query mode at a cmd prompt
+		find a "print" function that just writes to console, not stdout

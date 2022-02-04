@@ -63,14 +63,27 @@ namespace mscript
         }
 
         /// <summary>
-        /// Add a key-value pair to this
+        /// Associate a value with a key
         /// </summary>
-        void insert(const K& key, const V& val)
+        void set(const K& key, const V& val)
         {
-            if (contains(key))
-                throw std::runtime_error("key already exists");
-            m_map.insert({ key, val });
-            m_vec.push_back({ key, val });
+            if (!contains(key))
+            {
+                m_map.insert({ key, val });
+                m_vec.push_back({ key, val });
+                return;
+            }
+
+            m_map[key] = val;
+
+            for (auto& kvp : m_vec)
+            {
+                if (kvp.first == key)
+                {
+                    kvp.second = val;
+                    break;
+                }
+            }
         }
 
         /// <summary>

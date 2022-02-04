@@ -1,6 +1,6 @@
 $ in_query_mode = arguments.length() > 0
 
-$ lines = null
+$ lines
 ? in_query_mode
 	& lines = loadLines()
 <>
@@ -17,7 +17,7 @@ $ db = index()
 }
 
 O
-	$ matching_artists = null
+	$ matching_artists
 	? in_query_mode
 		& matching_artists = getMatchingArtistNames(db, arguments)
 	<>

@@ -130,10 +130,10 @@ namespace mscript
 
             ValidateExpression("a + b + 10", 25.0, symbols);
 
-            ValidateExpression("QUOTE", toWideStr("\""), symbols);
-            ValidateExpression("a + QUOTE + TAB", toWideStr("10\"\t"), symbols);
-            ValidateExpression("a + CRLF", toWideStr("10\r\n"), symbols);
-            ValidateExpression("a + LF", toWideStr("10\n"), symbols);
+            ValidateExpression("quote", toWideStr("\""), symbols);
+            ValidateExpression("a + quote + tab", toWideStr("10\"\t"), symbols);
+            ValidateExpression("a + crlf", toWideStr("10\r\n"), symbols);
+            ValidateExpression("a + lf", toWideStr("10\n"), symbols);
 
             ValidateExpression("5 + -4", 1.0, symbols);
             ValidateExpression("5 * -4", -20.0, symbols);
@@ -171,6 +171,9 @@ namespace mscript
             ValidateExpression("(3 * 2) + (9 - 2)", 13.0, symbols);
 
             ValidateExpression("sin(pi / 4)^2 + cos(pi / 4)^2", 1.0, symbols);
+
+            ValidateExpression("round(pi)", 3.0, symbols);
+            ValidateExpression("round(pi, 2)", 3.14, symbols);
 
             ValidateExpression("\"foo\"", toWideStr("foo"), symbols);
             ValidateExpression("\"foo\" + \"bar\"", toWideStr("foobar"), symbols);
@@ -232,8 +235,7 @@ namespace mscript
             ValidateExpression("join(list(1,2,3,4), \", \")", toWideStr("1, 2, 3, 4"), symbols);
             ValidateExpression("join(split(\"foo bar\", \" \"), \" blet \")", toWideStr("foo blet bar"), symbols);
 
-            ValidateExpression("exec(\"echo foobar\")", 0.0, symbols);
-            ValidateExpression("process(\"echo foobar\")", toWideStr("foobar\n"), symbols);
+            ValidateExpression("get(exec(\"echo foobar\"), \"exit_code\")", 0.0, symbols);
 
             ValidateExpression("writeFile(\"test.txt\", \"testy test\", \"ascii\")", true, symbols);
             ValidateExpression("readFile(\"test.txt\", \"ascii\")", toWideStr("testy test"), symbols);

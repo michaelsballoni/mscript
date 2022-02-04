@@ -67,6 +67,15 @@ one
 	deep
 >>}
 }
+
+>>
+
+$ foo
+& foo = 12
+> "Should be foo: " + foo
+$ bar = 13
+> "Should be bar: " + bar
+
 ===
 
 Should be 3: 3
@@ -89,3 +98,6 @@ Printing
 one
 	printed
 	deep
+
+Should be foo: 12
+Should be bar: 13
