@@ -1,60 +1,81 @@
-$ in_query_mode = arguments.length() > 0
+! If we have cmd line arguments, those are our search terms
+! Handle things directly, no "UI", just results
+? arguments.length() > 0
+	$ lines = loadLines()
+	
+	$ db = index()
+	* processLines(db, lines, false)
 
-$ lines
-? in_query_mode
-	& lines = loadLines()
-<>
-	>> Loading music files...
-	& lines = loadLines()
-	> "Music Files: " + lines.length()
+	$ matching_artists = getMatchingArtistNames(db, arguments)
+	@ matching_artist : matching_artists
+		* summarizeArtist(db, matching_artist)
+		>>
+	}
+	* exit(0)
 }
+
+>> Loading music files...
+$ lines = loadLines()
+> "Music Files: " + lines.length()
 
 $ db = index()
-* processLines(db, lines)
-? !in_query_mode
-	>> All done
-	* outputStats(db)
-}
+* processLines(db, lines, true)
+>> All done
+* outputStats(db)
 
 O
-	$ matching_artists
-	? in_query_mode
-		& matching_artists = getMatchingArtistNames(db, arguments)
-	<>
-		>>
-		>> Enter artist name, as much as you'd like, however you'd like:
-		& matching_artists = getMatchingArtistNames(db, split(input(), " "))
-		> "Matching Artists: (" + matching_artists.length() + ")"
-		? matching_artists.length() > 0
-			> matching_artists.join(lf)
-		}
+	>>
+	>> Enter artist name search string, as much as you'd like, however you'd like:
+	$ matching_artists = getMatchingArtistNames(db, split(input(), " "))
+
+	> "Matching Artists: (" + matching_artists.length() + ")"
+	? matching_artists.length() > 0
+		> matching_artists.join(lf)
 	}
+
 	@ matching_artist : matching_artists
 		* summarizeArtist(db, matching_artist)
 		>>
 	}
 }
 
+! Do the dir of the user's Music directory
+! Surprisingly fast!
 ~ loadLines()
-	<- split(process("dir /B /S C:\Users\%USERNAME%\Music"), crlf)
+	$ result_index = exec("dir /B /S C:\Users\%USERNAME%\Music")
+	? !result_index.get("success")
+		> "Running the dir command failed with exit code " + result_index.get("exit_code")
+		<- list()
+	}
+	<- split(replaced(result_index.get("output"), crlf, lf), lf)
 }
 
-~ processLines(db, lines)
-	$ line_count = 0
-	@ line : lines
-		* processLine(db, line)
-		& line_count = line_count + 1
-		? (line_count % 1000) = 0
-			> line_count
+! Walk dir output processing each line in turn
+~ processLines(db, lines, should_pacify)
+	? should_pacify
+		$ line_count = 0
+		@ line : lines
+			* processLine(db, line)
+			& line_count = line_count + 1
+			? (line_count % 1000) = 0
+				> line_count
+			}
+		}
+	<>
+		@ line : lines
+			* processLine(db, line)
 		}
 	}
 }
 
+! Given a line from the dir output, add a track to our database...
+! ...if it's a somewhat valid line
 ~ processLine(db, line)
 	! Split up path, bail if not at least artist\album\track
 	& line = line.trim()
 	$ parts = line.split("\")
 	? parts.length() < 3
+		! not deep enough
 		<- false
 	}
 	
@@ -91,6 +112,7 @@ O
 	<- true
 }
 
+! Walk the database of artist collections gathering and outputting stats
 ~ outputStats(db)
 	$ artists = db.keys()
 	$ album_count = 0
@@ -107,20 +129,34 @@ O
 	>>
 	> "Artists: " + artists.length()
 	? artists.length() > 0
-		> "Albums:  " + album_count + " - albums / artist = " + round(album_count / artists.length())
-		> "Tracks:  " + track_count + " - tracks / album = " + round(track_count / album_count)
+		> "Albums:  " + album_count + " - albums / artist = " + round(album_count / artists.length(), 1)
+		> "Tracks:  " + track_count + " - tracks / album = " + round(track_count / album_count, 1)
 	}
 }
 
+! Given search terms, return the names of artists that match all terms
 ~ getMatchingArtistNames(db, parts)
+	! Normalize the input, trimmed and lowered
+	$ normalized_parts = list()
+	@ part : parts
+		$ normalized_part = trim(toLower(part))
+		? normalized_part.length() > 0
+			* normalized_parts.add(normalized_part)
+		}
+	}
+
+	! Walk the artists finding matches
 	$ matching_artists = list()
+	? normalized_parts.length() = 0
+		<- matching_artists
+	}
 	@ artist : db.keys()
 		$ artist_lower = toLower(artist)
 		$ match = true
-		@ part : parts
-			? !artist_lower.has(toLower(part))
+		@ part : normalized_parts
+			? !artist_lower.has(part)
 				& match = false
-				^
+				v
 			}
 		}
 		? match
@@ -130,6 +166,7 @@ O
 	<- matching_artists
 }
 
+! Output an artist's collection
 ~ summarizeArtist(db, artist_name)
 	> "Artist: " + artist_name
 	$ artist_albums = db.get(artist_name)

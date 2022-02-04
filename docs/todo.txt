@@ -1,6 +1,0 @@
-test project: music query: artist -> albums -> tracks parser
-	get interactive mode working again
-		nothing output at all now
-		might be a problem with nested ?'s and @'s with <>'s
-	test out query mode at a cmd prompt
-		find a "print" function that just writes to console, not stdout

@@ -76,6 +76,18 @@ $ foo
 $ bar = 13
 > "Should be bar: " + bar
 
+>>
+
+$ got_there = false
+? false
+	@ a : list("a")
+		> "something"
+	}
+<>
+	& got_there = true
+}
+> "Should be got_there true: " + got_there
+
 ===
 
 Should be 3: 3
@@ -101,3 +113,5 @@ one
 
 Should be foo: 12
 Should be bar: 13
+
+Should be got_there true: true

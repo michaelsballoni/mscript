@@ -1,0 +1,15 @@
+$ got_there = false
+? false
+	@ a : list("a")
+		? true
+			> a
+		}
+	}
+<>
+	& got_there = true
+}
+> "Should be got_there true: " + got_there
+
+===
+
+Should be got_there true: true
