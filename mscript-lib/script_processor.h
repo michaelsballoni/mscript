@@ -45,13 +45,7 @@ namespace mscript
         /// <summary>
         /// Process an entire script
         /// </summary>
-        /// <returns>Return value from the overall script</returns>
         object process(const std::wstring& currentFilename, const std::wstring& newFilename);
-
-        // The good, the bad, the ugly
-        std::wstring Error;
-        int ErrorLineNumber = -1;
-        std::wstring ErrorLine;
 
         // Callable implementation
         virtual bool hasFunction(const std::wstring& name) const;
@@ -76,7 +70,7 @@ namespace mscript
         /// <param name="startLine">What line of the script to start on?</param>
         /// <param name="endLine">What line of the script to end with?</param>
         /// <param name="outcome">Outcome object filled in by processing the script</param>
-        /// <returns>Return value from a function call, or null</returns>
+        /// <returns>Return value from a function call</returns>
         object process
         (
             const std::wstring& previousFilename,

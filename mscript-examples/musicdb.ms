@@ -11,7 +11,8 @@
 		* summarizeArtist(db, matching_artist)
 		>>
 	}
-	* exit(0)
+	! Exit the script with a good exit code
+	<- 0
 }
 
 >> Loading music files...
@@ -57,7 +58,7 @@ O
 		@ line : lines
 			* processLine(db, line)
 			& line_count = line_count + 1
-			? (line_count % 1000) = 0
+			? (line_count % 5000) = 0
 				> line_count
 			}
 		}
@@ -129,8 +130,8 @@ O
 	>>
 	> "Artists: " + artists.length()
 	? artists.length() > 0
-		> "Albums:  " + album_count + " - albums / artist = " + round(album_count / artists.length(), 1)
-		> "Tracks:  " + track_count + " - tracks / album = " + round(track_count / album_count, 1)
+		> "Albums:  " + album_count + " - albums / artist = " + round(album_count / artists.length())
+		> "Tracks:  " + track_count + " - tracks / album = " + round(track_count / album_count)
 	}
 }
 

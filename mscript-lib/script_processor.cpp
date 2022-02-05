@@ -163,7 +163,7 @@ namespace mscript
                     object answer = evaluate(valueStr, callDepth);
                     m_output(answer.toString());
                 }
-                else if (first == '$') // variable declaration, initial value required
+                else if (first == '$') // variable declaration, initial value optional
                 {
                     line = line.substr(1);
                     size_t equalsIndex = line.find('=');
@@ -193,7 +193,7 @@ namespace mscript
 
                     m_symbols.assign(nameStr, answer);
                 }
-                else if (line == L"O") // infinite loop
+                else if (line == L"O" || line == L"o" || line == L"0") // infinite loop
                 {
                     int loopEnd = findMatchingEnd(lines, l, endLine);
                     int loopStart = l;
@@ -553,12 +553,12 @@ namespace mscript
                     // function has already been processed, just skip past it
                     l = findMatchingEnd(lines, l, endLine);
                 }
-                else if (first == '^') // continue
+                else if (line == L"^") // continue
                 {
                     outcome.Continue = true;
                     return object();
                 }
-                else if (first == 'v') // break
+                else if (line == L"V" || line == L"V") // break
                 {
                     outcome.Leave = true;
                     return object();
@@ -635,8 +635,6 @@ namespace mscript
             for (size_t p = 0; p < func->paramNames.size(); ++p)
                 m_symbols.set(func->paramNames[p], parameters[p]);
 
-            // FORNOW - Consider imported scripts
-            //          m_functions should have them, but we need to process them here
             process_outcome outcome;
             object returnValue =
                 process

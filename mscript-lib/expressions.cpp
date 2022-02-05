@@ -2,6 +2,7 @@
 #include "expressions.h"
 #include "utils.h"
 #include "names.h"
+#include "user_exception.h"
 
 namespace mscript
 {
@@ -1106,9 +1107,16 @@ namespace mscript
 
         if (function == "exit")
         {
-            if (paramList.size() != 1 || paramList[0].type() != object::NUMBER)
+            if (paramList.size() != 1 || first.type() != object::NUMBER)
                 raiseError("exit() works with one exit code number");
-            exit(int(paramList[0].numberVal()));
+            exit(int(first.numberVal()));
+        }
+
+        if (function == "error")
+        {
+            if (paramList.size() != 1 || first.type() != object::STRING)
+                raiseError("error() works with one error message string");
+            throw user_exception(toNarrowStr(first.stringVal()));
         }
 
         //

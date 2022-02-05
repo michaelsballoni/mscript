@@ -31,7 +31,7 @@ namespace mscript
         /// <summary>
         /// Evaluate an expression
         /// </summary>
-        /// <param name="expStr">The expression string to evaluate.</param>
+        /// <param name="expStr">The expression string to evaluate</param>
         /// <returns>The value from evaluating the expression</returns>
         object evaluate(std::wstring expStr);
 

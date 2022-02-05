@@ -23,12 +23,15 @@ namespace mscript
     std::wstring mscript::toWideStr(const std::string& str)
     {
         bool allNarrow = true;
-        for (char c : str)
         {
-            if (c < 0 || c > 127)
+            const unsigned char* bytes = reinterpret_cast<const unsigned char*>(str.data());
+            for (size_t i = 0; i < str.size(); ++i)
             {
-                allNarrow = false;
-                break;
+                if (bytes[i] > 127)
+                {
+                    allNarrow = false;
+                    break;
+                }
             }
         }
 
@@ -57,7 +60,7 @@ namespace mscript
         bool allAscii = true;
         for (wchar_t c : str)
         {
-            if (c < 0 || c > 127)
+            if (c <= 0 || c > 127)
             {
                 allAscii = false;
                 break;

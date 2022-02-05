@@ -99,7 +99,9 @@ int wmain(int argc, wchar_t* argv[])
 					printf("%S\n", text.c_str()); 
 				}
 			);
-		processor.process(std::wstring(), scriptPath);
+		object retVal = processor.process(std::wstring(), scriptPath);
+		if (retVal.type() == object::NUMBER)
+			return int(retVal.numberVal());
 	}
 #ifndef _DEBUG
 	catch (const script_exception& exp)
