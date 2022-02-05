@@ -130,10 +130,15 @@ namespace mscript
 
             ValidateExpression("a + b + 10", 25.0, symbols);
 
-            ValidateExpression("quote", toWideStr("\""), symbols);
-            ValidateExpression("a + quote + tab", toWideStr("10\"\t"), symbols);
+            ValidateExpression("squote", toWideStr("\'"), symbols);
+            ValidateExpression("a + squote + tab", toWideStr("10\'\t"), symbols);
+            ValidateExpression("dquote", toWideStr("\""), symbols);
+            ValidateExpression("a + dquote + tab", toWideStr("10\"\t"), symbols);
             ValidateExpression("a + crlf", toWideStr("10\r\n"), symbols);
             ValidateExpression("a + lf", toWideStr("10\n"), symbols);
+
+            ValidateExpression("'foo (\"bar\")'", toWideStr("foo (\"bar\")"), symbols);
+            ValidateExpression("\"foo (\'bar\')\"", toWideStr("foo (\'bar\')"), symbols);
 
             ValidateExpression("5 + -4", 1.0, symbols);
             ValidateExpression("5 * -4", -20.0, symbols);

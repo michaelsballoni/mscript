@@ -558,7 +558,7 @@ namespace mscript
                     outcome.Continue = true;
                     return object();
                 }
-                else if (line == L"V" || line == L"V") // break
+                else if (line == L"v" || line == L"V") // break
                 {
                     outcome.Leave = true;
                     return object();

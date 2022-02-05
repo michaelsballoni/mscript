@@ -43,7 +43,7 @@ O
 ! Do the dir of the user's Music directory
 ! Surprisingly fast!
 ~ loadLines()
-	$ result_index = exec("dir /B /S C:\Users\%USERNAME%\Music")
+	$ result_index = exec('dir /B /S "C:\Users\%USERNAME%\Music"')
 	? !result_index.get("success")
 		> "Running the dir command failed with exit code " + result_index.get("exit_code")
 		<- list()
@@ -74,22 +74,22 @@ O
 ~ processLine(db, line)
 	! Split up path, bail if not at least artist\album\track
 	& line = line.trim()
-	$ parts = line.split("\")
+	$ parts = line.split('\')
 	? parts.length() < 3
 		! not deep enough
 		<- false
 	}
 	
-	$ artist = parts.get(parts.length() - 3)
-	$ album = parts.get(parts.length() - 2)
 	$ filename = parts.get(parts.length() - 1)
-
-	$ dot_index = filename.lastLocation(".")
+	$ dot_index = filename.lastLocation('.')
 	? dot_index <= 0
 		! not a file
 		<- false
 	}
 	$ track = filename.subset(0, dot_index)
+
+	$ artist = parts.get(parts.length() - 3)
+	$ album = parts.get(parts.length() - 2)
 
 	! DEBUG
 	!> "Artist: " + artist + " - Album: " + album + " - Track: " + track
@@ -157,7 +157,7 @@ O
 		@ part : normalized_parts
 			? !artist_lower.has(part)
 				& match = false
-				v
+				V
 			}
 		}
 		? match

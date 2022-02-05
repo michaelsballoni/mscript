@@ -87,8 +87,36 @@ namespace mscript
             // It will get handled by the recursive evaluate of the two sides of the op
         }
 
-		if (narrow == "quote")
+        if (expStr[0] == '\'')
+        {
+            std::wstring str;
+            bool foundEnd = false;
+            bool foundAtEnd = false;
+            for (size_t s = 1; s < expStr.size(); ++s)
+            {
+                wchar_t c = expStr[s];
+                if (c == '\'')
+                {
+                    foundEnd = true;
+                    foundAtEnd = s == expStr.size() - 1;
+                    break;
+                }
+                else
+                    str += c;
+            }
+            if (!foundEnd)
+                raiseWError(L"Unfinished string: " + expStr);
+            else if (foundAtEnd)
+                return str;
+            // else it's a string at the start of an expression, like 'foo' + squote
+            // It will get handled by the recursive evaluate of the two sides of the op
+        }
+
+        if (narrow == "dquote")
             return toWideStr("\"");
+
+        if (narrow == "squote")
+            return toWideStr("\'");
 
         if (narrow == "tab")
             return toWideStr("\t");
@@ -121,7 +149,9 @@ namespace mscript
             size_t opLen = op.size();
 
             size_t parenCount = 0;
-            bool inString = false;
+
+            bool inSingleString = false;
+            bool inDoubleString = false;
 
             // Walk the exception from the end, so that we bind to
             // the right-side of the expression
@@ -130,9 +160,11 @@ namespace mscript
                 wchar_t c = expStr[idx];
 
                 // Stay out of strings
-                if (c == '\"')
-                    inString = !inString;
-                if (inString)
+                if (!inDoubleString && c == '\'')
+                    inSingleString = !inSingleString;
+                if (!inSingleString && c == '\"')
+                    inDoubleString = !inDoubleString;
+                if (inSingleString || inDoubleString)
                     continue;
 
                 // Stay out of parens
@@ -410,16 +442,21 @@ namespace mscript
         if (searchLen > source.length())
             return -1;
 
-        bool inString = false;
+        bool inSingleString = false;
+        bool inDoubleString = false;
 
         int openP = 0;
         int closeP = 0;
 
         for (int p = start; p >= 0; --p)
         {
-            if (source[p] == '\"')
-                inString = !inString;
-            if (inString)
+            // Stay out of strings
+            wchar_t c = source[p];
+            if (!inDoubleString && c == '\'')
+                inSingleString = !inSingleString;
+            if (!inSingleString && c == '\"')
+                inDoubleString = !inDoubleString;
+            if (inSingleString || inDoubleString)
                 continue;
 
             if (source.length() - (p + searchLen) >= 0)
@@ -454,15 +491,19 @@ namespace mscript
     {
         std::vector<std::wstring> expStrs;
         std::wstring curExp;
-        bool inString = false;
+        bool inSingleString = false;
+        bool inDoubleString = false;
         int parenCount = 0;
         for (size_t idx = 0; idx < expStr.size(); ++idx)
         {
+            // Stay out of strings
             wchar_t c = expStr[idx];
-            if (c == '\"')
-                inString = !inString;
+            if (!inDoubleString && c == '\'')
+                inSingleString = !inSingleString;
+            if (!inSingleString && c == '\"')
+                inDoubleString = !inDoubleString;
 
-            if (!inString)
+            if (!inSingleString && !inDoubleString)
             {
                 if (c == '(')
                     ++parenCount;
@@ -470,7 +511,7 @@ namespace mscript
                     --parenCount;
             }
 
-            if (!inString && parenCount == 0 && c == ',')
+            if (!(inSingleString || inDoubleString) && parenCount == 0 && c == ',')
             {
                 curExp = trim(curExp);
                 if (curExp.empty())
