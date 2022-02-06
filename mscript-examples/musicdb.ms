@@ -122,9 +122,8 @@ O
 		$ artist_index = db.get(artist)
 		@ album_name : artist_index.keys()
 			& album_count = album_count + 1
-			@ album_track : artist_index.get(album_name)
-				& track_count = track_count + 1
-			}
+			$ album_tracks = artist_index.get(album_name)
+			& track_count = track_count + album_tracks.length()
 		}
 	}
 	>>

@@ -607,13 +607,6 @@ namespace mscript
             return first.toString();
         }
 
-        if (function == "clone")
-        {
-            if (paramList.size() != 1)
-                raiseError("clone() takes one parameter");
-            return first.clone();
-        }
-
         if (function == "list")
             return object::list(paramList);
 
@@ -630,6 +623,13 @@ namespace mscript
                 newIndex.set(paramList[i], paramList[i + 1]);
             }
             return newIndex;
+        }
+
+        if (function == "clone")
+        {
+            if (paramList.size() != 1)
+                raiseError("clone() takes one parameter");
+            return first.clone();
         }
 
         //

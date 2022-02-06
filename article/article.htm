@@ -1,0 +1,671 @@
+﻿<!DOCTYPE HTML>
+<!--------------------------------------------------------------------------->  
+<!--                           INTRODUCTION                                
+
+ The CodeProject article submission template (HTML version)
+
+Using this template will help us post your article sooner. To use, just 
+follow the 3 easy steps below:
+ 
+     1. Fill in the article description details
+     2. Add links to your images and downloads
+     3. Include the main article text
+
+That's all there is to it! All formatting will be done by our submission
+scripts and style sheets. 
+
+-->  
+<!--------------------------------------------------------------------------->  
+<!--                        IGNORE THIS SECTION                            -->
+<html>
+<head>
+<title>CodeProject</title>
+<Style>
+BODY, P, TD { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt }
+BODY {padding:15px; }
+H2,H3,H4,H5 { color: #ff9900; font-weight: bold; }
+H2 { font-size: 13pt; }
+H3 { font-size: 12pt; }
+H4 { font-size: 10pt; color: black; }
+PRE { BACKGROUND-COLOR: #FBEDBB; FONT-FAMILY: "Courier New", Courier, mono; WHITE-SPACE: pre; }
+CODE { COLOR: #990000; FONT-FAMILY: "Courier New", Courier, mono; }
+</style>
+<link type="text/css" rel="stylesheet" 
+      href="https://codeproject.global.ssl.fastly.net/App_Themes/CodeProject/Css/Main.min.css">
+</head>
+<body bgcolor="#FFFFFF" color=#000000>
+<!--------------------------------------------------------------------------->  
+
+
+<!-------------------------------     STEP 1      --------------------------->
+<!--  Fill in the details (CodeProject will reformat this section for you) -->
+
+<pre>
+Title:       mscript: a programming language for scripting cmd line operations
+Description: Replace your nasty .bat files with friendly mscripts for clean and powerful scripting
+Abstract:    mscript is a programming language with general functionality, simple syntax, and cmd line automation built in. Useful for scripting that's too much for .bat files, and too little for powershell or python.
+
+Author:      Michael Sydney Balloni
+Email:       balloni.michael@yahoo.com
+
+Language:    C++
+Platform:    Windows
+Technology:  Standard C/C++, Win32
+Topic:       Programming Languages
+
+Section      Not
+SubSection   Sure
+
+License:     CPOL
+</pre>
+
+<!-------------------------------     STEP 2      --------------------------->
+<!--  Include download and sample image information.                       --> 
+
+<ul class=download>
+<li><a href="source.zip">Download source - 49 Kb</a></li>
+</ul>
+
+<!-------------------------------     STEP 3      --------------------------->
+
+<!--  Add the article text. Please use simple formatting (<h2>, <p> etc)   -->
+
+<h2>Introduction</h2>
+<p>mscript was initially designed as a teaching language.  That didn't work out.</p>
+<p>
+So I set out to make mscript useful to people who know how to code, people who are interested in scripting cmd line operations, and people who for whatever reason are not interested in powershell or python.  The thinking is, here's a simple scripting language, if it can solve your problem, then there's no need to get a bigger gun.
+</p>
+<p>
+Initially written in C# with all sorts of HTML, IDE, server..stuff.  I took a machete to it, ported it to C++, and made it internally and externally sensible.  You get a lot of bang for your buck with this 300 KB EXE, and no external dependencies.  Just put it in your path and have at it!
+</p>
+
+<h2>The mscript Language</h2>
+<p>
+Here is a tiny glance at mscript:
+</p>
+<pre>
+! Caching Fibonacci sequence
+~ fib(n)
+	! Check the cache
+	? fib_cache.has(n)
+		&lt;- fib_cache.get(n)
+	}
+	
+	! Compute the result
+	$ fib_result = 0
+	? n &lt;= 0
+		& fib_result = 0
+	? n = 1
+		& fib_result = 1
+	? n = 2
+		& fib_result = 1
+	&lt;&gt;
+		& fib_result = fib(n - 1) + fib(n - 2)
+	}
+	
+	! Stash the result in the cache
+	* fib_cache.add(n, fib_result)
+	
+	! All done
+	&lt;- fib_result
+}
+$ fib_cache = index()
+
+! Walk 1 to 10 printing the Fibonacci series
+# n : 1 -> 10
+	> fib(n)
+}
+</pre>
+<p>
+It is line-based, pseudo-object-oriented, and uses symbols instead of keywords.
+</p>
+
+<p>
+In mscript, every variable contains an object (think .NET Object), and an object can be one of six types of things:
+</p>
+<ol>
+<li>null</li>
+<li>number - double</li>
+<li>string - std::wstring</li>
+<li>bool</li>
+<li>list - std::vector&lt;object&gt;<li>
+<li>index - std::map&lt;object, object&gt;, but with order of insertion preserved, a "vectormap"<li>
+</ol>
+<p>list and index are copied by reference, the rest by value</p>
+
+<h3>mscript Statements</h3>
+<pre>/* a block
+comment
+*/
+
+! a single-line comment, on its own line, can't be at the end of a line
+
+> "print the value of an expression, like this string, including pi: " + round(pi, 4)
+
+>> print exaclty what is on this line, allowing for any "! '= " 0!')* nonsense you'd like
+
+{>>
+every line
+in "here"
+is printed "as-is"
+>>}
+
+! Declare a variable with an optional initial value
+! With no initial value, the variable has the null value
+$ new_variable = "initial value"
+
+! A variable assignment
+! Once a variable has a non-null value, the variable cannot be assigned
+! to a value of another type
+! So mscript is somewhat dynamic typed
+&amp; new_variable = "some other value"
+
+! The O signifies an unbounded loop, a while(true) type of thing
+! All loops end in a closing curly brace, but do not start with an opening one
+O
+	...
+	! the V statement is break
+	> "gotta get out!"
+	V
+}
+
+! If, else if, else
+! No curly braces at ends of if's and else if's, 
+! just at the end of the overall statement
+? some_number = 12
+	&amp; some_number = 13
+? some_number = 15
+	&amp; some_number = 16
+&lt;&gt;
+	&amp; some_number = -1
+}
+
+! A foreach loop
+! list(1, 2, 3) creates a new list with the given items
+! This statements processes each list item, printing them out
+! Note the string promotion in the print line
+@ item : list(1, 2, 3)
+	> "Item: " + item
+}
+
+! An indexing loop
+! Notice the pseudo-OOP of the my_list. calls
+! These are actually syntactic sugar for calls to global functions
+! length(my_list) and get(my_list, idx)
+$ my_list = list(1, 2, 3)
+# idx : 0 -> my_list.length() - 1
+	> "Item: " + my_list.get(idx)
+}
+
+{
+	! Just a little block statement for keeping scopes separate
+	! Variables declared in here...
+}
+! ...are not visible out here
+
+! Functions are declared like other statements
+~ my_function (param1, param2)
+	! do something with param1 and param2
+
+	! Function return values...
+	! ...with a value
+	&lt;- 15
+	! ...without a value
+	&lt;-
+}
+
+! A little loop example
+~ counter(low_value, high_value
+	$ cur_value = low_value
+	$ counted = list()
+	O
+		! Use the * statement to execute a statement discarding any return value
+		! Useful for requiring deliberate ignoring of return values
+		* counted.add(cur_value)
+		&amp; cur_value = cur_value + 1
+		? cur_value &gt; high_value
+			! Use the V statement to leave the loop
+			V
+		<>
+			! Use the ^ statement to go back up to the stop of the loop, a continue statement
+			^
+		}
+	}
+	&lt;- counted
+}
+
+! Load and run another script here, an import statement
+! The script path is an expression, so you can dynamically load different things
+! Scripts are loaded relative to the script they are imported from
++ "some_other_script.ms"
+</pre>
+
+<h3>mscript Expressions</h3>
+<p>mscript statements make use of expressions, some simple, some very powerful<p>
+<pre>Binary operators with least-to-most precedence:
+or || and && != <= >= < > = % - + / * ^
+
+Unary operators are: - ! not
+
+An expression can be:
+null
+true
+false
+complete floating-point number
+string
+dquote
+squote
+tab
+lf
+cr
+crlf
+pi
+e
+a variable as defined by a $ statement
+
+Strings can be double- or single-quoted, 'foo ("bar")' and "foo ('bar')" are valid
+This is useful for building cmd lines where you need to use a lot of " and don't want a lot of string match
+
+String promotion:
+	If either side is string, the expression becomes string
+
+Bool short-circuiting:
+	The left expression is evaluated first
+		If && and left is false, expression is false
+		If || and left is true, expression is true
+
+Standard math functions, for your math homework:
+abs asin acos atan ceil cos cosh exp floor 
+log log2 log10 round sin sinh sqrt tan tanh
+
+getType(obj) - get a string of the type of an object obj
+			 - you can also say obj.getType()
+			 - see the shorthand?
+number(val)	 - convert a string or bool into a number
+string(val)  - compute anything into a string
+list(item1, item2, etc.) - create a new list with the elements passed in
+index(key1, value1, key2, value2) - create a new index with pairs of keys and values passed in
+
+obj.clone() - deeply clone an object, including indexes containing list values, etc.
+obj.length() - C++ obj.size(), string or list length, or index pair count
+
+obj.add(to_add1, to_add2...) - append to a string, add to a list, or add pairs to an index
+obj.set(key, value) - set a character in a string, change the value at a key in a list or index
+obj.get(key) - return the character of a string, the element in a list, or the value for the key in an index
+obj.has(value) - returns if string has substring, list has item, or index has key
+
+obj.keys(), obj.values() - index collections access
+
+obj.reversed() - returns copy of obj with elements reversed, including keys of an index
+obj.sorted() - returns a copy of obj with elements sorted, including index keys
+
+join(list_obj, separator) - join items together into a string
+split(str, separatero) - split a string into a list of items
+
+trim(str) - return a copy of a string with the leading and trailing whitespace removed
+toUpper(str), toLower(string) - return a copy of a string with the case set upper or lower
+str.replaced(from, to) - return a copy of a string with characters replaced
+
+random(min, max) - return a random value in the range min -> max
+
+obj.firstLocation(toFind), obj.lastLocation(toFind) - find the first or last location of an item in a string or list
+obj.subset(startIndex[, length]) - return a substring of a string or a slice of a list
+
+obj.isMatch(regex) - see if a string is match for a regular expression
+obj.getMatches(regex) - return matches in a string from a regular expression
+
+exec(cmd_line) - execute a cmd line, return an index with keys for success, exit_code, and output
+
+exit(exit_code) - exit the script with a particular exit code
+
+error(error_msg) - raise an error, reported by the script running application
+
+readFile(file_path, encoding) - read a text file off disk into a string, using the specified encoding, either "ascii", "utf8", or "utf16"
+
+writeFile(file_path, file_contents, encoding) - write a text file to disk with an encoding
+
+A little magic:
+If a function name is not one of the above, and it's not the name of a user-defined function,
+then if the function name is the name of a variable, and the variable is a string, then the value of that variable becomes the function name, and is executed with the same parameters normal functions are.  Poor man's function pointers.  Pretty neat, huh?
+
+As discussed, mscript makes function calls of the form something.function "object oriented" by passing something as the first parameter to the function.  You can't chain these things, and something has to be the name of a variable, not another kind of expression.  Makes for easier to read scripts, but it's just syntactic sugar.
+</pre>
+
+<h3>Code of Note</h3>
+<h4>popen</h4>
+<p>
+The core useful functionality of mscript is the exec function:
+</p>
+<pre>object::index retVal;
+retVal.set(toWideStr("success"), false);
+retVal.set(toWideStr("exit_code"), -1.0);
+retVal.set(toWideStr("output"), toWideStr(""));
+
+FILE* file = _wpopen(paramList[0].stringVal().c_str(), L"rt");
+if (file == nullptr)
+	return retVal;
+
+char buffer[4096];
+std::string output;
+while (fgets(buffer, sizeof(buffer), file))
+	output.append(buffer);
+retVal.set(toWideStr("output"), toWideStr(output));
+
+retVal.set(toWideStr("success"), bool(feof(file)));
+
+int result = _pclose(file);
+retVal.set(toWideStr("exit_code"), double(result));
+file = nullptr;
+
+return retVal;
+</pre>
+<p>
+popen is the magic sauce.  
+Call it, read the output, close the file, get the exit code, and return it all.
+Using an index object in this way allows for a multi-valued return value.
+</p>
+
+
+<h4>std::string &lt;=&gt; std::wstring conversions</h4>
+<p>
+I've used character encoding code like this for years:
+<pre>std::string toNarrowStr(const std::wstring& str)
+{
+	std::wstring_convert&lt;std::codecvt_utf8&lt;wchar_t&gt;, wchar_t&gt; converter;
+	return converter.to_bytes(str);
+}
+
+std::wstring toWideStr(const std::string& str)
+{
+	std::wstring_convert&lt;std::codecvt_utf8_utf16&lt;wchar_t&gt;&gt; converter;
+	return converter.from_bytes(str);
+}
+</pre>
+<p>
+I noticed that the unit tests for mscript were running really slowly.
+I found that Visual Studio Community Edition includings a profiler, so I used that.
+It showed that 60% of the execution time of the program was in toWideStr, converter.from_bytes(str).
+Also, when I developed the sample script for this project, this code crashed processing the output from the dir program.  Something had to give.
+</p>
+<p>
+So I went with Win32 conversions functions, and pre-call conversion checkers.
+So many strings need no special recursion, especially within mscript, so I optimized those cases:
+<pre>
+std::wstring toWideStr(const std::string&amp; str)
+{
+	bool allNarrow = true;
+	{
+		const unsigned char* bytes = reinterpret_cast&lt;const unsigned char*&gt;(str.data());
+		for (size_t i = 0; i &lt; str.size(); ++i)
+		{
+			if (bytes[i] &gt; 127)
+			{
+				allNarrow = false;
+				break;
+			}
+		}
+	}
+
+	if (allNarrow)
+	{
+		std::wstring retVal;
+		retVal.reserve(str.size());
+		for (auto c : str)
+			retVal += char(c);
+		return retVal;
+	}
+
+	int needed = MultiByteToWideChar(CP_UTF8, 0, str.data(), int(str.size()), nullptr, 0);
+	if (needed &lt;= 0)
+		raiseError("MultiByteToWideChar failed");
+
+	std::wstring result(needed, 0);
+	MultiByteToWideChar(CP_UTF8, 0, str.data(), int(str.size()), result.data(), needed);
+	return result;
+}
+
+std::string toNarrowStr(const std::wstring&amp; str)
+{
+	if (str.empty())
+		return std::string();
+
+	bool allAscii = true;
+	for (wchar_t c : str)
+	{
+		if (c &lt;= 0 || c &gt; 127)
+		{
+			allAscii = false;
+			break;
+		}
+	}
+
+	if (allAscii)
+	{
+		std::string retVal;
+		retVal.reserve(str.size());
+		for (auto c : str)
+			retVal += char(c);
+		return retVal;
+	}
+
+	int needed = WideCharToMultiByte(CP_UTF8, 0, str.data(), int(str.size()), nullptr, 0, nullptr, nullptr);
+	if (needed &lt;= 0)
+		raiseError("WideCharToMultiByte failed");
+
+	std::string output(needed, 0);
+	WideCharToMultiByte(CP_UTF8, 0, str.data(), int(str.size()), output.data(), needed, nullptr, nullptr);
+	return output;
+}
+</pre>
+<p>
+I don't have the numbers, but the performance was night and day, and the dir output was processed and usabe.
+One-two punch.
+</p>
+
+<h2>Example Script: musicdb</h2>
+<p>
+This program uses dir against your entire music library, parsing out what look like artists, albums, and tracks.  You then enter search tokens to find artists of interest and see their catalogs.
+If arguments are passed to the script on the command line, the script takes those as the search tokens, and silently loads and processes the music library paths, does the search operation, outputs the results, and quits.
+</p>
+<pre>! If we have cmd line arguments, those are our search terms
+! Handle things directly, no "UI", just results
+? arguments.length() &gt; 0
+	$ lines = loadLines()
+	
+	$ db = index()
+	* processLines(db, lines, false)
+
+	$ matching_artists = getMatchingArtistNames(db, arguments)
+	@ matching_artist : matching_artists
+		* summarizeArtist(db, matching_artist)
+		&gt;&gt;
+	}
+	! Exit the script with a good exit code
+	&lt;- 0
+}
+
+&gt;&gt; Loading music files...
+$ lines = loadLines()
+&gt; "Music Files: " + lines.length()
+
+$ db = index()
+* processLines(db, lines, true)
+&gt;&gt; All done
+* outputStats(db)
+
+O
+	&gt;&gt;
+	&gt;&gt; Enter artist name search string, as much as you'd like, however you'd like:
+	$ matching_artists = getMatchingArtistNames(db, split(input(), " "))
+
+	&gt; "Matching Artists: (" + matching_artists.length() + ")"
+	? matching_artists.length() &gt; 0
+		&gt; matching_artists.join(lf)
+	}
+
+	@ matching_artist : matching_artists
+		* summarizeArtist(db, matching_artist)
+		&gt;&gt;
+	}
+}
+
+! Do the dir of the user's Music directory
+! Surprisingly fast!
+~ loadLines()
+	$ result_index = exec('dir /B /S "C:\Users\%USERNAME%\Music"')
+	? !result_index.get("success")
+		&gt; "Running the dir command failed with exit code " + result_index.get("exit_code")
+		&lt;- list()
+	}
+	&lt;- split(replaced(result_index.get("output"), crlf, lf), lf)
+}
+
+! Walk dir output processing each line in turn
+~ processLines(db, lines, should_pacify)
+	? should_pacify
+		$ line_count = 0
+		@ line : lines
+			* processLine(db, line)
+			&amp; line_count = line_count + 1
+			? (line_count % 5000) = 0
+				&gt; line_count
+			}
+		}
+	&lt;&gt;
+		@ line : lines
+			* processLine(db, line)
+		}
+	}
+}
+
+! Given a line from the dir output, add a track to our database...
+! ...if it's a somewhat valid line
+~ processLine(db, line)
+	! Split up path, bail if not at least artist\album\track
+	&amp; line = line.trim()
+	$ parts = line.split('\')
+	? parts.length() &lt; 3
+		! not deep enough
+		&lt;- false
+	}
+	
+	$ filename = parts.get(parts.length() - 1)
+	$ dot_index = filename.lastLocation('.')
+	? dot_index &lt;= 0
+		! not a file
+		&lt;- false
+	}
+	$ track = filename.subset(0, dot_index)
+
+	$ artist = parts.get(parts.length() - 3)
+	$ album = parts.get(parts.length() - 2)
+
+	! DEBUG
+	!&gt; "Artist: " + artist + " - Album: " + album + " - Track: " + track
+
+	! Ensure the artist is in the DB
+	? !db.has(artist)
+		* db.add(artist, index())
+	}
+	$ artist_index = db.get(artist)
+
+	! Ensure the artist has the album
+	? !artist_index.has(album)
+		* artist_index.add(album, list())
+	}
+	$ album_list = artist_index.get(album)
+
+	! Add the track to the album
+	* album_list.add(track)
+
+	! All done
+	&lt;- true
+}
+
+! Walk the database of artist collections gathering and outputting stats
+~ outputStats(db)
+	$ artists = db.keys()
+	$ album_count = 0
+	$ track_count = 0
+	@ artist : artists
+		$ artist_index = db.get(artist)
+		@ album_name : artist_index.keys()
+			&amp; album_count = album_count + 1
+			$ album_tracks = artist_index.get(album_name)
+			&amp; track_count = track_count + album_tracks.length()
+		}
+	}
+	&gt;&gt;
+	&gt; "Artists: " + artists.length()
+	? artists.length() &gt; 0
+		&gt; "Albums:  " + album_count + " - albums / artist = " + round(album_count / artists.length())
+		&gt; "Tracks:  " + track_count + " - tracks / album = " + round(track_count / album_count)
+	}
+}
+
+! Given search terms, return the names of artists that match all terms
+~ getMatchingArtistNames(db, parts)
+	! Normalize the input, trimmed and lowered
+	$ normalized_parts = list()
+	@ part : parts
+		$ normalized_part = trim(toLower(part))
+		? normalized_part.length() &gt; 0
+			* normalized_parts.add(normalized_part)
+		}
+	}
+
+	! Walk the artists finding matches
+	$ matching_artists = list()
+	? normalized_parts.length() = 0
+		&lt;- matching_artists
+	}
+	@ artist : db.keys()
+		$ artist_lower = toLower(artist)
+		$ match = true
+		@ part : normalized_parts
+			? !artist_lower.has(part)
+				&amp; match = false
+				V
+			}
+		}
+		? match
+			* matching_artists.add(artist)
+		}
+	}
+	&lt;- matching_artists
+}
+
+! Output an artist's collection
+~ summarizeArtist(db, artist_name)
+	&gt; "Artist: " + artist_name
+	$ artist_albums = db.get(artist_name)
+	@ album : artist_albums.keys()
+		&gt; "  Album: " + album
+		$ album_tracks = artist_albums.get(album)
+		@ album_track : album_tracks
+			&gt; "    " + album_track
+		}
+	}
+}
+</pre>
+
+<h2>Conclusion</h2>
+<p>
+So that was a deep dive into the mscript language:
+the short symbol-driven list of statement types;
+the standard expression syntax with a purpose-built function library,
+and a real-world example.
+</p>
+<p>
+This is the second draft of mscript.
+Hopefully it resonates with you, and you can use it to get big jobs done simple and clean.
+I'd love to get your feedback, so please chime in in the Comments.
+Thank you.
+Enjoy.
+</p>
+
+<!-------------------------------    That's it!   --------------------------->
+</body>
+
+</html>
+

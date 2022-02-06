@@ -38,6 +38,7 @@ namespace mscript
         if (allNarrow)
         {
             std::wstring retVal;
+            retVal.reserve(str.size());
             for (auto c : str)
                 retVal += char(c);
             return retVal;
@@ -70,6 +71,7 @@ namespace mscript
         if (allAscii)
         {
             std::string retVal;
+            retVal.reserve(str.size());
             for (auto c : str)
                 retVal += char(c);
             return retVal;
