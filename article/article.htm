@@ -41,29 +41,30 @@ CODE { COLOR: #990000; FONT-FAMILY: "Courier New", Courier, mono; }
 <!--  Fill in the details (CodeProject will reformat this section for you) -->
 
 <pre>
-Title:       mscript: a programming language for scripting cmd line operations
-Description: Replace your nasty .bat files with friendly mscripts for clean and powerful scripting
-Abstract:    mscript is a programming language with general functionality, simple syntax, and cmd line automation built in. Useful for scripting that's too much for .bat files, and too little for powershell or python.
+Title:       mscript: a programming language for scripting command line operations
+Description: Replace your nasty .bat files with friendly mscripts for clean and powerful command line operations
+Abstract:    mscript is a programming language with general functionality, simple syntax, and command line automation built in. Useful for scripting that's too much for .bat files, and too little for powershell or python.
 
 Author:      Michael Sydney Balloni
 Email:       balloni.michael@yahoo.com
 
 Language:    C++
 Platform:    Windows
-Technology:  Standard C/C++, Win32
+Technology:  Standard Library, Win32
 Topic:       Programming Languages
 
-Section      Not
-SubSection   Sure
+Section      Programming Languages
+SubSection   C++
 
-License:     CPOL
+License:     Apache 2.0
 </pre>
 
 <!-------------------------------     STEP 2      --------------------------->
 <!--  Include download and sample image information.                       --> 
 
 <ul class=download>
-<li><a href="source.zip">Download source - 49 Kb</a></li>
+<li><a href="source.zip">Download source - 54 Kb</a></li>
+<li><a href="source.zip">Download program - 364 Kb</a></li>
 </ul>
 
 <!-------------------------------     STEP 3      --------------------------->
@@ -73,10 +74,21 @@ License:     CPOL
 <h2>Introduction</h2>
 <p>mscript was initially designed as a teaching language.  That didn't work out.</p>
 <p>
-So I set out to make mscript useful to people who know how to code, people who are interested in scripting cmd line operations, and people who for whatever reason are not interested in powershell or python.  The thinking is, here's a simple scripting language, if it can solve your problem, then there's no need to get a bigger gun.
+So I set out to make mscript useful to...
+<ul>
+<li>people who know how to code</li>
+<li>people who are interested in scripting command line operations</li>
+<li>people who for whatever reason are not interested in using powershell or python for the task</li>
+</ul>
+The thinking is, here's a simple scripting language,
+if it can solve your problem, then there's no need to get a bigger gun.
 </p>
 <p>
-Initially written in C# with all sorts of HTML, IDE, server..stuff.  I took a machete to it, ported it to C++, and made it internally and externally sensible.  You get a lot of bang for your buck with this 300 KB EXE, and no external dependencies.  Just put it in your path and have at it!
+Initially written in C# with all sorts of HTML, IDE, server..stuff.  I took a machete to all of that!  
+I ported it to C++, and made it internally and externally sensible.  
+You get a lot of bang for your buck with a 800 KB EXE script interpreter,
+with no external dependencies to boot.  
+Just put it in your path and have at it!
 </p>
 
 <h2>The mscript Language</h2>
@@ -92,12 +104,10 @@ Here is a tiny glance at mscript:
 	}
 	
 	! Compute the result
-	$ fib_result = 0
+	$ fib_result
 	? n &lt;= 0
 		& fib_result = 0
-	? n = 1
-		& fib_result = 1
-	? n = 2
+	? n = 1 || n = 2
 		& fib_result = 1
 	&lt;&gt;
 		& fib_result = fib(n - 1) + fib(n - 2)
@@ -109,27 +119,30 @@ Here is a tiny glance at mscript:
 	! All done
 	&lt;- fib_result
 }
+! Our cache is an index, a hash table, any-to-any
 $ fib_cache = index()
 
-! Walk 1 to 10 printing the Fibonacci series
+! Print the first 10 values of the Fibonacci series
+! Look, ma!  No keywords!
 # n : 1 -> 10
 	> fib(n)
 }
 </pre>
+<p>It is a line-based, pseudo-object-oriented scripting language that uses symbols instead of keywords.</p>
+<p>It doesn't care about whitespace.  No semicolons.</p>
+<h3>Objects</h3>
 <p>
-It is line-based, pseudo-object-oriented, and uses symbols instead of keywords.
+In mscript, every variable contains an object (think .NET's Object, but more like VB6's VARIANT).
 </p>
-
 <p>
-In mscript, every variable contains an object (think .NET Object), and an object can be one of six types of things:
-</p>
+An object can be one of six types of things:
 <ol>
 <li>null</li>
 <li>number - double</li>
 <li>string - std::wstring</li>
 <li>bool</li>
 <li>list - std::vector&lt;object&gt;<li>
-<li>index - std::map&lt;object, object&gt;, but with order of insertion preserved, a "vectormap"<li>
+<li>index - std::map&lt;object, object&gt;, with order of insertion preserved, a vectormap<li>
 </ol>
 <p>list and index are copied by reference, the rest by value</p>
 
@@ -170,7 +183,7 @@ O
 }
 
 ! If, else if, else
-! No curly braces at ends of if's and else if's, 
+! No curly braces at ends of each if or else if clause, 
 ! just at the end of the overall statement
 ? some_number = 12
 	&amp; some_number = 13
@@ -189,8 +202,8 @@ O
 }
 
 ! An indexing loop
-! Notice the pseudo-OOP of the my_list. calls
-! These are actually syntactic sugar for calls to global functions
+! Notice the pseudo-OOP of the my_list.length() and my_list.get() calls
+! This is syntactic sugar for calls to global functions,
 ! length(my_list) and get(my_list, idx)
 $ my_list = list(1, 2, 3)
 # idx : 0 -> my_list.length() - 1
@@ -198,7 +211,7 @@ $ my_list = list(1, 2, 3)
 }
 
 {
-	! Just a little block statement for keeping scopes separate
+	! Just a little block statement for keeping variable scopes separate
 	! Variables declared in here...
 }
 ! ...are not visible out here
@@ -219,7 +232,7 @@ $ my_list = list(1, 2, 3)
 	$ cur_value = low_value
 	$ counted = list()
 	O
-		! Use the * statement to execute a statement discarding any return value
+		! Use the * statement to evaluate an expression and discard its return value
 		! Useful for requiring deliberate ignoring of return values
 		* counted.add(cur_value)
 		&amp; cur_value = cur_value + 1
@@ -227,7 +240,7 @@ $ my_list = list(1, 2, 3)
 			! Use the V statement to leave the loop
 			V
 		<>
-			! Use the ^ statement to go back up to the stop of the loop, a continue statement
+			! Use the ^ statement to go back up to the start of the loop, a continue statement
 			^
 		}
 	}
@@ -237,21 +250,24 @@ $ my_list = list(1, 2, 3)
 ! Load and run another script here, an import statement
 ! The script path is an expression, so you can dynamically load different things
 ! Scripts are loaded relative to the script they are imported from
+! Scripts loaded in this way are processed just like top-level scripts,
+! so they can declare global variables, define functions, and...execute script statements
+! Plenty of rope...
 + "some_other_script.ms"
 </pre>
 
 <h3>mscript Expressions</h3>
 <p>mscript statements make use of expressions, some simple, some very powerful<p>
-<pre>Binary operators with least-to-most precedence:
+<pre>Binary operators, from least to highest precedence:
 or || and && != <= >= < > = % - + / * ^
 
-Unary operators are: - ! not
+Unary operators: - ! not
 
 An expression can be:
 null
 true
 false
-complete floating-point number
+number
 string
 dquote
 squote
@@ -261,13 +277,15 @@ cr
 crlf
 pi
 e
-a variable as defined by a $ statement
+variable as defined by a $ statement
 
-Strings can be double- or single-quoted, 'foo ("bar")' and "foo ('bar')" are valid
-This is useful for building cmd lines where you need to use a lot of " and don't want a lot of string match
+Strings can be double- or single-quoted, 'foo ("bar")' and "foo ('bar')" are valid; 
+this is handy for building command lines that involve lots of double-quotes; 
+just use single quotes around them.
 
 String promotion:
-	If either side is string, the expression becomes string
+	If either side of binary expression evaluates to a string, 
+	the expression promotes both sides to string
 
 Bool short-circuiting:
 	The left expression is evaluated first
@@ -278,93 +296,136 @@ Standard math functions, for your math homework:
 abs asin acos atan ceil cos cosh exp floor 
 log log2 log10 round sin sinh sqrt tan tanh
 
-getType(obj) - get a string of the type of an object obj
+getType(obj) - the type of an object obj as a string
 			 - you can also say obj.getType()
 			 - see the shorthand?
 number(val)	 - convert a string or bool into a number
-string(val)  - compute anything into a string
+string(val)  - convert anything into a string
 list(item1, item2, etc.) - create a new list with the elements passed in
-index(key1, value1, key2, value2) - create a new index with pairs of keys and values passed in
+index(key1, value1, key2, value2) - create a new index with the pairs of keys and values passed in
 
 obj.clone() - deeply clone an object, including indexes containing list values, etc.
-obj.length() - C++ obj.size(), string or list length, or index pair count
+obj.length() - C++ .size(), string or list length, or index pair count
 
 obj.add(to_add1, to_add2...) - append to a string, add to a list, or add pairs to an index
 obj.set(key, value) - set a character in a string, change the value at a key in a list or index
 obj.get(key) - return the character of a string, the element in a list, or the value for the key in an index
 obj.has(value) - returns if string has substring, list has item, or index has key
 
-obj.keys(), obj.values() - index collections access
+obj.keys(), obj.values() - index collection access
 
 obj.reversed() - returns copy of obj with elements reversed, including keys of an index
 obj.sorted() - returns a copy of obj with elements sorted, including index keys
 
-join(list_obj, separator) - join items together into a string
-split(str, separatero) - split a string into a list of items
+join(list_obj, separator) - join list items together into a string
+split(str, separator) - split a string into a list of items
 
-trim(str) - return a copy of a string with the leading and trailing whitespace removed
-toUpper(str), toLower(string) - return a copy of a string with the case set upper or lower
+trim(str) - return a copy of a string with any leading or trailing whitespace removed
+toUpper(str), toLower(string) - return a copy of a string in upper or lower case
 str.replaced(from, to) - return a copy of a string with characters replaced
 
 random(min, max) - return a random value in the range min -> max
 
-obj.firstLocation(toFind), obj.lastLocation(toFind) - find the first or last location of an item in a string or list
-obj.subset(startIndex[, length]) - return a substring of a string or a slice of a list
+obj.firstLocation(toFind), obj.lastLocation(toFind) - find the first or last location of an a substring in a string or item in a list
+obj.subset(startIndex[, length]) - return a substring of a string or a slice of a list, with an optional length
 
-obj.isMatch(regex) - see if a string is match for a regular expression
-obj.getMatches(regex) - return matches in a string from a regular expression
+obj.isMatch(regex) - see if a string is a match for a regular expression
+obj.getMatches(regex) - return a list of matches from a regular expression applied to a string
 
-exec(cmd_line) - execute a cmd line, return an index with keys for success, exit_code, and output
+exec(cmd_line) - execute a command line, return an index with keys ("success", "exit_code", "output")
+This is the main function gives mscript meaning in life.  You build your command line, you call exec, and it returns an index with all you need to know.  Write all the script you want around calls to exec, and get a lot done.
 
-exit(exit_code) - exit the script with a particular exit code
+exit(exit_code) - exit the script with an exit code
 
-error(error_msg) - raise an error, reported by the script running application
+error(error_msg) - raise an error, reported by the script interpreter
 
-readFile(file_path, encoding) - read a text file off disk into a string, using the specified encoding, either "ascii", "utf8", or "utf16"
+readFile(file_path, encoding) - read a text file into a string, using the specified encoding, either "ascii", "utf8", or "utf16"
 
-writeFile(file_path, file_contents, encoding) - write a text file to disk with an encoding
-
-A little magic:
-If a function name is not one of the above, and it's not the name of a user-defined function,
-then if the function name is the name of a variable, and the variable is a string, then the value of that variable becomes the function name, and is executed with the same parameters normal functions are.  Poor man's function pointers.  Pretty neat, huh?
-
-As discussed, mscript makes function calls of the form something.function "object oriented" by passing something as the first parameter to the function.  You can't chain these things, and something has to be the name of a variable, not another kind of expression.  Makes for easier to read scripts, but it's just syntactic sugar.
+writeFile(file_path, file_contents, encoding) - write a string to a text file with an encoding
 </pre>
+
+<h3>A little magic</h3>
+<p>
+If a function name is not a built-in one, and it's not the name of a user-defined function,
+then, if the function name is the name of a variable, and the variable is a string, then the value of that variable becomes the function name, and is executed with the same parameters.
+</p>
+<pre>So if you have...
+
+~ addTogether(one, two)
+	&lt;- one + two
+}
+
+and
+
+~ powTogether(one, two)
+	&lt;- one ^ two
+}
+
+...you can then use...
+
+$ func = "addTogether"
+$ added = func(2, 3)
+! added is 5
+
+&amp; func = "powTogether"
+$ powed = func(2 ,3)
+! powed is 8
+</pre>
+<p>Poor man's function pointers.  Pretty neat, huh?</p>
+
+<h3>A little more magic</h3>
+<p>
+As discussed, mscript makes function calls of the form something.function(param1...) "object oriented" 
+by passing something as the first parameter to the function, function(something, param1...).  
+You can't chain these things, and something has to be the name of a variable, 
+not any another kind of expression.  
+This shorthand makes it easier to read and write scripts.
+</p>
+<p>
+If you want to do a lot with one line of code, you can nest functions to your heart's content:
+</p>
+<pre>$ lines = split(trim(replaced(get(exec("dir"), "output"), crlf, lf)), lf)</pre>
 
 <h3>Code of Note</h3>
 <h4>popen</h4>
 <p>
-The core useful functionality of mscript is the exec function:
+The core useful functionality of mscript is the exec function.
 </p>
-<pre>object::index retVal;
+<p>In C++...</p>
+<pre>// Initialze our output object, an index
+object::index retVal;
 retVal.set(toWideStr("success"), false);
 retVal.set(toWideStr("exit_code"), -1.0);
 retVal.set(toWideStr("output"), toWideStr(""));
 
+// Run the program.
 FILE* file = _wpopen(paramList[0].stringVal().c_str(), L"rt");
 if (file == nullptr)
 	return retVal;
 
+// Read the program's output into a string
 char buffer[4096];
 std::string output;
 while (fgets(buffer, sizeof(buffer), file))
 	output.append(buffer);
 retVal.set(toWideStr("output"), toWideStr(output));
 
+// If we stopped at EOF, things went well
 retVal.set(toWideStr("success"), bool(feof(file)));
 
+// Close the "file" and get our exit code
 int result = _pclose(file);
 retVal.set(toWideStr("exit_code"), double(result));
 file = nullptr;
 
+// All done
 return retVal;
 </pre>
 <p>
 popen is the magic sauce.  
 Call it, read the output, close the file, get the exit code, and return it all.
-Using an index object in this way allows for a multi-valued return value.
+Using an index object in this way allows for a multi-valued return...value.
 </p>
-
 
 <h4>std::string &lt;=&gt; std::wstring conversions</h4>
 <p>
@@ -382,14 +443,20 @@ std::wstring toWideStr(const std::string& str)
 }
 </pre>
 <p>
-I noticed that the unit tests for mscript were running really slowly.
-I found that Visual Studio Community Edition includings a profiler, so I used that.
-It showed that 60% of the execution time of the program was in toWideStr, converter.from_bytes(str).
-Also, when I developed the sample script for this project, this code crashed processing the output from the dir program.  Something had to give.
+I noticed that the test scripts were running really slowly.
+I found that Visual Studio Community Edition includings a profiler (wow!)
+and it showed that 60% of the execution time of the whole program was in toWideStr,
+specifically converter.from_bytes(str).
+The sample script for this project called dir on a large and varied directory structure, 
+and the mscript interpreter crashed processing the dir output.
 </p>
 <p>
-So I went with Win32 conversions functions, and pre-call conversion checkers.
-So many strings need no special recursion, especially within mscript, so I optimized those cases:
+Something had to give.
+</p>
+<p>
+So I went with Win32 character conversions functions for correctness,
+and pre-call conversion checkers for speed.
+So many strings need no special processing, especially within mscript, so I optimized those cases:
 <pre>
 std::wstring toWideStr(const std::string&amp; str)
 {
@@ -458,16 +525,20 @@ std::string toNarrowStr(const std::wstring&amp; str)
 }
 </pre>
 <p>
-I don't have the numbers, but the performance was night and day, and the dir output was processed and usabe.
+I don't have the numbers, but the performance was night and day, and the dir output was processed and usable.
 One-two punch.
 </p>
 
-<h2>Example Script: musicdb</h2>
+<h2>Sample Script: musicdb</h2>
 <p>
-This program uses dir against your entire music library, parsing out what look like artists, albums, and tracks.  You then enter search tokens to find artists of interest and see their catalogs.
-If arguments are passed to the script on the command line, the script takes those as the search tokens, and silently loads and processes the music library paths, does the search operation, outputs the results, and quits.
+This sample script uses dir against your entire music library, 
+parsing out what look like artists, albums, and tracks.  
+You then enter search tokens to find artists of interest and see their catalogs.
+If arguments are passed to the script on the command line, 
+the script takes those as the search tokens, and silently loads and processes the music library paths, 
+does the search operation, outputs the results, and quits.
 </p>
-<pre>! If we have cmd line arguments, those are our search terms
+<pre>! If we have command line arguments, those are our search terms
 ! Handle things directly, no "UI", just results
 ? arguments.length() &gt; 0
 	$ lines = loadLines()
@@ -649,16 +720,56 @@ O
 }
 </pre>
 
+<h2>Project Layout</h2>
+<p>In the attached source.zip you'll find it all, including the Visual Studio solution file.</p>
+<p>Here are the projects that make up the solution:</p>
+
+<h3>mscript-lib</h3>
+<p>
+The mscript-lib project is where expressions and statements are implemented.
+All the working code in the solution is in this project.
+<ul>
+	<li>expressions</li>
+	<li>object</li>
+	<li>script_processor</li>
+	<li>symbols</li>
+	<li>utils</li>
+	<li>vectormap</li>
+</ul>
+</p>
+
+<h3>mscript-tests</h3>
+<p>Unit tests</p>
+
+<h3>mscript-test-runner</h3>
+<p>
+You can only do so much with unit tests without the test code getting large and unwieldy.
+Instead of making bad unit tests, I made a set of files with script to execute and results to expect.
+So in mscript-tests you'll find test files, with statements up top and expected results below, separated by ===.
+</p>
+<p>mscript-test-runner runs all scripts in the directory and validates that it gets the expected results.</p>
+
+<h3>mscript</h3>
+<p>
+This is the script interpreter.  All the code is in mscript-lib, so this is just a shell around that project.
+</p>
+<p>
+The tricky bit in the mscript program is loading secondary scripts as requested by + statements.
+The path to the secondary script is relative to the script doing the importing.
+So if you tell the intepreter to run c:\my_scripts\mine.ms, and mine.ms imports yours.ms, yours.ms is looked for in c:\my_scripts, not in the current directory or some such thing.
+</p>
+
 <h2>Conclusion</h2>
 <p>
 So that was a deep dive into the mscript language:
-the short symbol-driven list of statement types;
-the standard expression syntax with a purpose-built function library,
+the symbol-driven list of statement types;
+the expression syntax with a purpose-built function library and a little magic,
 and a real-world example.
 </p>
 <p>
 This is the second draft of mscript.
-Hopefully it resonates with you, and you can use it to get big jobs done simple and clean.
+Hopefully it resonates with you, and you can use it to get big command line jobs done 
+with simple and clean scripts.
 I'd love to get your feedback, so please chime in in the Comments.
 Thank you.
 Enjoy.
