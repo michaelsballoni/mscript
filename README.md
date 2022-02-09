@@ -1,5 +1,5 @@
 # mscript
-A simple, keyword-free scripting language for automating command line operations
+A simple, symbol-driven scripting language for automating command line operations
 
 It is useful for scripting that's too much for .bat files, when Powershell or Python are unavailable or unnecessary
 
@@ -7,7 +7,7 @@ The thinking is, here's a simple scripting language, if it can solve your proble
 
 ## a little taste
 ```
-! Caching Fibonacci sequence
+// Caching Fibonacci sequence
 ~ fib(n)
 	! Check the cache
 	? fib_cache.has(n)
