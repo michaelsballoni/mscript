@@ -41,14 +41,14 @@ $ fib_cache = index()
 ```
 It is a line-based, pseudo-object-oriented scripting language that uses symbols instead of keywords
 
-To just in and see more mscript, check out the [mscript-examples musicdb.ms file](mscript-examples/musicdb.ms), there's good stuff in there
+To jump in and see more mscript, check out the [musicdb sample](mscript-examples/musicdb.ms)
 
 ## project layout
-The mscript project is a Visual Studio solution.  mscript has no external dependencies; it statically links the runtime.
+The mscript project is a Visual Studio solution.  mscript has no external dependencies; it statically links the runtime
 
 Here are the projects that make up the solution:
 ### mscript-lib
-The mscript-lib project is where expressions and statements are implemented. All the working code in the solution is in this project.
+The mscript-lib project is where expressions and statements are implemented. All the working code in the solution is in this project
 
 - expressions
 - object
@@ -63,19 +63,27 @@ Unit tests
 
 ### mscript-test-runner
 
-You can only do so much with unit tests without the test code getting large and unwieldy. Instead of making bad unit tests, I made a set of files with script to execute and results to expect. So in mscript-tests, you'll find test files, with statements up top and expected results below, separated by ===.
+You can only do so much with unit tests without the test code getting large and unwieldy
 
-mscript-test-runner runs all scripts in the directory and validates that it gets the expected results.
+Instead of making bad unit tests, I made a set of files with script to execute and results to expect
+
+In mscript-tests you'll find test files, with statements up top and expected results below, separated by ===
+
+mscript-test-runner runs all scripts in the directory and validates that it gets the expected results
 
 ### mscript
 
-This is the script interpreter. All the code is in mscript-lib, so this is just a shell around that project.
+This is the script interpreter; all the code is in mscript-lib, so this is just a shell around that project
 
-The tricky bit in the mscript program is loading secondary scripts as requested by + statements. The path to the secondary script is relative to the script doing the importing. So if you tell the intepreter to run c:\my_scripts\mine.ms, and mine.ms imports yours.ms, yours.ms is looked for in c:\my_scripts, not in the current directory or some such thing.
+The tricky bit in the mscript program is loading secondary scripts as requested by + statements
+
+The path to the secondary script is relative to the script doing the importing
+
+So if you tell the intepreter to run c:\my_scripts\mine.ms, and mine.ms imports yours.ms, yours.ms is looked for in c:\my_scripts, not in the current directory or some such thing
 
 ## objects
 
-In mscript, every variable contains an object (think .NET's Object)
+In mscript, every variable contains an object
 
 An object can be one of six types of things:
 1. null
@@ -109,7 +117,7 @@ cr
 crlf
 pi
 e
-variable as defined by a $ statement
+an object variable
 
 Strings can be double- or single-quoted, 'foo ("bar")' and "foo ('bar')" are valid; 
 this is handy for building command lines that involve lots of double-quotes; 
