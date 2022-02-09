@@ -5,6 +5,9 @@ another commented line
 !
 ! line comment
 !
+//
+// another line comment
+//
 
 $ beforeBlockComment = 1
 /*

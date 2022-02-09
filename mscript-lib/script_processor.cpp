@@ -136,7 +136,7 @@ namespace mscript
                             raiseError("Unfinished block comment");
                     }
                 }
-                else if (first == '!') // single line comment
+                else if (first == '!' || startsWith(line, L"//")) // single line comment
                 {
                     // No op
                 }
