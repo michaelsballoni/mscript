@@ -301,19 +301,19 @@ $ my_list = list(1, 2, 3)
 + "some_other_script.ms"
 ```
 
-## the object-oriented magic
+## the object-oriented trick
 
 As discussed, mscript makes function calls of the form something.function(param1...) "object oriented" by passing something as the first parameter to the function, function(something, param1...)
+
 You can't chain these things, and something has to be the name of a variable, not any another kind of expression
+
 This shorthand makes it easier to read and write scripts
 
 If you want to do a lot with one line of code, you can nest functions to your heart's content:
-mscript
-Copy Code
 ```
 $ lines = split(trim(replaced(get(exec("dir"), "output"), crlf, lf)), lf)
 ```
-Perhaps separate variables and OOP-style calls would be a little cleaner...
+Perhaps separate variables and object-oriented-style calls would be better...
 
 ## a little more magic
 
@@ -341,6 +341,6 @@ $ added = func(2, 3)
 $ powed = func(2 ,3)
 ! powed is 8
 ```
-Poor man's function pointers
+Poor man's function pointers...
 
 Enjoy
