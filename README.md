@@ -121,37 +121,37 @@ an object variable
 
 Strings can be double- or single-quoted, 'foo ("bar")' and "foo ('bar')" are valid; 
 this is handy for building command lines that involve lots of double-quotes; 
-just use single quotes around them.
+just use single quotes around them
+
+There are no escape characters in strings; this way you don't have to double-up \\'s  
+
+If you need special characters there are the squote (single quote), dquote (double quote), tab, crlf, and lf string constants.
 
 String promotion:
-	If either side of binary expression evaluates to a string, 
-	the expression promotes both sides to string
+If either side of binary expression evaluates to a string, the expression promotes both sides to string
 
 Bool short-circuiting:
-	The left expression is evaluated first
-		If && and left is false, expression is false
-		If || and left is true, expression is true
+The left expression is evaluated first
+If && and left is false, expression is false
+If || and left is true, expression is true
 
 Standard math functions, for your math homework:
 abs asin acos atan ceil cos cosh exp floor 
 log log2 log10 round sin sinh sqrt tan tanh
 
-getType(obj) - the type of an object obj as a string
-			 - you can also say obj.getType()
-			 - see the shorthand?
-number(val)	 - convert a string or bool into a number
+getType(obj) - the type of an object obj as a string; you can also say obj.getType()
+number(val)  - convert a string or bool into a number
 string(val)  - convert anything into a string
 list(item1, item2, etc.) - create a new list with the elements passed in
 index(key1, value1, key2, value2) - create a new index with the pairs of keys 
 and values passed in
 
-obj.clone() - deeply clone an object, including indexes containing list values, etc.
+obj.clone() - deeply clone an object, including indexes containing lists containing indexes, etc.
 obj.length() - C++ .size(), string or list length, or index pair count
 
 obj.add(to_add1, to_add2...) - append to a string, add to a list, or add pairs to an index
 obj.set(key, value) - set a character in a string, change the value at a key in a list or index
-obj.get(key) - return the character of a string, the element in a list, 
-or the value for the key in an index
+obj.get(key) - return the character of a string, the element in a list, or the value for the key in an index
 obj.has(value) - returns if string has substring, list has item, or index has key
 
 obj.keys(), obj.values() - index collection access
@@ -168,19 +168,17 @@ str.replaced(from, to) - return a copy of a string with characters replaced
 
 random(min, max) - return a random value in the range min -> max
 
-obj.firstLocation(toFind), obj.lastLocation(toFind) - find the first or last location 
-of an a substring in a string or item in a list
+obj.firstLocation(toFind), obj.lastLocation(toFind) - find the first or last location of an a substring in a string or item in a list
 obj.subset(startIndex[, length]) - return a substring of a string or a slice of a list, 
 with an optional length
 
 obj.isMatch(regex) - see if a string is a match for a regular expression
 obj.getMatches(regex) - return a list of matches from a regular expression applied to a string
 
-exec(cmd_line) - execute a command line, return an index with keys 
-("success", "exit_code", "output")
-This is the main function gives mscript meaning in life.  
-You build your command line, you call exec, and it returns an index with all you need to know. 
-Write all the script you want around calls to exec, and get a lot done.
+exec(cmd_line) - execute a command line, return an index with keys ("success", "exit_code", "output")
+This is the main function that gives mscript meaning in life
+You build your command line, you call exec, and it returns an index with all you need to know
+Write all the script you want around calls to exec, and get a lot done
 
 exit(exit_code) - exit the script with an exit code
 
@@ -298,14 +296,16 @@ $ my_list = list(1, 2, 3)
 ! The script path is an expression, so you can dynamically load different things
 ! Scripts are loaded relative to the script they are imported from
 ! Scripts loaded in this way are processed just like top-level scripts,
-! so they can declare global variables, define functions, and...execute script statements
+! so they can declare global variables, define functions, and execute script statements
 ! Plenty of rope...
 + "some_other_script.ms"
 ```
 
 ## the object-oriented magic
 
-As discussed, mscript makes function calls of the form something.function(param1...) "object oriented" by passing something as the first parameter to the function, function(something, param1...). You can't chain these things, and something has to be the name of a variable, not any another kind of expression. This shorthand makes it easier to read and write scripts.
+As discussed, mscript makes function calls of the form something.function(param1...) "object oriented" by passing something as the first parameter to the function, function(something, param1...)
+You can't chain these things, and something has to be the name of a variable, not any another kind of expression
+This shorthand makes it easier to read and write scripts
 
 If you want to do a lot with one line of code, you can nest functions to your heart's content:
 mscript
@@ -313,11 +313,11 @@ Copy Code
 ```
 $ lines = split(trim(replaced(get(exec("dir"), "output"), crlf, lf)), lf)
 ```
+Perhaps separate variables and OOP-style calls would be a little cleaner...
 
 ## a little more magic
 
-If a function name is not a built-in one, and it's not the name of a user-defined function, then, if the function name is the name of a variable, and the variable is a string, then the value of that variable becomes the function name, and is executed with the same parameters.
-mscript
+If a function name does not match a built-in or user-defined function, then, if the function name is the name of a variable, and the variable is a string, then the value of that variable becomes the function name, and is executed with the same parameters
 ```
 So if you have...
 
@@ -341,4 +341,6 @@ $ added = func(2, 3)
 $ powed = func(2 ,3)
 ! powed is 8
 ```
-Poor man's function pointers. Pretty neat, huh?
+Poor man's function pointers
+
+Enjoy
