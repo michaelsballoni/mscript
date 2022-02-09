@@ -1,9 +1,9 @@
 # mscript
 A simple, keyword-free scripting language for automating command line operations
 
-It is useful for scripting that's too much for .bat files, and if Powershell or Python are unavailable or unnecessary
+It is useful for scripting that's too much for .bat files, when Powershell or Python are unavailable or unnecessary
 
-The thinking is, here's a simple scripting language, if it can solve your problem, then there's no need to get a bigger gun.
+The thinking is, here's a simple scripting language, if it can solve your problem, then there's no need to get a bigger gun
 
 ## a little taste
 ```
