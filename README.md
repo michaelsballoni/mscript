@@ -41,6 +41,8 @@ $ fib_cache = index()
 ```
 It is a line-based, pseudo-object-oriented scripting language that uses symbols instead of keywords
 
+To just in and see more mscript, check out the [mscript-examples musicdb.ms file](mscript-examples/musicdb.ms), there's good stuff in there
+
 ## project layout
 The mscript project is a Visual Studio solution.  mscript has no external dependencies; it statically links the runtime.
 
@@ -292,3 +294,43 @@ $ my_list = list(1, 2, 3)
 ! Plenty of rope...
 + "some_other_script.ms"
 ```
+
+## the object-oriented magic
+
+As discussed, mscript makes function calls of the form something.function(param1...) "object oriented" by passing something as the first parameter to the function, function(something, param1...). You can't chain these things, and something has to be the name of a variable, not any another kind of expression. This shorthand makes it easier to read and write scripts.
+
+If you want to do a lot with one line of code, you can nest functions to your heart's content:
+mscript
+Copy Code
+```
+$ lines = split(trim(replaced(get(exec("dir"), "output"), crlf, lf)), lf)
+```
+
+## a little more magic
+
+If a function name is not a built-in one, and it's not the name of a user-defined function, then, if the function name is the name of a variable, and the variable is a string, then the value of that variable becomes the function name, and is executed with the same parameters.
+mscript
+```
+So if you have...
+
+~ addTogether(one, two)
+	<- one + two
+}
+
+and
+
+~ powTogether(one, two)
+	<- one ^ two
+}
+
+...you can then use...
+
+$ func = "addTogether"
+$ added = func(2, 3)
+! added is 5
+
+& func = "powTogether"
+$ powed = func(2 ,3)
+! powed is 8
+```
+Poor man's function pointers. Pretty neat, huh?
