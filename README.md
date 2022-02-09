@@ -12,10 +12,10 @@ In mscript, every variable contains an object (think .NET's Object)
 An object can be one of six types of things:
 1. null
 2. number - double
-3. string - std::wstring
+3. string - wstring
 4. bool
-5. list - std::vector<object>
-6. index - std::map<object, object>, with order of insertion preserved, a vectormap
+5. list - vector\<object\>
+6. index - vectormap\<object, object\>
 
 list and index are copied by reference, the rest by value
 
