@@ -1,9 +1,45 @@
 # mscript
 A simple, keyword-free scripting language for automating command line operations
 
-It is useful for scripting that's too much for .bat files, and if Powershell or Python are unavailable or not necessary.
+It is useful for scripting that's too much for .bat files, and if Powershell or Python are unavailable or unnecessary
 
 The thinking is, here's a simple scripting language, if it can solve your problem, then there's no need to get a bigger gun.
+
+## a little taste
+```
+! Caching Fibonacci sequence
+~ fib(n)
+	! Check the cache
+	? fib_cache.has(n)
+		<- fib_cache.get(n)
+	}
+	
+	! Compute the result
+	$ fib_result
+	? n <= 0
+		& fib_result = 0
+	? n = 1 || n = 2
+		& fib_result = 1
+	<>
+		& fib_result = fib(n - 1) + fib(n - 2)
+	}
+	
+	! Stash the result in the cache
+	* fib_cache.add(n, fib_result)
+	
+	! All done
+	<- fib_result
+}
+! Our cache is an index, a hash table, any-to-any
+$ fib_cache = index()
+
+! Print the first 10 values of the Fibonacci series
+! Look, ma!  No keywords!
+# n : 1 -> 10
+	> fib(n)
+}
+```
+It is a line-based, pseudo-object-oriented scripting language that uses symbols instead of keywords
 
 ## objects
 
@@ -114,4 +150,115 @@ readFile(file_path, encoding) - read a text file into a string, using the specif
 either "ascii", "utf8", or "utf16"
 
 writeFile(file_path, file_contents, encoding) - write a string to a text file with an encoding
+```
+
+## statements
+```
+/* a block
+comment
+*/
+
+! a single-line comment, on its own line, can't be at the end of a line
+
+> "print the value of an expression, like this string, including pi: " + round(pi, 4)
+
+>> print exaclty what is on this line, allowing for any "! '= " 0!')* nonsense you'd like
+
+{>>
+every line
+in "here"
+is printed "as-is"
+>>}
+
+! Declare a variable with an optional initial value
+! With no initial value, the variable has the null value
+$ new_variable = "initial value"
+
+! A variable assignment
+! Once a variable has a non-null value, the variable cannot be assigned
+! to a value of another type
+! So mscript is somewhat dynamic typed
+& new_variable = "some other value"
+
+! The O signifies an unbounded loop, a while(true) type of thing
+! All loops end in a closing curly brace, but do not start with an opening one
+O
+	...
+	! the V statement is break
+	> "gotta get out!"
+	V
+}
+
+! If, else if, else
+! No curly braces at ends of each if or else if clause, 
+! just at the end of the overall statement
+? some_number = 12
+	& some_number = 13
+? some_number = 15
+	& some_number = 16
+<>
+	& some_number = -1
+}
+
+! A foreach loop
+! list(1, 2, 3) creates a new list with the given items
+! This statements processes each list item, printing them out
+! Note the string promotion in the print line
+@ item : list(1, 2, 3)
+	> "Item: " + item
+}
+
+! An indexing loop
+! Notice the pseudo-OOP of the my_list.length() and my_list.get() calls
+! This is syntactic sugar for calls to global functions,
+! length(my_list) and get(my_list, idx)
+$ my_list = list(1, 2, 3)
+# idx : 0 -> my_list.length() - 1
+	> "Item: " + my_list.get(idx)
+}
+
+{
+	! Just a little block statement for keeping variable scopes separate
+	! Variables declared in here...
+}
+! ...are not visible out here
+
+! Functions are declared like other statements
+~ my_function (param1, param2)
+	! do something with param1 and param2
+
+	! Function return values...
+	! ...with a value
+	<- 15
+	! ...without a value
+	<-
+}
+
+! A little loop example
+~ counter(low_value, high_value
+	$ cur_value = low_value
+	$ counted = list()
+	O
+		! Use the * statement to evaluate an expression and discard its return value
+		! Useful for requiring deliberate ignoring of return values
+		* counted.add(cur_value)
+		& cur_value = cur_value + 1
+		? cur_value > high_value
+			! Use the V statement to leave the loop
+			V
+		<>
+			! Use the ^ statement to go back up to the start of the loop, a continue statement
+			^
+		}
+	}
+	<- counted
+}
+
+! Load and run another script here, an import statement
+! The script path is an expression, so you can dynamically load different things
+! Scripts are loaded relative to the script they are imported from
+! Scripts loaded in this way are processed just like top-level scripts,
+! so they can declare global variables, define functions, and...execute script statements
+! Plenty of rope...
++ "some_other_script.ms"
 ```
