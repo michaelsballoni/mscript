@@ -1,5 +1,5 @@
 # mscript
-A simple, keyword-free scripting language for automating command line operations
+A simple, symbol-driven scripting language for automating command line operations
 
 It is useful for scripting that's too much for .bat files, when Powershell or Python are unavailable or unnecessary
 
@@ -7,14 +7,14 @@ The thinking is, here's a simple scripting language, if it can solve your proble
 
 ## a little taste
 ```
-! Caching Fibonacci sequence
+// Caching Fibonacci sequence
 ~ fib(n)
-	! Check the cache
+	// Check the cache
 	? fib_cache.has(n)
 		<- fib_cache.get(n)
 	}
 	
-	! Compute the result
+	// Compute the result
 	$ fib_result
 	? n <= 0
 		& fib_result = 0
@@ -24,17 +24,17 @@ The thinking is, here's a simple scripting language, if it can solve your proble
 		& fib_result = fib(n - 1) + fib(n - 2)
 	}
 	
-	! Stash the result in the cache
+	// Stash the result in the cache
 	* fib_cache.add(n, fib_result)
 	
 	! All done
 	<- fib_result
 }
-! Our cache is an index, a hash table, any-to-any
+// Our cache is an index, a hash table, any-to-any
 $ fib_cache = index()
 
-! Print the first 10 values of the Fibonacci series
-! Look, ma!  No keywords!
+// Print the first 10 values of the Fibonacci series
+// Look, ma!  No keywords!
 # n : 1 -> 10
 	> fib(n)
 }
@@ -196,7 +196,7 @@ writeFile(file_path, file_contents, encoding) - write a string to a text file wi
 comment
 */
 
-! a single-line comment, on its own line, can't be at the end of a line
+// a single-line comment, on its own line, can't be at the end of a line, a line starting with a ! is also a single-line comment
 
 > "print the value of an expression, like this string, including pi: " + round(pi, 4)
 
