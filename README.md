@@ -218,9 +218,6 @@ $ new_variable = "initial value"
 ! So mscript is somewhat dynamic typed
 & new_variable = "some other value"
 
-! Evaluate expression and ignore the resultant value
-* my_list.add(10)
-
 ! The O signifies an unbounded loop, a while(true) type of thing
 ! All loops end in a closing curly brace, but do not start with an opening one
 O
