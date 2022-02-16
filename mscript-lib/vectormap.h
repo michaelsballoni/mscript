@@ -17,19 +17,11 @@ namespace mscript
     {
     public:
         /// <summary>
-        /// Access the vector directly
+        /// Access the vector of pairs directly for index access or iteration
         /// </summary>
         const std::vector<std::pair<K, V>>& vec() const
         {
             return m_vec;
-        }
-
-        /// <summary>
-        /// Access the map directly
-        /// </summary>
-        const std::unordered_map<K, V>& map() const
-        {
-            return m_map;
         }
 
         /// <summary>
@@ -41,9 +33,24 @@ namespace mscript
         /// </summary>
         V get(const K& key) const
         {
-            if (!contains(key))
+            const auto& it = m_map.find(key);
+            if (it == m_map.end())
                 throw std::runtime_error("key not found");
-            return m_map.find(key)->second;
+            return it->second.value;
+        }
+
+        /// <summary>
+        /// What is the value at a given index?
+        /// NOTE: By returning the value by, well, value
+        ///       this function can stay const
+        ///       and users of the class can use pointers 
+        ///       if they want side effects down the line.
+        /// </summary>
+        V get_at(size_t index) const
+        {
+            if (index >= m_vec.size())
+                throw std::runtime_error("index out of range");
+            return m_vec[index].second;
         }
 
         /// <summary>
@@ -67,23 +74,16 @@ namespace mscript
         /// </summary>
         void set(const K& key, const V& val)
         {
-            if (!contains(key))
+            auto it = m_map.find(key);
+            if (it == m_map.end())
             {
-                m_map.insert({ key, val });
+                m_map.insert({ key, map_entry<V>(val, m_vec.size()) });
                 m_vec.push_back({ key, val });
                 return;
             }
 
-            m_map[key] = val;
-
-            for (auto& kvp : m_vec)
-            {
-                if (kvp.first == key)
-                {
-                    kvp.second = val;
-                    break;
-                }
-            }
+            it->second.value = val;
+            m_vec[it->second.index].second = val;
         }
 
         /// <summary>
@@ -94,11 +94,11 @@ namespace mscript
         /// <returns>true if a value exists for the key, false otherwise</returns>
         bool tryGet(const K& key, V& val) const
         {
-            auto it = m_map.find(key);
+            const auto& it = m_map.find(key);
             if (it == m_map.end())
                 return false;
 
-            val = it->second;
+            val = it->second.value;
             return true;
         }
 
@@ -127,7 +127,18 @@ namespace mscript
         }
 
     private:
-        std::unordered_map<K, V> m_map;
+        template <typename ValueType>
+        struct map_entry
+        {
+            map_entry(const ValueType& _value, size_t _index)
+                : value(_value)
+                , index(_index)
+            {}
+
+            ValueType value;
+            size_t index;
+        };
+        std::unordered_map<K, map_entry<V>> m_map;
         std::vector<std::pair<K, V>> m_vec;
     };
 }

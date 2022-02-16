@@ -176,6 +176,7 @@
     </ClCompile>
     <ClCompile Include="symbol-tests.cpp" />
     <ClCompile Include="utils-tests.cpp" />
+    <ClCompile Include="vectormap-tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
