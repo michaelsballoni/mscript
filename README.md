@@ -181,6 +181,9 @@ exec(cmd_line) - execute a command line, return an index with keys ("success", "
 This is the main function that gives mscript meaning in life
 You build your command line, you call exec, and it returns an index with all you need to know
 Write all the script you want around calls to exec, and get a lot done
+You can pass in an index with options for running the program
+At parent there is one option, "method" which can be "popen", the default, or "system"
+Choose your poison
 
 getEnv(name) - get the value of an environment variable by name
 
