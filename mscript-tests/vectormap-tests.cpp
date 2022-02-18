@@ -29,7 +29,7 @@ namespace mscript
 
 			try
 			{
-				map.get_at(914);
+				map.getAt(914);
 				Assert::Fail();
 			}
 			catch (const std::exception&) {}
@@ -67,11 +67,11 @@ namespace mscript
 
 			try
 			{
-				map.get_at(914);
+				map.getAt(914);
 				Assert::Fail();
 			}
 			catch (const std::exception&) {}
-			Assert::AreEqual(std::string("foo"), map.get_at(0));
+			Assert::AreEqual(std::string("foo"), map.getAt(0));
 
 			Assert::IsTrue(!map.contains(0));
 			Assert::IsTrue(map.contains(1));
@@ -124,13 +124,13 @@ namespace mscript
 
 			try
 			{
-				map.get_at(914);
+				map.getAt(914);
 				Assert::Fail();
 			}
 			catch (const std::exception&) {}
-			Assert::AreEqual(std::string("foo"), map.get_at(0));
-			Assert::AreEqual(std::string("bar"), map.get_at(1));
-			Assert::AreEqual(std::string("blet"), map.get_at(2));
+			Assert::AreEqual(std::string("foo"), map.getAt(0));
+			Assert::AreEqual(std::string("bar"), map.getAt(1));
+			Assert::AreEqual(std::string("blet"), map.getAt(2));
 
 			Assert::IsTrue(!map.contains(0));
 			Assert::IsTrue(map.contains(1));
@@ -189,13 +189,13 @@ namespace mscript
 
 			try
 			{
-				map.get_at(914);
+				map.getAt(914);
 				Assert::Fail();
 			}
 			catch (const std::exception&) {}
-			Assert::AreEqual(std::string("monkey"), map.get_at(0));
-			Assert::AreEqual(std::string("something"), map.get_at(1));
-			Assert::AreEqual(std::string("else"), map.get_at(2));
+			Assert::AreEqual(std::string("monkey"), map.getAt(0));
+			Assert::AreEqual(std::string("something"), map.getAt(1));
+			Assert::AreEqual(std::string("else"), map.getAt(2));
 
 			Assert::IsTrue(!map.contains(0));
 			Assert::IsTrue(map.contains(1));

@@ -36,7 +36,7 @@ namespace mscript
             const auto& it = m_map.find(key);
             if (it == m_map.end())
                 throw std::runtime_error("key not found");
-            return it->second.value;
+            return m_vec[it->second].second;
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace mscript
         ///       and users of the class can use pointers 
         ///       if they want side effects down the line.
         /// </summary>
-        V get_at(size_t index) const
+        V getAt(size_t index) const
         {
             if (index >= m_vec.size())
                 throw std::runtime_error("index out of range");
@@ -77,13 +77,11 @@ namespace mscript
             auto it = m_map.find(key);
             if (it == m_map.end())
             {
-                m_map.insert({ key, map_entry<V>(val, m_vec.size()) });
-                m_vec.push_back({ key, val });
-                return;
+                m_map.insert({ key, m_vec.size() });
+                m_vec.emplace_back(key, val);
             }
-
-            it->second.value = val;
-            m_vec[it->second.index].second = val;
+            else
+                m_vec[it->second].second = val;
         }
 
         /// <summary>
@@ -98,7 +96,7 @@ namespace mscript
             if (it == m_map.end())
                 return false;
 
-            val = it->second.value;
+            val = m_vec[it->second].second;
             return true;
         }
 
@@ -127,18 +125,7 @@ namespace mscript
         }
 
     private:
-        template <typename ValueType>
-        struct map_entry
-        {
-            map_entry(const ValueType& _value, size_t _index)
-                : value(_value)
-                , index(_index)
-            {}
-
-            ValueType value;
-            size_t index;
-        };
-        std::unordered_map<K, map_entry<V>> m_map;
+        std::unordered_map<K, size_t> m_map;
         std::vector<std::pair<K, V>> m_vec;
     };
 }

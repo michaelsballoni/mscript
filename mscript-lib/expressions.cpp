@@ -872,10 +872,10 @@ namespace mscript
             return splittedObjs;
         }
 
-        if (function == "trim")
+        if (function == "trim" || function == "trimmed")
         {
             if (paramList.size() != 1 || first.type() != object::STRING)
-                raiseError("trim() works one string");
+                raiseError("trimmed() works one string");
             return trim(first.stringVal());
         }
 
@@ -1119,31 +1119,84 @@ namespace mscript
         //
         if (function == "exec")
         {
-            if (paramList.size() != 1 || paramList[0].type() != object::STRING)
-                raiseError("process() works with one command string");
+            if (paramList.size() < 1 || paramList[0].type() != object::STRING)
+                raiseError("process() works with a command string");
+
+            if (paramList.size() == 2 && paramList[1].type() != object::INDEX)
+                raiseError("process() works with a command string and an optional index");
+
+            object::index options;
+            if (paramList.size() >= 2)
+                options = paramList[1].indexVal();
 
             object::index retVal;
             retVal.set(toWideStr("success"), false);
             retVal.set(toWideStr("exit_code"), -1.0);
             retVal.set(toWideStr("output"), toWideStr(""));
 
-            FILE* file = _wpopen(paramList[0].stringVal().c_str(), L"rt");
-            if (file == nullptr)
-                return retVal;
+            std::wstring method;
+            {
+                object methodObj;
+                if (options.tryGet("method", methodObj))
+                {
+                    if (methodObj.type() != object::STRING)
+                        raiseError("process() method option value must be a string");
+                    method = methodObj.stringVal();
+                }
+            }
 
-            char buffer[4096];
-            std::string output;
-            while (fgets(buffer, sizeof(buffer), file))
-                output.append(buffer);
-            retVal.set(toWideStr("output"), toWideStr(output));
+            if (method.empty() || method == L"popen")
+            {
+                FILE* file = _wpopen(paramList[0].stringVal().c_str(), L"rt");
+                if (file == nullptr)
+                    return retVal;
 
-            retVal.set(toWideStr("success"), bool(feof(file)));
+                char buffer[4096];
+                std::string output;
+                while (fgets(buffer, sizeof(buffer), file))
+                    output.append(buffer);
+                retVal.set(toWideStr("output"), toWideStr(output));
 
-            int result = _pclose(file);
-            retVal.set(toWideStr("exit_code"), double(result));
-            file = nullptr;
+                retVal.set(toWideStr("success"), bool(feof(file)));
 
+                int result = _pclose(file);
+                retVal.set(toWideStr("exit_code"), double(result));
+                file = nullptr;
+            }
+            else if (method == L"system")
+            {
+                int exit_code = ::system(toNarrowStr(paramList[0].stringVal()).c_str());
+                retVal.set(toWideStr("success"), true);
+                retVal.set(toWideStr("exit_code"), double(exit_code));
+            }
+            else
+                raiseError("exec() invalid method, must be popen or system");
             return retVal;
+        }
+
+        if (function == "setEnv")
+        {
+            if (paramList.size() != 2 || paramList[0].type() != object::STRING || paramList[1].type() != object::STRING)
+                raiseError("setEnv() works with name and value string parameters");
+
+            if (_wputenv((paramList[0].stringVal() + L"=" + paramList[1].stringVal()).c_str()) != 0)
+                raiseError("setEnv() setting environment variable failed");
+
+            return object();
+        }
+
+        if (function == "getEnv")
+        {
+            if (paramList.size() != 1 || paramList[0].type() != object::STRING)
+                raiseError("getEnv() works with one name string parameter");
+
+            std::wstring envValStr;
+            {
+                const wchar_t* envVal = _wgetenv(paramList[0].stringVal().c_str());
+                if (envVal != nullptr)
+                    envValStr = envVal;
+            }
+            return envValStr;
         }
 
         if (function == "exit")
