@@ -220,6 +220,10 @@ is printed "as-is"
 ! With no initial value, the variable has the null value
 $ new_variable = "initial value"
 
+! Evaluate an expression and ignore the resultant value
+! Useful for things like some_list.add(...)
+* some_expression
+
 ! A variable assignment
 ! Once a variable has a non-null value, the variable cannot be assigned
 ! to a value of another type
