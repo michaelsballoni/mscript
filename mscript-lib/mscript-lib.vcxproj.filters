@@ -54,6 +54,12 @@
     <ClInclude Include="user_exception.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="object_json.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -75,6 +81,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="script_processor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="object_json.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

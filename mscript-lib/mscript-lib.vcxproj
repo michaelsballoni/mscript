@@ -169,8 +169,10 @@
     <ClInclude Include="expressions.h" />
     <ClInclude Include="functions.h" />
     <ClInclude Include="includes.h" />
+    <ClInclude Include="json.hpp" />
     <ClInclude Include="names.h" />
     <ClInclude Include="object.h" />
+    <ClInclude Include="object_json.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="script_exception.h" />
     <ClInclude Include="script_processor.h" />
@@ -183,6 +185,7 @@
     <ClCompile Include="expressions.cpp" />
     <ClCompile Include="names.cpp" />
     <ClCompile Include="object.cpp" />
+    <ClCompile Include="object_json.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
