@@ -175,10 +175,21 @@ with an optional length
 obj.isMatch(regex) - see if a string is a match for a regular expression
 obj.getMatches(regex) - return a list of matches from a regular expression applied to a string
 
+input() - call this function to get a line of text from the input stream
+
 exec(cmd_line) - execute a command line, return an index with keys ("success", "exit_code", "output")
 This is the main function that gives mscript meaning in life
 You build your command line, you call exec, and it returns an index with all you need to know
 Write all the script you want around calls to exec, and get a lot done
+You can pass in an index with options for running the program
+At parent there is one option, "method" which can be "popen", the default, or "system"
+Choose your poison
+
+getEnv(name) - get the value of an environment variable by name
+
+setEnv(name, value) - set the value of an environment varialble
+Changes to environment variables are only visible to mscript and programs run by exec(),
+and do not last longer than the life of the mscript run
 
 exit(exit_code) - exit the script with an exit code
 
@@ -211,6 +222,10 @@ is printed "as-is"
 ! Declare a variable with an optional initial value
 ! With no initial value, the variable has the null value
 $ new_variable = "initial value"
+
+! Evaluate an expression and ignore the resultant value
+! Useful for things like some_list.add(...)
+* some_expression
 
 ! A variable assignment
 ! Once a variable has a non-null value, the variable cannot be assigned
