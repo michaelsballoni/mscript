@@ -19,30 +19,6 @@ namespace mscript
 			return m_objStack.front();
 		}
 
-		object& cur()
-		{
-			return m_objStack.back();
-		}
-
-		void set_obj_val(const object& obj)
-		{
-			object& cur_obj = cur();
-			if (cur_obj.type() == object::INDEX && !m_keyStack.empty())
-			{
-				if (!m_keyStack.empty())
-				{
-					cur_obj.indexVal().set(m_keyStack.back(), obj);
-					m_keyStack.pop_back();
-				}
-				else
-					raiseError("No object key in context");
-			}
-			else if (cur_obj.type() == object::LIST)
-				cur_obj.listVal().push_back(obj);
-			else
-				cur_obj = obj;
-		}
-
 		bool null()
 		{
 			set_obj_val(object());
@@ -79,7 +55,7 @@ namespace mscript
 
 		bool binary(json::binary_t&)
 		{
-			raiseError("Binary values are not allowed");
+			raiseError("Binary values are not allowed in mscript JSON");
 		}
 
 		bool start_object(std::size_t)
@@ -103,7 +79,7 @@ namespace mscript
 		{
 			return on_end();
 		}
-		
+
 		bool key(json::string_t& val)
 		{
 			m_keyStack.push_back(object(toWideStr(val)));
@@ -117,21 +93,34 @@ namespace mscript
 		}
 
 	private:
+		void set_obj_val(const object& obj)
+		{
+			object& cur_obj = m_objStack.back();
+			if (cur_obj.type() == object::INDEX)
+			{
+				if (m_keyStack.empty())
+					raiseError("No object key in context");
+				cur_obj.indexVal().set(m_keyStack.back(), obj);
+				m_keyStack.pop_back();
+			}
+			else if (cur_obj.type() == object::LIST)
+				cur_obj.listVal().push_back(obj);
+			else
+				cur_obj = obj;
+		}
+
 		bool on_end()
 		{
 			object back_obj = m_objStack.back();
 			m_objStack.pop_back();
 
-			object& cur_obj = cur();
+			object& cur_obj = m_objStack.back();
 			if (cur_obj.type() == object::INDEX)
 			{
-				if (!m_keyStack.empty())
-				{
-					cur_obj.indexVal().set(m_keyStack.back(), back_obj);
-					m_keyStack.pop_back();
-				}
-				else
+				if (m_keyStack.empty())
 					raiseError("No object key in context");
+				cur_obj.indexVal().set(m_keyStack.back(), back_obj);
+				m_keyStack.pop_back();
 			}
 			else if (cur_obj.type() == object::LIST)
 				cur_obj.listVal().push_back(back_obj);
@@ -149,12 +138,53 @@ namespace mscript
 		mscript_json_sax my_sax;
 		if (!json::sax_parse(json, &my_sax))
 			raiseError("JSON parsing failed");
-		return my_sax.final();
+		object final = my_sax.final();
+		return final;
 	}
 
-	std::wstring objectToJson(const object&)
+	std::wstring objectToJson(const object& obj)
 	{
-		// FORNOW
-		return L"";
+		switch (obj.type())
+		{
+		case object::NOTHING:
+			return L"null";
+		case object::BOOL:
+			return obj.boolVal() ? L"true" : L"false";
+		case object::NUMBER:
+			return num2wstr(obj.numberVal());
+		case object::STRING:
+		{
+			std::wstring str = obj.stringVal();
+			str = replace(str, L"\\", L"\\\\");
+			str = replace(str, L"\n", L"\\n");
+			str = replace(str, L"\r", L"\\r");
+			str = replace(str, L"\t", L"\\t");
+			return str;
+		}
+		case object::LIST:
+		{
+			const object::list& list = obj.listVal();
+			std::vector<std::wstring> strs;
+			strs.reserve(list.size());
+			for (size_t e = 0; e < list.size(); ++e)
+				strs.push_back(objectToJson(list[e]));
+			return L"[" + join(strs, L", ") + L"]";
+		}
+		case object::INDEX:
+		{
+			const object::index& index = obj.indexVal();
+			std::vector<std::wstring> strs;
+			strs.reserve(index.size());
+			for (size_t e = 0; e < index.vec().size(); ++e)
+			{
+				const auto& pair = index.vec()[e];
+				strs.push_back(objectToJson(pair.first) + L": " + objectToJson(pair.second));
+			}
+			return L"{" + join(strs, L", ") + L"}";
+		}
+
+		default:
+			raiseError("Invalid object type of conversion to JSON: " + num2str((int)obj.type()));
+		}
 	}
 }
