@@ -156,10 +156,11 @@ namespace mscript
 		{
 			std::wstring str = obj.stringVal();
 			str = replace(str, L"\\", L"\\\\");
+			str = replace(str, L"\"", L"\\\"");
 			str = replace(str, L"\n", L"\\n");
 			str = replace(str, L"\r", L"\\r");
 			str = replace(str, L"\t", L"\\t");
-			return str;
+			return L"\"" + str + L"\"";
 		}
 		case object::LIST:
 		{

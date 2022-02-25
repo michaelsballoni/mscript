@@ -9,14 +9,14 @@ namespace mscript
     std::wstring mscript::num2wstr(double num)
     {
         std::wstringstream ss;
-        ss << num;
+        ss << std::setprecision(10) << num;
         return ss.str();
     }
 
     std::string mscript::num2str(double num)
     {
         std::stringstream ss;
-        ss << num;
+        ss << std::setprecision(10) << num;
         return ss.str();
     }
 
