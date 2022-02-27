@@ -53,9 +53,32 @@ namespace mscript
 			str = objectToJson(obj);
 			Assert::AreEqual(toWideStr("\"foo\\nbar\\tsome\\\"thing\""), str);
 
-			// list FORNOW
+			obj = object::list();
+			str = objectToJson(obj);
+			Assert::AreEqual(toWideStr("[]"), str);
 
-			// index FORNOW
+			obj = object::list{ true, 2.0, toWideStr("blet")};
+			str = objectToJson(obj);
+			Assert::AreEqual(toWideStr("[true, 2, \"blet\"]"), str);
+
+			obj = object::list{ true, 2.0, object::list{ 3.0, false } };
+			str = objectToJson(obj);
+			Assert::AreEqual(toWideStr("[true, 2, [3, false]]"), str);
+
+			obj = object::index();
+			str = objectToJson(obj);
+			Assert::AreEqual(toWideStr("{}"), str);
+
+			obj = object::index();
+			obj.indexVal().set(toWideStr("foo"), 3.4);
+			obj.indexVal().set(toWideStr("bar"), true);
+			str = objectToJson(obj);
+			Assert::AreEqual(toWideStr("{\"foo\": 3.4, \"bar\": true}"), str);
+
+			obj = object::index();
+			obj.indexVal().set(toWideStr("foo"), object::list{ 1.0, 2.0, 3.0 });
+			str = objectToJson(obj);
+			Assert::AreEqual(toWideStr("{\"foo\": [1, 2, 3]}"), str);
 		}
 	};
 }
