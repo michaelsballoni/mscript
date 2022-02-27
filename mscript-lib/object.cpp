@@ -137,7 +137,7 @@ namespace mscript
 	bool object::operator==(const object& other) const
 	{
 		if (m_type == NOTHING || other.m_type == NOTHING)
-			return m_type == other.m_type;
+			return m_type == other.m_type; // if both null, match, otherwise fail
 		
 		if (m_type != other.m_type)
 			raiseError("Type mismatch for equality comparison: " + typeStr() + " and " + other.typeStr());
@@ -145,11 +145,22 @@ namespace mscript
 		switch (m_type)
 		{
 		case NUMBER:
-			return m_number == other.m_number;
+		{
+			if (m_number == other.m_number)
+				return true;
+			else if (int64_t(m_number) != int64_t(other.m_number))
+				return false;
+			else
+				return num2str(m_number) == num2str(other.m_number); // handle rounding
+		}
 		case STRING:
+		{
 			return m_string == other.m_string;
+		}
 		case BOOL:
+		{
 			return m_bool == other.m_bool;
+		}
 		case LIST:
 		{
 			const auto& list1 = *m_list;
