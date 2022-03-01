@@ -45,10 +45,10 @@ namespace mscript
                 Assert::IsTrue(answer.isNull());
             else if (expected.type() == object::BOOL)
                 Assert::AreEqual(expected.boolVal(), answer.boolVal());
-            else if (expected.type() == object::STRING) // handles LIST and INDEX with toString
-                Assert::AreEqual(expected.stringVal(), answer.toString());
-            else
+            else if (expected.type() == object::NUMBER) 
                 Assert::AreEqual(round2places(expected.numberVal()), round2places(answer.numberVal()));
+            else // handle LIST and INDEX with toString
+                Assert::AreEqual(expected.toString(), answer.toString());
         }
 
         TEST_METHOD(TestFunctionPrecedence)
@@ -250,6 +250,9 @@ namespace mscript
 
             ValidateExpression("writeFile(\"test.txt\", \"testy test\", \"utf-16\")", true, symbols);
             ValidateExpression("readFile(\"test.txt\", \"utf-16\")", toWideStr("testy test"), symbols);
+
+            ValidateExpression("toJson(list(1,2,3))", toWideStr("[1, 2, 3]"), symbols);
+            ValidateExpression("fromJson(\"[1, 2, 3]\")", object::list{ 1.0, 2.0, 3.0 }, symbols);
         }
     };
 }

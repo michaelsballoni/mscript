@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "names.h"
 #include "user_exception.h"
+#include "object_json.h"
 
 namespace mscript
 {
@@ -1299,6 +1300,26 @@ namespace mscript
             raiseError("Unsupported writeFile() encoding: must be ascii, utf-8, or utf-16");
         }
 
+        //
+        // JSON
+        //
+        if (function == "toJson")
+        {
+            if (paramList.size() != 1)
+                raiseError("toJson() takes one object to turn into JSON");
+            return objectToJson(paramList[0]);
+        }
+
+        if (function == "fromJson")
+        {
+            if (paramList.size() != 1 || paramList[0].type() != object::STRING)
+                raiseError("fromJson() takes one JSON string to turn into an object");
+            return objectFromJson(paramList[0].stringVal());
+        }
+
+        //
+        // Function calls
+        //
         if (m_callable.hasFunction(functionW))
         {
             object answer = m_callable.callFunction(functionW, paramList);
