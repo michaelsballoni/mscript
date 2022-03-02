@@ -173,6 +173,7 @@
     <ClInclude Include="expressions.h" />
     <ClInclude Include="functions.h" />
     <ClInclude Include="includes.h" />
+    <ClInclude Include="libs.h" />
     <ClInclude Include="names.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="object_json.h" />
