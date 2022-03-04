@@ -96,7 +96,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)../json/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../mscript-core</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -117,7 +117,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)../json/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../mscript-core</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -137,7 +137,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)../json/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../mscript-core</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -158,7 +158,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)../json/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../mscript-core</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -173,23 +173,16 @@
     <ClInclude Include="expressions.h" />
     <ClInclude Include="functions.h" />
     <ClInclude Include="includes.h" />
-    <ClInclude Include="libs.h" />
     <ClInclude Include="names.h" />
-    <ClInclude Include="object.h" />
-    <ClInclude Include="object_json.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="script_exception.h" />
     <ClInclude Include="script_processor.h" />
     <ClInclude Include="symbols.h" />
     <ClInclude Include="user_exception.h" />
-    <ClInclude Include="utils.h" />
-    <ClInclude Include="vectormap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="expressions.cpp" />
     <ClCompile Include="names.cpp" />
-    <ClCompile Include="object.cpp" />
-    <ClCompile Include="object_json.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -198,7 +191,6 @@
     </ClCompile>
     <ClCompile Include="script_processor.cpp" />
     <ClCompile Include="symbols.cpp" />
-    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,6 +1,7 @@
 #include "includes.h"
 #include "script_processor.h"
 #include "utils.h"
+#pragma comment(lib, "mscript-core")
 #pragma comment(lib, "mscript-lib")
 
 #include <filesystem>

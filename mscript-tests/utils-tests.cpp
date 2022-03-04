@@ -4,7 +4,7 @@
 #include "object.h"
 #include "names.h"
 #include "utils.h"
-
+#pragma comment(lib, "mscript-core")
 #pragma comment(lib, "mscript-lib")
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;

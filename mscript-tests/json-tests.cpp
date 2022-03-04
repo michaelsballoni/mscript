@@ -3,7 +3,7 @@
 
 #include "object_json.h"
 #include "utils.h"
-#pragma comment(lib, "mscript-lib")
+#pragma comment(lib, "mscript-core")
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
