@@ -1,9 +1,14 @@
+#ifdef WIN32
+#include <Windows.h>
+#endif
+
 #include "includes.h"
 #include "script_processor.h"
 #include "utils.h"
 #pragma comment(lib, "mscript-core")
 #pragma comment(lib, "mscript-lib")
 
+#include <array>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -59,6 +64,23 @@ std::vector<std::wstring> loadScript(const std::wstring& current, const std::wst
 	return contents;
 }
 
+static std::wstring getModuleFilePath(const std::wstring& filename)
+{
+	if (fs::exists(filename))
+		return filename;
+
+	const int max_path = 32 * 1024;
+	char* exe_file_path = new char[max_path + 1];
+	exe_file_path[max_path] = '\0';
+#ifdef WIN32
+	if (GetModuleFileNameA(NULL, exe_file_path, max_path) == 0)
+		raiseError(L"Loading mscript.exe file path failed");
+#endif
+	fs::path exe_dir_path = fs::path(exe_file_path).parent_path();
+	fs::path module_file_path = exe_dir_path.append(filename);
+	return module_file_path;
+}
+
 int wmain(int argc, wchar_t* argv[])
 {
 	if (argc < 2)
@@ -86,7 +108,12 @@ int wmain(int argc, wchar_t* argv[])
 				{
 					return loadScript(currentFilename, filename);
 				},
-				symbols,
+				[&](const std::wstring& filename)
+				{
+					std::wstring module_file_path = getModuleFilePath(filename);
+					return module_file_path;
+				},
+					symbols,
 				[]() -> std::optional<std::wstring> // input
 				{
 					std::wstring line;

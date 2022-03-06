@@ -79,6 +79,11 @@ int main(int argc, char* argv[])
 						else
 							return split(script, L"\n"); 
 					},
+					[&](const std::wstring& filename)
+					{
+						std::wstring module_file_path = fs::path(testDirPath).append(filename); 
+						return module_file_path;
+					},
 					symbols,
 					[](){ return L"input"; },
 					[&output](const std::wstring& text) { output += text + L"\n"; }

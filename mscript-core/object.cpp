@@ -69,7 +69,7 @@ namespace mscript
 			std::vector<std::wstring> listStrs;
 			for (const auto& obj : *m_list)
 				listStrs.push_back(obj.toString());
-			return join(listStrs, L", ");
+			return L"[" + join(listStrs, L", ") + L"]";
 		}
 
 		case INDEX:
@@ -77,7 +77,7 @@ namespace mscript
 			std::vector<std::wstring> indexStrs;
 			for (const auto& kvp : m_index->vec())
 				indexStrs.push_back(kvp.first.toString() + L": " + kvp.second.toString());
-			return join(indexStrs, L", ");
+			return L"{" + join(indexStrs, L", ") + L"}";
 		}
 
 		default:

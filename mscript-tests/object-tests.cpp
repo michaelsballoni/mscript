@@ -67,28 +67,28 @@ namespace mscript
 				auto list = object::list();
 				object obj(list);
 				Assert::IsTrue(obj.type() == object::LIST);
-				Assert::AreEqual(toWideStr(""), obj.toString());
+				Assert::AreEqual(toWideStr("[]"), obj.toString());
 				Assert::AreEqual(std::string("list"), obj.typeStr());
 				Assert::AreEqual(size_t(0), obj.listVal().size());
 
-				obj.listVal().push_back(object(toWideStr("foo")));
-				obj.listVal().push_back(object(toWideStr("bar")));
+				obj.listVal().push_back(object(toWideStr("[foo]")));
+				obj.listVal().push_back(object(toWideStr("[bar]")));
 				Assert::AreEqual(size_t(2), obj.listVal().size());
-				Assert::AreEqual(toWideStr("foo, bar"), obj.toString());
+				Assert::AreEqual(toWideStr("[[foo], [bar]]"), obj.toString());
 			}
 
 			{
 				auto index = object::index();
 				object obj(index);
 				Assert::IsTrue(obj.type() == object::INDEX);
-				Assert::AreEqual(toWideStr(""), obj.toString());
+				Assert::AreEqual(toWideStr("{}"), obj.toString());
 				Assert::AreEqual(std::string("index"), obj.typeStr());
 				Assert::AreEqual(size_t(0), obj.indexVal().size());
 
 				obj.indexVal().set(toWideStr("foo"), toWideStr("bar"));
 				obj.indexVal().set(toWideStr("blet"), toWideStr("monkey"));
 				Assert::AreEqual(size_t(2), obj.indexVal().size());
-				Assert::AreEqual(toWideStr("foo: bar, blet: monkey"), obj.toString());
+				Assert::AreEqual(toWideStr("{foo: bar, blet: monkey}"), obj.toString());
 			}
 
 			{
