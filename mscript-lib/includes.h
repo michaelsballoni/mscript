@@ -8,6 +8,10 @@
 
 #define _USE_MATH_DEFINES
 
+#ifdef WIN32
+#include <Windows.h> // HMODULE
+#endif
+
 #include <algorithm>
 #include <charconv>
 #include <cmath>

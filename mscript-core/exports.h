@@ -1,7 +1,7 @@
 #pragma once
 
 /// <summary>
-/// Implement all of these functions to integrate with mscript 
+/// Implement all of these functions to integrate your external module with mscript 
 /// </summary>
 namespace mscript
 {

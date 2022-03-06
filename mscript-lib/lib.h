@@ -1,11 +1,12 @@
 #pragma once
 
 #include "exports.h"
-#include "utils.h"
+#include "object.h"
 
-#include <Windows.h>
+#ifdef WIN32
+#include <Windows.h> // HMODULE
+#endif
 
-#include <memory>
 #include <string>
 #include <vector>
 #include <unordered_set>
@@ -15,35 +16,25 @@ namespace mscript
 	class lib
 	{
 	public:
-		lib(const std::wstring& filePath)
-			: m_module(NULL)
+		lib(const std::wstring& filePath);
+		~lib();
+
+		const auto& getFunctionNames() const
 		{
-			m_module = ::LoadLibrary(filePath.c_str());
-			if (m_module == NULL)
-				raiseWError(L"Loading library failed: " + filePath);
+			return m_importedFunctionNames;
 		}
 
-		~lib()
-		{
-			::FreeLibrary(m_module);
-		}
-
-		static std::vector<std::shared_ptr<lib>>& libs()
-		{
-			static std::vector<std::shared_ptr<lib>> s_libs;
-			return s_libs;
-		}
-
-
+		object executeFunction(const std::wstring& name, const object& param);
 
 	private:
+#ifdef WIN32
 		HMODULE m_module;
+#endif
+		std::wstring m_filePath;
 
 		std::unordered_set<std::wstring> m_importedFunctionNames;
 
+		FreeStringFunction m_freer;
 		ExecuteExportFunction m_executer;
-		FreeStringFunction m_strFreer;
-
-		typedef wchar_t* (*GetExportsFunction)();
 	};
 }

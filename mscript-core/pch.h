@@ -4,7 +4,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #pragma warning(disable: 26451)
-#include "json.hpp"
+#include "../../json/single_include/nlohmann/json.hpp"
 #pragma warning(default: 26451)
 
 #include <memory>
