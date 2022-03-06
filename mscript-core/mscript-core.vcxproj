@@ -169,7 +169,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="libs.h" />
+    <ClInclude Include="exports.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="object_json.h" />
     <ClInclude Include="pch.h" />

@@ -173,6 +173,7 @@
     <ClInclude Include="expressions.h" />
     <ClInclude Include="functions.h" />
     <ClInclude Include="includes.h" />
+    <ClInclude Include="lib.h" />
     <ClInclude Include="names.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="script_exception.h" />
