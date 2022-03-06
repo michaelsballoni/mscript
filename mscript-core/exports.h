@@ -1,5 +1,8 @@
 #pragma once
 
+/// <summary>
+/// Implement all of these functions to integrate with mscript 
+/// </summary>
 namespace mscript
 {
 	typedef wchar_t* (*GetExportsFunction)();
