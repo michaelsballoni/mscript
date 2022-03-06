@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "script_processor.h"
 #include "names.h"
+#include "lib.h"
 
 namespace mscript
 {
@@ -10,7 +11,7 @@ namespace mscript
         if (m_linesDb.find(newFilename) != m_linesDb.end())
             return object();
 
-        m_linesDb.insert({ newFilename, m_fileLoader(currentFilename, newFilename) });
+        m_linesDb.insert({ newFilename, m_scriptLoader(currentFilename, newFilename) });
 
         preprocessFunctions(currentFilename, newFilename); // scan for functions first
 
@@ -282,8 +283,17 @@ namespace mscript
                     if (newFilename.empty())
                         raiseError("import statement has no file name");
 
-                    object newFilenameValue = evaluate(newFilename, callDepth);
-                    process(filename, newFilenameValue.stringVal());
+                    if (endsWith(newFilename, L".dll"))
+                    {
+                        std::wstring moduleFilePath = m_moduleLoader(newFilename);
+                        lib::loadLib(moduleFilePath);
+                        return object();
+                    }
+                    else
+                    {
+                        object newFilenameValue = evaluate(newFilename, callDepth);
+                        return process(filename, newFilenameValue.stringVal());
+                    }
                 }
                 else if (first == '?') // if else
                 {

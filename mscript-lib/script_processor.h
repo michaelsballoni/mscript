@@ -31,12 +31,14 @@ namespace mscript
         /// <param name="output">Function for writing to the output</param>
         script_processor
         (
-            std::function<std::vector<std::wstring>(const std::wstring& current, const std::wstring& filename)> fileLoader,
+            std::function<std::vector<std::wstring>(const std::wstring& current, const std::wstring& filename)> scriptLoader,
+            std::function<std::wstring(const std::wstring& filename)> moduleLoader,
             symbol_table& symbols,
             std::function<std::optional<std::wstring>()> input,
             std::function<void (const std::wstring& text)> output
         )
-        : m_fileLoader(fileLoader)
+        : m_scriptLoader(scriptLoader)
+        , m_moduleLoader(moduleLoader)
         , m_symbols(symbols)
         , m_input(input)
         , m_output(output)
@@ -91,7 +93,8 @@ namespace mscript
         static bool isLineBlockBegin(std::wstring line);
 
     private:
-        std::function<std::vector<std::wstring>(const std::wstring& current, const std::wstring& filename)> m_fileLoader;
+        std::function<std::vector<std::wstring>(const std::wstring& current, const std::wstring& filename)> m_scriptLoader;
+        std::function<std::wstring(const std::wstring& filename)> m_moduleLoader;
 
         std::unordered_map<std::wstring, std::vector<std::wstring>> m_linesDb;
 

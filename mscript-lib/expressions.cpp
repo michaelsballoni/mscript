@@ -4,6 +4,7 @@
 #include "names.h"
 #include "user_exception.h"
 #include "object_json.h"
+#include "lib.h"
 
 namespace mscript
 {
@@ -1324,6 +1325,18 @@ namespace mscript
         {
             object answer = m_callable.callFunction(functionW, paramList);
             return answer;
+        }
+
+        {
+            const auto moduleLib = lib::getLib(functionW);
+            if (moduleLib != nullptr)
+            {
+                if (paramList.size() != 1)
+                    raiseWError(L"Module functions take one object parameter: " + functionW);
+                
+                object moduleResult = moduleLib->executeFunction(functionW, paramList[0]);
+                return moduleResult;
+            }
         }
 
         if (m_symbols.contains(functionW)) // function name ~= function pointer

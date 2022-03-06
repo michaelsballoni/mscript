@@ -27,4 +27,5 @@ namespace mscript
     std::wstring replace(const std::wstring& str, const std::wstring& from, const std::wstring& to);
 
     bool startsWith(const std::wstring& str, const std::wstring& starter);
+    bool endsWith(const std::wstring& str, const std::wstring& finisher);
 }

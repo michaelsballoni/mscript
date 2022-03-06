@@ -106,6 +106,21 @@ namespace mscript
 			Assert::IsTrue(startsWith(L"foodie", L"foo"));
 		}
 
+		TEST_METHOD(EndsWithTests)
+		{
+			Assert::IsTrue(!endsWith(L"", L""));
+			Assert::IsTrue(!endsWith(L"foo", L""));
+			Assert::IsTrue(!endsWith(L"", L"foo"));
+			Assert::IsTrue(!endsWith(L"fo", L"foo"));
+			Assert::IsTrue(!endsWith(L"foo", L"fob"));
+			Assert::IsTrue(!endsWith(L"foblle", L"bll"));
+
+			Assert::IsTrue(endsWith(L"foo", L"foo"));
+			Assert::IsTrue(endsWith(L"foo", L"o"));
+			Assert::IsTrue(endsWith(L"food", L"ood"));
+			Assert::IsTrue(endsWith(L"foodie", L"die"));
+		}
+
 		TEST_METHOD(SplitTests)
 		{
 			Assert::AreEqual(toWideStr(""), join(split(L"", L""), L", "));

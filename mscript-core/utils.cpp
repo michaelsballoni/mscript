@@ -176,6 +176,24 @@ bool mscript::startsWith(const std::wstring& str, const std::wstring& starter)
     return true;
 }
 
+bool mscript::endsWith(const std::wstring& str, const std::wstring& finisher)
+{
+    if (str.empty() || finisher.empty())
+        return false;
+
+    if (finisher.length() > str.length())
+        return false;
+
+    size_t startingPoint = str.length() - finisher.length();
+    for (size_t s = 0; s < finisher.length(); ++s)
+    {
+        if (str[s + startingPoint] != finisher[s])
+            return false;
+    }
+
+    return true;
+}
+
 std::vector<std::wstring> mscript::split(std::wstring str, const wchar_t* seperator)
 {
     std::vector<std::wstring> retVal;
