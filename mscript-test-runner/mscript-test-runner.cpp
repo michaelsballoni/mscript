@@ -9,6 +9,9 @@
 #include <string>
 #include <map>
 
+#undef min
+#undef max
+
 namespace fs = std::filesystem;
 using namespace mscript;
 
@@ -67,7 +70,7 @@ int main(int argc, char* argv[])
 			script_processor
 				processor
 				(
-					[&](const std::wstring&, const std::wstring& filename) 
+					[=](const std::wstring&, const std::wstring& filename) 
 					{
 						bool isExternal = fs::path(filename).extension() == ".ms";
 						if (isExternal)
@@ -79,9 +82,9 @@ int main(int argc, char* argv[])
 						else
 							return split(script, L"\n"); 
 					},
-					[&](const std::wstring& filename)
+					[=](const std::wstring& filename)
 					{
-						std::wstring module_file_path = fs::path(testDirPath).append(filename); 
+						std::wstring module_file_path = fs::path(testDirPath).append(filename);
 						return module_file_path;
 					},
 					symbols,

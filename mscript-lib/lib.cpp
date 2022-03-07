@@ -12,11 +12,11 @@ namespace mscript
 		: m_filePath(filePath)
 		, m_executer(nullptr)
 		, m_freer(nullptr)
-#ifdef WIN32
+#if defined(_WIN32) || defined(_WIN64)
 		, m_module(nullptr)
 #endif
 	{
-#ifdef WIN32
+#if defined(_WIN32) || defined(_WIN64)
 		m_module = ::LoadLibrary(m_filePath.c_str());
 		if (m_module == nullptr)
 			raiseWError(L"Loading library failed: " + m_filePath);
@@ -50,10 +50,10 @@ namespace mscript
 			const auto& funcIt = s_funcLibs.find(func_name_trimmed);
 			if (funcIt != s_funcLibs.end())
 			{
-				if (toLower(funcIt->second.m_filePath) != toLower(m_filePath))
-					raiseWError(L"Function already defined in another export: function " + func_name_trimmed + L" - " + in m_filePath + L" - already defined by " + funcIt.second->m_filePath);
-				else if (m_functions.find() != m_functions.end(func_name_trimmed))
-					raiseWError(L"Duplicate export function: " + func_name_trimmed + L" - " + in m_filePath);
+				if (toLower(funcIt->second->m_filePath) != toLower(m_filePath))
+					raiseWError(L"Function already defined in another export: function " + func_name_trimmed + L" - in " + m_filePath + L" - already defined in " + funcIt->second->m_filePath);
+				else if (m_functions.find(func_name_trimmed) != m_functions.end())
+					raiseWError(L"Duplicate export function: " + func_name_trimmed + L" in " + m_filePath);
 				else
 					continue;
 			}
@@ -69,7 +69,7 @@ namespace mscript
 
 	lib::~lib()
 	{
-#ifdef WIN32
+#if defined(_WIN32) || defined(_WIN64)
 		if (m_module != nullptr)
 			::FreeLibrary(m_module);
 #endif
@@ -111,7 +111,12 @@ namespace mscript
 		m_freer(output_json_str);
 		output_json_str = nullptr;
 
-		const object output_obj = objectFromJson(output_json);
+		object output_obj = objectFromJson(output_json);
+		if (output_obj.type() == object::STRING)
+		{
+			if (startsWith(output_obj.stringVal(), L"mscript EXCEPTION ~~~"))
+				raiseWError(L"Executing function failed: " + m_filePath + L" - " + name + L": " + output_obj.stringVal());
+		}
 		return output_obj;
 	}
 }

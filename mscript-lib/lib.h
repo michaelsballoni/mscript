@@ -3,7 +3,7 @@
 #include "exports.h"
 #include "object.h"
 
-#ifdef WIN32
+#if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h> // HMODULE
 #endif
 
@@ -28,7 +28,7 @@ namespace mscript
 		static std::shared_ptr<lib> getLib(const std::wstring& name);
 
 	private:
-#ifdef WIN32
+#if defined(_WIN32) || defined(_WIN64)
 		HMODULE m_module;
 #endif
 		std::wstring m_filePath;

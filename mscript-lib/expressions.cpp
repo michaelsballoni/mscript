@@ -6,6 +6,9 @@
 #include "object_json.h"
 #include "lib.h"
 
+#undef min
+#undef max
+
 namespace mscript
 {
     /// <summary>
@@ -1332,7 +1335,7 @@ namespace mscript
             if (moduleLib != nullptr)
             {
                 if (paramList.size() != 1)
-                    raiseWError(L"Module functions take one object parameter: " + functionW);
+                    raiseWError(L"Module functions take one parameter, of any type: " + functionW);
                 
                 object moduleResult = moduleLib->executeFunction(functionW, paramList[0]);
                 return moduleResult;

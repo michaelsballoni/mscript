@@ -3,6 +3,9 @@
 #include "names.h"
 #include "lib.h"
 
+#undef min
+#undef max
+
 namespace mscript
 {
     object script_processor::process(const std::wstring& currentFilename, const std::wstring& newFilename)
@@ -282,17 +285,22 @@ namespace mscript
                     std::wstring newFilename = trim(line.substr(1));
                     if (newFilename.empty())
                         raiseError("import statement has no file name");
+                    object filenameObj = evaluate(newFilename, callDepth);
+                    if (filenameObj.type() != object::STRING)
+                        raiseError("import statement does not evaluate as string");
+                    newFilename = filenameObj.stringVal();
+                    if (newFilename.empty())
+                        raiseError("import statement evaluates to an empty string");
 
                     if (endsWith(newFilename, L".dll"))
                     {
                         std::wstring moduleFilePath = m_moduleLoader(newFilename);
                         lib::loadLib(moduleFilePath);
-                        return object();
                     }
                     else
                     {
                         object newFilenameValue = evaluate(newFilename, callDepth);
-                        return process(filename, newFilenameValue.stringVal());
+                        process(filename, newFilenameValue.stringVal());
                     }
                 }
                 else if (first == '?') // if else

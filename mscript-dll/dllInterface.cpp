@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "dllInterface.h"
+#include "dllinterface.h"
 
 #include "../mscript-core/object.h"
 #include "../mscript-core/object_json.h"
@@ -27,43 +27,58 @@ static std::vector<double> stringToNumbers(const wchar_t* str)
 	retVal.reserve(topObj.listVal().size());
 	for (const object& obj : topObj.listVal())
 	{
-		double numVal = obj.toNumber();
-		retVal.push_back(numVal);
+		if (obj.type() != object::NUMBER)
+			throw std::runtime_error("List entry is not a number");
+		else
+			retVal.push_back(obj.numberVal());
 	}
 	return retVal;
 }
 
-wchar_t* __cdecl mscript_GetExportsFunction()
+wchar_t* __cdecl mscript_GetExports()
 {
-	return cloneString(L"mscript-dll.sum, mscript-dll.cat");
+	return cloneString(L"mscript_dll_sum, mscript_dll_cat");
 }
 
-void mscript_FreeStringFunction(wchar_t* str)
+void mscript_FreeString(wchar_t* str)
 {
 	delete[] str;
 }
 
-wchar_t* mscript_ExecuteExportFunction(const wchar_t* functionName, const wchar_t* parametersJson)
+wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* parametersJson)
 {
-	auto paramNumbers = stringToNumbers(parametersJson);
-	std::wstring funcName = functionName;
+	try
+	{
+		auto paramNumbers = stringToNumbers(parametersJson);
+		std::wstring funcName = functionName;
 
-	if (funcName == L"sum")
-	{
-		double retVal = 0.0;
-		for (double numVal : paramNumbers)
-			retVal += numVal;
-		std::wstring json = objectToJson(retVal);
-		return cloneString(json.c_str());
+		if (funcName == L"mscript_dll_sum")
+		{
+			double retVal = 0.0;
+			for (double numVal : paramNumbers)
+				retVal += numVal;
+			std::wstring json = objectToJson(retVal);
+			return cloneString(json.c_str());
+		}
+		else if (funcName == L"mscript_dll_cat")
+		{
+			std::wstring retVal;
+			for (double numVal : paramNumbers)
+				retVal += num2wstr(numVal);
+			std::wstring json = objectToJson(retVal);
+			return cloneString(json.c_str());
+		}
+		else
+			raiseWError(L"Unknown function: " + funcName);
 	}
-	else if (funcName == L"cat")
+	catch (const std::exception& exp)
 	{
-		std::wstring retVal;
-		for (double numVal : paramNumbers)
-			retVal += num2wstr(numVal);
-		std::wstring json = objectToJson(retVal);
-		return cloneString(json.c_str());
+		object errorObj = L"mscript EXCEPTION ~~~ mscript_ExecuteFunction(" + std::wstring(functionName) + L"): " + toWideStr(exp.what());
+		std::wstring errorJson = objectToJson(errorObj);
+		return cloneString(errorJson.c_str());
 	}
-	else
-		raiseWError(L"Unknown function: " + funcName);
+	catch (...)
+	{
+		return nullptr;
+	}
 }

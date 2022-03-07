@@ -1,4 +1,4 @@
-#ifdef WIN32
+#if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
 #endif
 
@@ -72,9 +72,9 @@ static std::wstring getModuleFilePath(const std::wstring& filename)
 	const int max_path = 32 * 1024;
 	char* exe_file_path = new char[max_path + 1];
 	exe_file_path[max_path] = '\0';
-#ifdef WIN32
+#if defined(_WIN32) || defined(_WIN64)
 	if (GetModuleFileNameA(NULL, exe_file_path, max_path) == 0)
-		raiseError(L"Loading mscript.exe file path failed");
+		raiseError("Loading mscript.exe file path failed");
 #endif
 	fs::path exe_dir_path = fs::path(exe_file_path).parent_path();
 	fs::path module_file_path = exe_dir_path.append(filename);
@@ -108,12 +108,12 @@ int wmain(int argc, wchar_t* argv[])
 				{
 					return loadScript(currentFilename, filename);
 				},
-				[&](const std::wstring& filename)
+				[](const std::wstring& filename)
 				{
 					std::wstring module_file_path = getModuleFilePath(filename);
 					return module_file_path;
 				},
-					symbols,
+				symbols,
 				[]() -> std::optional<std::wstring> // input
 				{
 					std::wstring line;
