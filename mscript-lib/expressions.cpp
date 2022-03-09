@@ -1213,9 +1213,9 @@ namespace mscript
 
         if (function == "error")
         {
-            if (paramList.size() != 1 || first.type() != object::STRING)
-                raiseError("error() works with one error message string");
-            throw user_exception(toNarrowStr(first.stringVal()));
+            if (paramList.size() != 1)
+                raiseError("error() works with one error object");
+            throw first;
         }
 
         //

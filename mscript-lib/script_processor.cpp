@@ -25,7 +25,8 @@ namespace mscript
     void script_processor::preprocessFunctions(const std::wstring& previousFilename, const std::wstring& filename)
     {
         const std::vector<std::wstring>& lines = m_linesDb[filename];
-        for (int l = 0; l < int(lines.size()); ++l)
+        int lineCount = int(lines.size());
+        for (int l = 0; l < lineCount; ++l)
         {
             std::wstring line = trim(lines[l]);
             if (line.empty())
@@ -118,6 +119,7 @@ namespace mscript
         unsigned callDepth
     )
     {
+        object exceptionObject;
         const std::vector<std::wstring>& lines = m_linesDb[filename];
         for (int l = startLine; l <= endLine; ++l)
         {
@@ -140,7 +142,7 @@ namespace mscript
                             raiseError("Unfinished block comment");
                     }
                 }
-                else if (first == '!' || startsWith(line, L"//")) // single line comment
+                else if (first == '/') // single line comment
                 {
                     // No op
                 }
@@ -171,17 +173,15 @@ namespace mscript
                 {
                     line = line.substr(1);
                     size_t equalsIndex = line.find('=');
-                    if (equalsIndex != std::wstring::npos)
-                    {
-                        std::wstring nameStr = trim(line.substr(0, equalsIndex));
-                        std::wstring valueStr = trim(line.substr(equalsIndex + 1));
+                    if (equalsIndex == std::wstring::npos)
+                        raiseError("Variable declaraion lacks initial value");
 
-                        object answer = evaluate(valueStr, callDepth);
+                    std::wstring nameStr = trim(line.substr(0, equalsIndex));
+                    std::wstring valueStr = trim(line.substr(equalsIndex + 1));
 
-                        m_symbols.set(nameStr, answer);
-                    }
-                    else
-                        m_symbols.set(trim(line), object());
+                    object answer = evaluate(valueStr, callDepth);
+
+                    m_symbols.set(nameStr, answer);
                 }
                 else if (first == '&') // variable assignment
                 {
@@ -196,6 +196,51 @@ namespace mscript
                     object answer = evaluate(valueStr, callDepth);
 
                     m_symbols.assign(nameStr, answer);
+                }
+                else if (first == '!') // exception handler
+                {
+                    int loopEnd = findMatchingEnd(lines, l, endLine);
+                    int loopStart = l;
+                    l = loopEnd;
+
+                    if (exceptionObject.type() != object::NOTHING)
+                    {
+                        line = line.substr(1);
+                        size_t spaceIndex = line.find(' ');
+                        if (spaceIndex == std::wstring::npos)
+                            raiseError("Exception handler lacks catch variable");
+
+                        std::wstring labelStr = trim(line.substr(spaceIndex + 1));
+
+                        symbol_stacker stacker(m_symbols);
+                        m_symbols.set(labelStr, exceptionObject);
+                        process_outcome ourOutcome;
+                        process
+                        (
+                            previousFilename,
+                            filename,
+                            loopStart + 1,
+                            loopEnd - 1,
+                            ourOutcome,
+                            callDepth + 1
+                        );
+                        if (ourOutcome.Return)
+                        {
+                            outcome.Return = true;
+                            outcome.ReturnValue = ourOutcome.ReturnValue;
+                            return ourOutcome.ReturnValue;
+                        }
+                        else if (ourOutcome.Continue)
+                        {
+                            outcome.Continue = true;
+                            return object();
+                        }
+                        else if (ourOutcome.Leave)
+                        {
+                            outcome.Leave = true;
+                            return object();
+                        }
+                    }
                 }
                 else if (line == L"O" || line == L"o" || line == L"0") // infinite loop
                 {
@@ -594,8 +639,27 @@ namespace mscript
                 {
                     raiseWError(L"Invalid statement: " + line);
                 }
+
+                exceptionObject = object();
             }
 #ifndef _DEBUG
+            catch (const object& expObj)
+            {
+                bool foundHandler = false;
+                while (++l < endLine)
+                {
+                    if (startsWith(trim(lines[l]), L"!"))
+                    {
+                        --l;
+                        exceptionObject = expObj;
+                        foundHandler = true;
+                    }
+                }
+                if (foundHandler)
+                    continue;
+                else
+                    throw expObj;
+            }
             catch (const script_exception& exp)
             {
                 throw exp;

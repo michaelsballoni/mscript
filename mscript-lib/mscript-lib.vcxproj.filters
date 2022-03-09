@@ -42,10 +42,10 @@
     <ClInclude Include="script_exception.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="user_exception.h">
+    <ClInclude Include="lib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lib.h">
+    <ClInclude Include="user_exception.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

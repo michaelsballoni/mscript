@@ -18,10 +18,13 @@ namespace mscript
 		// getDateDiff(units, big, little)
 		// addToDate(units, amount, str)
 
-		static std::string getNow()
+		static std::string getNow(bool utc)
 		{
 			SYSTEMTIME st;
-			::GetSystemTime(&st);
+			if (utc)
+				::GetSystemTime(&st);
+			else
+				::GetLocalTime(&st);
 			return sysTimeToString(st);
 		}
 
@@ -143,13 +146,13 @@ namespace mscript
 		static std::string sysTimeToString(const SYSTEMTIME& sysTime)
 		{
 			std::stringstream msg;
-			msg << sysTime.wYear << "-"
-				<< std::setw(2) << std::setfill('0') << sysTime.wMonth << "-"
-				<< std::setw(2) << std::setfill('0') << sysTime.wDay << " "
-				<< std::setw(2) << std::setfill('0') << sysTime.wHour << ":"
-				<< std::setw(2) << std::setfill('0') << sysTime.wMinute << ":"
-				<< std::setw(2) << std::setfill('0') << sysTime.wSecond << "."
-				<< std::setw(3) << std::setfill('0') << sysTime.wMilliseconds;
+			msg << sysTime.wYear 
+				<< "-" << std::setw(2) << std::setfill('0') << sysTime.wMonth 
+				<< "-" << std::setw(2) << std::setfill('0') << sysTime.wDay 
+				<< " "
+				<< std::setw(2) << std::setfill('0') << sysTime.wHour 
+				<< ":" << std::setw(2) << std::setfill('0') << sysTime.wMinute 
+				<< ":" << std::setw(2) << std::setfill('0') << sysTime.wSecond;
 			return msg.str();
 		}
 
@@ -159,14 +162,13 @@ namespace mscript
 			sscanf_s
 			(
 				stringToParse.c_str(), 
-				"%hd-%hd-%hd %hd:%hd:%hd.%hd",
+				"%hd-%hd-%hd %hd:%hd:%hd",
 				&st.wYear,
 				&st.wMonth,
 				&st.wDay,
 				&st.wHour,
 				&st.wMinute,
-				&st.wSecond,
-				&st.wMilliseconds
+				&st.wSecond
 			);
 			return st;
 		}

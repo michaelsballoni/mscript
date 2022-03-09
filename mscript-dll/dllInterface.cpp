@@ -31,8 +31,8 @@ wchar_t* __cdecl mscript_GetExports()
 {
 	std::vector<std::wstring> exports
 	{
-		L"mscript_dll_sum",
-		L"mscript_dll_cat"
+		L"ms_sample_sum",
+		L"ms_sample_cat"
 	};
 	return module_utils::getExports(exports);
 }
@@ -48,14 +48,14 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 	{
 		std::wstring funcName = functionName;
 		auto paramNumbers = stringToNumbers(parametersJson);
-		if (funcName == L"mscript_dll_sum")
+		if (funcName == L"ms_sample_sum")
 		{
 			double retVal = 0.0;
 			for (double numVal : paramNumbers)
 				retVal += numVal;
 			return module_utils::jsonStr(retVal);
 		}
-		else if (funcName == L"mscript_dll_cat")
+		else if (funcName == L"ms_sample_cat")
 		{
 			std::wstring retVal;
 			for (double numVal : paramNumbers)

@@ -132,6 +132,11 @@ int wmain(int argc, wchar_t* argv[])
 			return int(retVal.numberVal());
 	}
 #ifndef _DEBUG
+	catch (const object& expObj)
+	{
+		printf("Object ERROR: %S\n", expObj.toString().c_str());
+		return 1;
+	}
 	catch (const script_exception& exp)
 	{
 		printf("Script ERROR: %s - %S - line: %d - %S\n", 
