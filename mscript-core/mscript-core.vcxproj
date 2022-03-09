@@ -170,6 +170,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="exports.h" />
+    <ClInclude Include="module_utils.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="object_json.h" />
     <ClInclude Include="pch.h" />
