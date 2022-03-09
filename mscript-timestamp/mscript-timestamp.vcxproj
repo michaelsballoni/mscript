@@ -151,7 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="mscript-datetime.h" />
+    <ClInclude Include="mscript-timestamp.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

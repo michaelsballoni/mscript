@@ -8,7 +8,7 @@
 
 namespace mscript
 {
-	class datetime
+	class timestamp
 	{
 	public:
 		// FORNOW
@@ -87,7 +87,7 @@ namespace mscript
 			return sysTimeToString(st);
 		}
 
-		BOOL touch(const std::wstring& filePath)
+		static BOOL touch(const std::wstring& filePath)
 		{
 			SYSTEMTIME st;
 			::GetSystemTime(&st);
