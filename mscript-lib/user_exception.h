@@ -1,17 +1,21 @@
 #pragma once
 
-#include "utils.h"
+#include "object.h"
 
 namespace mscript
 {
     /// <summary>
     /// user_exception has the message the scripter is sending
     /// </summary>
-    class user_exception : public std::runtime_error
+    struct user_exception
     {
     public:
-        user_exception(const std::string& msg)
-            : std::runtime_error(msg.c_str())
-        {}
+        user_exception(const object& obj = object()) : obj(obj) {}
+
+        object obj;
+
+        std::wstring filename;
+        int lineNumber = -1;
+        std::wstring line;
     };
 }

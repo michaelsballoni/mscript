@@ -2,12 +2,9 @@
 in a block comment
 another commented line
 */
-!
-! line comment
-!
-//
-// another line comment
-//
+/
+/ line comment
+/
 
 $ beforeBlockComment = 1
 /*

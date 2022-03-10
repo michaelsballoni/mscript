@@ -8,8 +8,10 @@ $ utc = msts_to_utc(local)
 $ local2 = msts_to_local(utc)
 $ utc2 = msts_to_utc(local2)
 
-> "Should be true: " + (local2 = utc2)
+> "Should be true (local): " + (local2 = local)
+> "Should be true (utc): " + (utc2 = utc)
 
 ===
 
-Should be true: true
+Should be true (local): true
+Should be true (utc): true

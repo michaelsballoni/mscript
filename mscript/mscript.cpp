@@ -85,12 +85,10 @@ int wmain(int argc, wchar_t* argv[])
 {
 	if (argc < 2)
 	{
-		printf("Usage: mscript <script path> ...\n");
+		printf("Usage: mscript2 <script path> ...\n");
 		return 0;
 	}
-#ifndef _DEBUG
 	try
-#endif
 	{
 		std::wstring scriptPath = argv[1];
 
@@ -131,16 +129,16 @@ int wmain(int argc, wchar_t* argv[])
 		if (retVal.type() == object::NUMBER)
 			return int(retVal.numberVal());
 	}
-#ifndef _DEBUG
-	catch (const object& expObj)
+	catch (const user_exception& exp)
 	{
-		printf("Object ERROR: %S\n", expObj.toString().c_str());
+		printf("Object ERROR: %S - %S - line: %d\n",
+			   exp.obj.toString().c_str(), exp.filename.c_str(), exp.lineNumber);
 		return 1;
 	}
 	catch (const script_exception& exp)
 	{
-		printf("Script ERROR: %s - %S - line: %d - %S\n", 
-			   exp.what(), exp.filename.c_str(), exp.lineNumber, exp.line.c_str());
+		printf("Script ERROR: %s - %S - line: %d\n", 
+			   exp.what(), exp.filename.c_str(), exp.lineNumber);
 		return 1;
 	}
 	catch (const std::exception& exp)
@@ -148,6 +146,10 @@ int wmain(int argc, wchar_t* argv[])
 		printf("Runtime ERROR: %s\n", exp.what());
 		return 1;
 	}
-#endif
+	catch (...)
+	{
+		printf("Unhandled ... ERROR\n");
+		return 1;
+	}
 	return 0;
 }

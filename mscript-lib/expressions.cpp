@@ -1214,8 +1214,8 @@ namespace mscript
         if (function == "error")
         {
             if (paramList.size() != 1)
-                raiseError("error() works with one error object");
-            throw first;
+                raiseError("error() works with one object for error handling");
+            throw user_exception(first);
         }
 
         //

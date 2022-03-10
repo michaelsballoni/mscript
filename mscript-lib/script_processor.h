@@ -5,6 +5,7 @@
 #include "object.h"
 #include "symbols.h"
 #include "script_exception.h"
+#include "user_exception.h"
 
 #include <functional>
 #include <memory>

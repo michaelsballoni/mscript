@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "script_processor.h"
 #include "names.h"
 #include "lib.h"
 
@@ -96,10 +95,6 @@ namespace mscript
                 m_functions.insert({ name, std::make_shared<script_function>(function) });
             }
 #ifndef _DEBUG
-            catch (const script_exception& exp)
-            {
-                throw exp;
-            }
             catch (const std::exception& exp)
             {
                 handleException(exp, filename, line, l);
@@ -119,7 +114,7 @@ namespace mscript
         unsigned callDepth
     )
     {
-        object exceptionObject;
+        user_exception curException;
         const std::vector<std::wstring>& lines = m_linesDb[filename];
         for (int l = startLine; l <= endLine; ++l)
         {
@@ -128,9 +123,7 @@ namespace mscript
                 continue;
 
             auto first = line[0];
-#ifndef _DEBUG
             try
-#endif
             {
                 if (startsWith(line, L"/*")) // block comment
                 {
@@ -203,17 +196,18 @@ namespace mscript
                     int loopStart = l;
                     l = loopEnd;
 
-                    if (exceptionObject.type() != object::NOTHING)
+                    if (curException.obj != object::NOTHING)
                     {
                         line = line.substr(1);
                         size_t spaceIndex = line.find(' ');
                         if (spaceIndex == std::wstring::npos)
                             raiseError("Exception handler lacks catch variable");
 
-                        std::wstring labelStr = trim(line.substr(spaceIndex + 1));
+                        std::wstring label = trim(line.substr(spaceIndex + 1));
+                        validateName(label);
 
                         symbol_stacker stacker(m_symbols);
-                        m_symbols.set(labelStr, exceptionObject);
+                        m_symbols.set(label, curException.obj);
                         process_outcome ourOutcome;
                         process
                         (
@@ -640,30 +634,49 @@ namespace mscript
                     raiseWError(L"Invalid statement: " + line);
                 }
 
-                exceptionObject = object();
+                curException.obj = object();
             }
-#ifndef _DEBUG
-            catch (const object& expObj)
+            catch (const user_exception& userExp)
             {
+                if (curException.obj.type() != object::NOTHING)
+                    throw curException;
+
+                curException.obj = userExp.obj;
+
+                if (curException.filename.empty())
+                {
+                    curException.filename = filename;
+                    curException.lineNumber = l;
+                    curException.line = line;
+                }
+
                 bool foundHandler = false;
                 while (++l < endLine)
                 {
+                    if (trim(lines[l]) == L"/*")
+                    {
+                        ++l;
+                        while (trim(lines[l]) != L"*/")
+                        {
+                            ++l;
+                            if (l >= lines.size())
+                                raiseError("Unfinished block comment");
+                        }
+                    }
+
                     if (startsWith(trim(lines[l]), L"!"))
                     {
                         --l;
-                        exceptionObject = expObj;
                         foundHandler = true;
+                        break;
                     }
                 }
                 if (foundHandler)
                     continue;
                 else
-                    throw expObj;
+                    throw curException;
             }
-            catch (const script_exception& exp)
-            {
-                throw exp;
-            }
+#ifndef _DEBUG
             catch (const std::exception& exp)
             {
                 handleException(exp, filename, line, l);

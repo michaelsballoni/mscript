@@ -65,36 +65,64 @@ int main(int argc, char* argv[])
 		expected = trim(replace(expected, L"\r\n", L"\n"));
 
 		std::wstring output;
+#ifndef _DEBUG
+		try
+#endif
 		{
-			symbol_table symbols;
-			script_processor
-				processor
-				(
-					[=](const std::wstring&, const std::wstring& filename) 
-					{
-						bool isExternal = fs::path(filename).extension() == ".ms";
-						if (isExternal)
+			{
+				symbol_table symbols;
+				script_processor
+					processor
+					(
+						[=](const std::wstring&, const std::wstring& filename)
 						{
-							std::string externalFilePath = toNarrowStr(fs::path(testDirPath).append(filename));
-							std::wstring externalScript = trim(replace(readFileIntoString(externalFilePath), L"\r\n", L"\n"));
-							return split(externalScript, L"\n");
-						}
-						else
-							return split(script, L"\n"); 
-					},
-					[=](const std::wstring& filename)
-					{
-						std::wstring module_file_path = fs::path(testDirPath).append(filename);
-						return module_file_path;
-					},
-					symbols,
-					[](){ return L"input"; },
-					[&output](const std::wstring& text) { output += text + L"\n"; }
-				);
-			processor.process(std::wstring(), it.first.filename().wstring());
-			output = trim(output);
+							bool isExternal = fs::path(filename).extension() == ".ms";
+							if (isExternal)
+							{
+								std::string externalFilePath = toNarrowStr(fs::path(testDirPath).append(filename));
+								std::wstring externalScript = trim(replace(readFileIntoString(externalFilePath), L"\r\n", L"\n"));
+								return split(externalScript, L"\n");
+							}
+							else
+								return split(script, L"\n");
+						},
+						[=](const std::wstring& filename)
+						{
+							std::wstring module_file_path = fs::path(testDirPath).append(filename);
+							return module_file_path;
+						},
+						symbols,
+						[]() { return L"input"; },
+						[&output](const std::wstring& text) { output += text + L"\n"; }
+					);
+				processor.process(std::wstring(), it.first.filename().wstring());
+				output = trim(output);
+			}
 		}
-
+#ifndef _DEBUG
+		catch (const user_exception& exp)
+		{
+			printf("Object ERROR: %S - %S - line: %d\n",
+				exp.obj.toString().c_str(), exp.filename.c_str(), exp.lineNumber);
+			return 1;
+		}
+		catch (const script_exception& exp)
+		{
+			printf("Script ERROR: %s - %S - line: %d\n",
+				exp.what(), exp.filename.c_str(), exp.lineNumber);
+			return 1;
+		}
+		catch (const std::exception& exp)
+		{
+			printf("Runtime ERROR: %s\n", exp.what());
+			return 1;
+		}
+		catch (...)
+		{
+			printf("Unhandled ... ERROR\n");
+			return 1;
+		}
+#endif
 		if (output != expected)
 		{
 			printf("\nERROR: Test fails!\n");
