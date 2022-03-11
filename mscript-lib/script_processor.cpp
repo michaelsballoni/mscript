@@ -117,6 +117,7 @@ namespace mscript
     {
         user_exception curException;
         const std::vector<std::wstring>& lines = m_linesDb[filename];
+        const int lineCount = int(lines.size());
         for (int l = startLine; l <= endLine; ++l)
         {
             std::wstring line = trim(lines[l]);
@@ -132,7 +133,7 @@ namespace mscript
                     while (trim(lines[l]) != L"*/")
                     {
                         ++l;
-                        if (l >= endLine)
+                        if (l >= lineCount)
                             raiseError("Unfinished block comment");
                     }
                 }
@@ -147,7 +148,7 @@ namespace mscript
                     {
                         m_output(lines[l]);
                         ++l;
-                        if (l >= endLine)
+                        if (l >= lineCount)
                             raiseError("Unfinished block print");
                     }
                 }
@@ -338,10 +339,7 @@ namespace mscript
                         lib::loadLib(moduleFilePath);
                     }
                     else
-                    {
-                        object newFilenameValue = evaluate(newFilename, callDepth);
-                        process(filename, newFilenameValue.stringVal());
-                    }
+                       process(filename, newFilename);
                 }
                 else if (first == '?') // if else
                 {
@@ -837,7 +835,7 @@ namespace mscript
         if (line == L"O" || line == L"{")
             return true;
 
-        static std::vector<std::wstring> blockBeginnings{ L"?", L"@", L"#", L"~" };
+        static std::vector<std::wstring> blockBeginnings{ L"?", L"@", L"#", L"~", L"!" };
         for (const auto& begin : blockBeginnings)
         {
             if (startsWith(line, begin))

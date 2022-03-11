@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 		size_t separatorIdx = fileText.find(L"===");
 		if (separatorIdx == 0 || separatorIdx == std::wstring::npos)
 		{
-			if (it.first.filename().extension() == ".ms")
+			if (it.first.filename().extension() != ".txt")
 				continue;
 
 			printf("ERROR: Test lacks == divider\n");

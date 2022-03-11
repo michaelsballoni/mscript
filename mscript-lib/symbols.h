@@ -89,7 +89,7 @@ namespace mscript
 
     /// <summary>
     /// Remove all stack frames but the top global level on creation,
-    /// then restore the frames on dispoal
+    /// then restore the frames on disposal
     /// </summary>
     class symbol_smacker
     {
@@ -109,7 +109,7 @@ namespace mscript
 
     /// <summary>
     /// Push a frame on construction,
-    /// the pop the frame on disposal
+    /// then pop the frame on disposal
     /// </summary>
     class symbol_stacker
     {

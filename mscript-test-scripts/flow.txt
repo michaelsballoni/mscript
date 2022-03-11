@@ -70,7 +70,7 @@ one
 
 >>
 
-$ foo
+$ foo = null
 & foo = 12
 > "Should be foo: " + foo
 $ bar = 13

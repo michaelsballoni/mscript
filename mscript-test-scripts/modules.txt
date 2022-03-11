@@ -1,4 +1,4 @@
-+ "mscript-dll.dll"
++ "mscript-dll-sample.dll"
 
 $ test_list = list(1, 2, 3)
 > "Should be [1, 2, 3]: " + test_list
