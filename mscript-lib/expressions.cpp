@@ -160,7 +160,8 @@ namespace mscript
 
             // Walk the exception from the end, so that we bind to
             // the right-side of the expression
-            for (int idx = int(expStr.size()) - 1; idx >= 0; --idx)
+            int expStrSize = int(expStr.size());
+            for (int idx = expStrSize - 1; idx >= 0; --idx)
             {
                 wchar_t c = expStr[idx];
 
@@ -189,12 +190,12 @@ namespace mscript
                     }
                     else if (opLen == 2)
                     {
-                        if (idx < expStr.size() - 1)
+                        if (idx < expStrSize - 1)
                             opMatches = expStr[idx + 1] == op[1];
                     }
                     else if (opLen == 3)
                     {
-                        if (idx < expStr.size() - 2)
+                        if (idx < expStrSize - 2)
                         {
                             opMatches = 
                                 expStr[idx + 1] == op[1]
@@ -391,7 +392,7 @@ namespace mscript
         if (expr.empty())
             return true;
 
-        if (n < 0 || n >= expr.length())
+        if (n < 0 || n >= int(expr.length()))
             return true;
 
         if (op == "and" || op == "&&" || op == "or" || op == "||")
@@ -444,7 +445,7 @@ namespace mscript
     int expression::reverseFind(const std::wstring& source, const std::wstring& searchW, int start)
     {
         int searchLen = int(searchW.length());
-        if (searchLen > source.length())
+        if (searchLen > int(source.length()))
             return -1;
 
         bool inSingleString = false;
@@ -651,14 +652,14 @@ namespace mscript
         {
             if (first.type() == object::STRING)
             {
-                for (int v = 1; v < paramList.size(); ++v)
+                for (int v = 1; v < int(paramList.size()); ++v)
                     first.stringVal() += paramList[v].toString();
                 return first;
             }
             else if (first.type() == object::LIST)
             {
                 auto& list = first.listVal();
-                for (int v = 1; v < paramList.size(); ++v)
+                for (int v = 1; v < int(paramList.size()); ++v)
                     list.push_back(paramList[v]);
                 return first;
             }
@@ -668,7 +669,7 @@ namespace mscript
                     raiseError("add() parameters for index must be an even count");
 
                 auto& index = first.indexVal();
-                for (int a = 1; a < paramList.size(); a += 2)
+                for (int a = 1; a < int(paramList.size()); a += 2)
                 {
                     if (index.contains(paramList[a]))
                         raiseError("add() index key repeated: " + num2str(a));
@@ -732,7 +733,7 @@ namespace mscript
 
             int idx = int(paramList[1].numberVal());
 
-            if (idx < 0 || idx >= first.length())
+            if (idx < 0 || idx >= int(first.length()))
                 raiseError("get() index is out of range");
             
             switch (first.type())
@@ -1031,17 +1032,17 @@ namespace mscript
                 if (first.type() == object::STRING)
                 {
                     const auto& s = first.stringVal();
-                    if (startIndex >= s.size())
+                    if (startIndex >= int(s.size()))
                         raiseError("subset() start index must be less than the length of the string");
                     return s.substr(startIndex);
                 }
                 else if (first.type() == object::LIST)
                 {
                     const auto& list = first.listVal();
-                    if (startIndex >= list.size())
+                    if (startIndex >= int(list.size()))
                         raiseError("subset() start index must be less than the length of the list");
                     object::list subset;
-                    for (int i = startIndex; i < list.size(); ++i)
+                    for (int i = startIndex; i < int(list.size()); ++i)
                         subset.push_back(list[i]);
                     return subset;
                 }
@@ -1062,18 +1063,18 @@ namespace mscript
                 if (first.type() == object::STRING)
                 {
                     const auto& s = first.stringVal();
-                    if (startIndex >= s.size())
+                    if (startIndex >= int(s.size()))
                         raiseError("subset() start index must be less than the length of the string");
                     return s.substr(startIndex, length);
                 }
                 else if (first.type() == object::LIST)
                 {
                     const auto& list = first.listVal();
-                    if (startIndex >= list.size())
+                    if (startIndex >= int(list.size()))
                         raiseError("subset() start index must be less than the length of the list");
                     object::list subset;
                     int endIndex = std::min(int(list.size()) - 1, startIndex + length - 1);
-                    if (endIndex >= list.size())
+                    if (endIndex >= int(list.size()))
                         raiseError("subset() end index must be less than the length of the list");
                     for (int i = startIndex; i <= endIndex; ++i)
                         subset.push_back(list[i]);

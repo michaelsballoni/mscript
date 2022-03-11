@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "script_processor.h"
 #include "names.h"
 #include "lib.h"
 
@@ -40,7 +41,7 @@ namespace mscript
                     while (trim(lines[l]) != L"*/")
                     {
                         ++l;
-                        if (l >= lines.size())
+                        if (l >= lineCount)
                             raiseError("Unfinished block comment");
                     }
                 }
@@ -131,7 +132,7 @@ namespace mscript
                     while (trim(lines[l]) != L"*/")
                     {
                         ++l;
-                        if (l >= lines.size())
+                        if (l >= endLine)
                             raiseError("Unfinished block comment");
                     }
                 }
@@ -146,7 +147,7 @@ namespace mscript
                     {
                         m_output(lines[l]);
                         ++l;
-                        if (l >= lines.size())
+                        if (l >= endLine)
                             raiseError("Unfinished block print");
                     }
                 }
@@ -501,8 +502,9 @@ namespace mscript
                     std::wstring fromExpStr, toExpStr;
                     int parenCount = 0;
                     bool inString = false;
-                    static size_t arrowLen = strlen(" -> ");
-                    for (int f = 0; f < theRest.size() - arrowLen; ++f)
+                    static int arrowLen = int(strlen(" -> "));
+                    int theRestSize = int(theRest.size());
+                    for (int f = 0; f < theRestSize - arrowLen; ++f)
                     {
                         auto c = theRest[f];
                         if (c == '\"')
@@ -659,7 +661,7 @@ namespace mscript
                         while (trim(lines[l]) != L"*/")
                         {
                             ++l;
-                            if (l >= lines.size())
+                            if (l >= endLine)
                                 raiseError("Unfinished block comment");
                         }
                     }
