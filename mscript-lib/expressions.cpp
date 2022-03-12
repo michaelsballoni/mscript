@@ -1344,18 +1344,8 @@ namespace mscript
             const auto moduleLib = lib::getLib(functionW);
             if (moduleLib != nullptr)
             {
-                if (paramList.empty())
-                {
-                    object moduleResult = moduleLib->executeFunction(functionW, object::list());
-                    return moduleResult;
-                }
-                else
-                {
-                    if (paramList.size() != 1)
-                        raiseWError(L"Module functions take one parameter, of any type: " + functionW);
-                    object moduleResult = moduleLib->executeFunction(functionW, paramList[0]);
-                    return moduleResult;
-                }
+                object moduleResult = moduleLib->executeFunction(functionW, paramList);
+                return moduleResult;
             }
         }
 

@@ -22,6 +22,10 @@ $ second_last_modified = msts_last_modified("test.txt")
 > "Should be true (last modified 1): " + (second_last_modified <> first_last_modified)
 > "Should be true (last modified 2): " + (second_last_modified = now)
 
+$ start = msts_build(1953, 12, 21)
+& added = msts_add(start, "day", 3)
+> "Should be 1953-12-24 0:0:0: " + added
+
 ===
 
 Should be true (local): true
@@ -29,3 +33,5 @@ Should be true (utc): true
 
 Should be true (last modified 1): true
 Should be true (last modified 2): true
+
+Should be 1953-12-24 0:0:0: 1953-12-24 0:0:0

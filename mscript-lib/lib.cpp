@@ -105,9 +105,9 @@ namespace mscript
 			return funcIt->second;
 	}
 
-	object lib::executeFunction(const std::wstring& name, const object& param) const
+	object lib::executeFunction(const std::wstring& name, const object::list& paramList) const
 	{
-		const std::wstring input_json = objectToJson(param);
+		const std::wstring input_json = objectToJson(paramList);
 		wchar_t* output_json_str = m_executer(name.c_str(), input_json.c_str());
 		if (output_json_str == nullptr)
 			raiseWError(L"Executing function failed: " + m_filePath + L" - " + name);

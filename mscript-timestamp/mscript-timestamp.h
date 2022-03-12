@@ -78,7 +78,6 @@ namespace mscript
 			}
 		}
 
-		// https://en.cppreference.com/w/cpp/io/manip/get_time
 		// https://en.cppreference.com/w/cpp/io/manip/put_time
 		static std::wstring format(const std::string& dt, const std::wstring& fmt)
 		{
