@@ -20,6 +20,7 @@ namespace mscript
 		static wchar_t* getExports(const std::vector<std::wstring>& exports);
 
 		static object::list getParams(const wchar_t* parametersJson);
+		static std::vector<double> getNumberParams(const wchar_t* parametersJson);
 
 		static wchar_t* jsonStr(const object& obj);
 		static wchar_t* jsonStr(const std::string& str);

@@ -26,6 +26,20 @@ namespace mscript
 			return object::list{ obj };
 	}
 
+	std::vector<double> module_utils::getNumberParams(const wchar_t* parametersJson)
+	{
+		std::vector<double> retVal;
+		for (const object& obj : getParams(parametersJson))
+		{
+			if (obj.type() != object::NUMBER)
+				throw std::runtime_error("A param is not a number");
+			else
+				retVal.push_back(obj.numberVal());
+		}
+		return retVal;
+	}
+
+
 	wchar_t* module_utils::jsonStr(const object& obj)
 	{
 		const std::wstring json = objectToJson(obj);

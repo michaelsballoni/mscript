@@ -2,19 +2,6 @@
 
 using namespace mscript;
 
-static std::vector<double> getNumberParams(const wchar_t* parametersJson)
-{
-	std::vector<double> retVal;
-	for (const object& obj : module_utils::getParams(parametersJson))
-	{
-		if (obj.type() != object::NUMBER)
-			throw std::runtime_error("A param is not a number");
-		else
-			retVal.push_back(obj.numberVal());
-	}
-	return retVal;
-}
-
 wchar_t* __cdecl mscript_GetExports()
 {
 	std::vector<std::wstring> exports
@@ -38,14 +25,14 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 		if (funcName == L"ms_sample_sum")
 		{
 			double retVal = 0.0;
-			for (double numVal : getNumberParams(parametersJson))
+			for (double numVal : module_utils::getNumberParams(parametersJson))
 				retVal += numVal;
 			return module_utils::jsonStr(retVal);
 		}
 		else if (funcName == L"ms_sample_cat")
 		{
 			std::wstring retVal;
-			for (double numVal : getNumberParams(parametersJson))
+			for (double numVal : module_utils::getNumberParams(parametersJson))
 				retVal += num2wstr(numVal);
 			return module_utils::jsonStr(retVal);
 		}
