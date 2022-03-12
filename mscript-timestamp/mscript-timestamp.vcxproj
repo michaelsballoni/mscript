@@ -169,7 +169,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="dllinterface.h" />
     <ClInclude Include="mscript-timestamp.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>

@@ -54,14 +54,14 @@ namespace mscript
 			SYSTEMTIME st = sysTimeFromString(str);
 			FILETIME ft{};
 			if (!::SystemTimeToFileTime(&st, &ft))
-				raiseError("SystemTimeToFileTime failed: " + num2str(::GetLastError()));
+				raiseError("SystemTimeToFileTime failed");
 			
 			FILETIME localFt{};
 			if (!::LocalFileTimeToFileTime(&ft, &localFt))
-				raiseError("LocalFileTimeToFileTime failed: " + num2str(::GetLastError()));
+				raiseError("LocalFileTimeToFileTime failed");
 
 			if (!::FileTimeToSystemTime(&localFt, &st))
-				raiseError("FileTimeToSystemTime failed: " + num2str(::GetLastError()));
+				raiseError("FileTimeToSystemTime failed");
 			
 			return sysTimeToString(st);
 		}
@@ -71,31 +71,31 @@ namespace mscript
 			SYSTEMTIME st = sysTimeFromString(str);
 			FILETIME ft{};
 			if (!::SystemTimeToFileTime(&st, &ft))
-				raiseError("SystemTimeToFileTime failed: " + num2str(::GetLastError()));
+				raiseError("SystemTimeToFileTime failed");
 
 			FILETIME localFt{};
 			if (!::FileTimeToLocalFileTime(&ft, &localFt))
-				raiseError("FileTimeToLocalFileTime failed: " + num2str(::GetLastError()));
+				raiseError("FileTimeToLocalFileTime failed");
 
 			if (!::FileTimeToSystemTime(&localFt, &st))
-				raiseError("FileTimeToSystemTime failed: " + num2str(::GetLastError()));
+				raiseError("FileTimeToSystemTime failed");
 
 			return sysTimeToString(st);
 		}
 
-		static BOOL touch(const std::wstring& filePath)
+		static void touch(const std::wstring& filePath)
 		{
 			SYSTEMTIME st;
 			::GetSystemTime(&st);
 			FILETIME ft{};
 			if (!::SystemTimeToFileTime(&st, &ft))
-				raiseError("SystemTimeToFileTime failed: " + num2str(::GetLastError()));
+				raiseError("SystemTimeToFileTime failed");
 
 			HANDLE hFile =
 				::CreateFile
 				(
 					filePath.c_str(),
-					GENERIC_WRITE,
+					FILE_WRITE_ATTRIBUTES,
 					FILE_SHARE_READ,
 					nullptr,
 					OPEN_EXISTING,
@@ -103,12 +103,12 @@ namespace mscript
 					nullptr
 				);
 			if (hFile == nullptr)
-				raiseError("CreateFile failed: " + num2str(::GetLastError()));
+				raiseError("CreateFile failed");
 
 			BOOL success = ::SetFileTime(hFile, nullptr, nullptr, &ft);
 			::CloseHandle(hFile);
 			if (!success)
-				raiseError("SetFileTime failed: " + num2str(::GetLastError()));
+				raiseError("SetFileTime failed");
 		}
 
 	private:
@@ -126,19 +126,19 @@ namespace mscript
 					nullptr
 				);
 			if (hFile == nullptr)
-				raiseError("CreateFile failed: " + num2str(::GetLastError()));
+				raiseError("CreateFile failed");
 
 			BOOL success = ::GetFileTime(hFile, &ftCreate, &ftAccess, &ftWrite);
 			::CloseHandle(hFile);
 			if (!success)
-				raiseError("GetFileTime failed: " + num2str(::GetLastError()));
+				raiseError("GetFileTime failed");
 		}
 
 		static std::string fileTimeToString(const FILETIME& ft)
 		{
 			SYSTEMTIME st{};
 			if (!FileTimeToSystemTime(&ft, &st))
-				raiseError("FileTimeToSystemTime failed: " + num2str(::GetLastError()));
+				raiseError("FileTimeToSystemTime failed");
 			else
 				return sysTimeToString(st);
 		}

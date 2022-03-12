@@ -169,7 +169,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="dllinterface.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

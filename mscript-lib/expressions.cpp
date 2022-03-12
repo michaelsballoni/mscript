@@ -22,6 +22,7 @@ namespace mscript
         "and",
         "&&",
 
+        "<>",
         "!=",
         "<=",
         ">=",
@@ -239,7 +240,7 @@ namespace mscript
                             {
                                 if (op == "=")
                                     value = leftVal == rightVal;
-                                else if (op == "!=")
+                                else if (op == "!=" || op == "<>")
                                     value = leftVal != rightVal;
                                 else
                                     raiseWError(L"Invalid operator for null values: " + expStr);
@@ -264,7 +265,7 @@ namespace mscript
                                 }
                                 else
                                 {
-                                    if (op == "!=")
+                                    if (op == "!=" || op == "<>")
                                         value = leftValStr != rightValStr;
                                     else
                                         raiseWError(L"Unrecognized string operator: " + expStr);
@@ -300,7 +301,7 @@ namespace mscript
                                     }
                                     else
                                     {
-                                        if (op == "!=")
+                                        if (op == "!=" || op == "<>")
                                             value = leftNum != rightNum;
                                         else if (op == "<=")
                                             value = leftNum <= rightNum;
@@ -1219,6 +1220,14 @@ namespace mscript
             throw user_exception(first);
         }
 
+        if (function == "sleep")
+        {
+            if (paramList.size() != 1 || first.type() != object::NUMBER)
+                raiseError("sleep() works with one parameter, the number of seconds to sleep");
+            std::this_thread::sleep_for(std::chrono::seconds(int(first.numberVal())));
+            return true;
+        }
+
         //
         // File I/O
         //
@@ -1335,11 +1344,18 @@ namespace mscript
             const auto moduleLib = lib::getLib(functionW);
             if (moduleLib != nullptr)
             {
-                if (paramList.size() != 1)
-                    raiseWError(L"Module functions take one parameter, of any type: " + functionW);
-                
-                object moduleResult = moduleLib->executeFunction(functionW, paramList[0]);
-                return moduleResult;
+                if (paramList.empty())
+                {
+                    object moduleResult = moduleLib->executeFunction(functionW, object::list());
+                    return moduleResult;
+                }
+                else
+                {
+                    if (paramList.size() != 1)
+                        raiseWError(L"Module functions take one parameter, of any type: " + functionW);
+                    object moduleResult = moduleLib->executeFunction(functionW, paramList[0]);
+                    return moduleResult;
+                }
             }
         }
 

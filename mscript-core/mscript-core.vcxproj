@@ -170,7 +170,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="exports.h" />
-    <ClInclude Include="module_utils.h" />
+    <ClInclude Include="module.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="object_json.h" />
     <ClInclude Include="pch.h" />
@@ -178,6 +178,7 @@
     <ClInclude Include="vectormap.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="module.cpp" />
     <ClCompile Include="object.cpp" />
     <ClCompile Include="object_json.cpp" />
     <ClCompile Include="pch.cpp">

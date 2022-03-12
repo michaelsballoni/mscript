@@ -333,13 +333,15 @@ namespace mscript
                     if (newFilename.empty())
                         raiseError("import statement evaluates to an empty string");
 
-                    if (endsWith(newFilename, L".dll"))
+                    if (endsWith(newFilename, L".ms"))
+                    {
+                        process(filename, newFilename);
+                    }
+                    else
                     {
                         std::wstring moduleFilePath = m_moduleLoader(newFilename);
                         lib::loadLib(moduleFilePath);
                     }
-                    else
-                       process(filename, newFilename);
                 }
                 else if (first == '?') // if else
                 {

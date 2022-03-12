@@ -1,6 +1,6 @@
 + "mscript-timestamp.dll"
 
-$ now = msts_now(true)
+$ now = msts_now()
 
 $ local = msts_to_local(now)
 $ utc = msts_to_utc(local)
@@ -11,7 +11,21 @@ $ utc2 = msts_to_utc(local2)
 > "Should be true (local): " + (local2 = local)
 > "Should be true (utc): " + (utc2 = utc)
 
+>>
+
+* writeFile("test.txt", "foobar", "utf-8")
+$ first_last_modified = msts_last_modified("test.txt")
+* sleep(1)
+& now = msts_now()
+* msts_touch("test.txt")
+$ second_last_modified = msts_last_modified("test.txt")
+> "Should be true (last modified 1): " + (second_last_modified <> first_last_modified)
+> "Should be true (last modified 2): " + (second_last_modified = now)
+
 ===
 
 Should be true (local): true
 Should be true (utc): true
+
+Should be true (last modified 1): true
+Should be true (last modified 2): true

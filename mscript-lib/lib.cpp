@@ -85,8 +85,13 @@ namespace mscript
 
 		auto ptr = std::make_shared<lib>(filePath);
 
-		for (const auto& funcName : ptr->m_functions)
+		for (const auto& funcName : ptr->m_functions) 
+		{
+			auto existingIt = s_funcLibs.find(funcName);
+			if (existingIt != s_funcLibs.end())
+				raiseWError(L"Function '" + funcName + L"' already defined in module '" + existingIt->first + L"'");
 			s_funcLibs.insert({ funcName, ptr });
+		}
 		
 		return ptr;
 	}
@@ -114,8 +119,10 @@ namespace mscript
 		object output_obj = objectFromJson(output_json);
 		if (output_obj.type() == object::STRING)
 		{
-			if (startsWith(output_obj.stringVal(), L"mscript EXCEPTION ~~~"))
-				raiseWError(L"Executing function failed: " + m_filePath + L" - " + name + L": " + output_obj.stringVal());
+			static const wchar_t* expPrefix = L"mscript EXCEPTION ~~~";
+			static size_t prefixLen = wcslen(expPrefix);
+			if (startsWith(output_obj.stringVal(), expPrefix))
+				raiseWError(L"Executing function failed: " + m_filePath + L" - " + name + L": " + output_obj.stringVal().substr(prefixLen));
 		}
 		return output_obj;
 	}

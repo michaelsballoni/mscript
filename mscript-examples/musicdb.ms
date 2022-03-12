@@ -1,5 +1,5 @@
-! If we have cmd line arguments, those are our search terms
-! Handle things directly, no "UI", just results
+/ If we have cmd line arguments, those are our search terms
+/ Handle things directly, no "UI", just results
 ? arguments.length() > 0
 	$ lines = loadLines()
 	
@@ -11,7 +11,7 @@
 		* summarizeArtist(db, matching_artist)
 		>>
 	}
-	! Exit the script with a good exit code
+	/ Exit the script with a good exit code
 	<- 0
 }
 
@@ -40,8 +40,8 @@ O
 	}
 }
 
-! Do the dir of the user's Music directory
-! Surprisingly fast!
+/ Do the dir of the user's Music directory
+/ Surprisingly fast/
 ~ loadLines()
 	$ result_index = exec('dir /B /S "C:\Users\%USERNAME%\Music"')
 	? !result_index.get("success")
@@ -51,7 +51,7 @@ O
 	<- split(replaced(result_index.get("output"), crlf, lf), lf)
 }
 
-! Walk dir output processing each line in turn
+/ Walk dir output processing each line in turn
 ~ processLines(db, lines, should_pacify)
 	? should_pacify
 		$ line_count = 0
@@ -69,21 +69,21 @@ O
 	}
 }
 
-! Given a line from the dir output, add a track to our database...
-! ...if it's a somewhat valid line
+/ Given a line from the dir output, add a track to our database...
+/ ...if it's a somewhat valid line
 ~ processLine(db, line)
-	! Split up path, bail if not at least artist\album\track
+	/ Split up path, bail if not at least artist\album\track
 	& line = line.trim()
 	$ parts = line.split('\')
 	? parts.length() < 3
-		! not deep enough
+		/ not deep enough
 		<- false
 	}
 	
 	$ filename = parts.get(parts.length() - 1)
 	$ dot_index = filename.lastLocation('.')
 	? dot_index <= 0
-		! not a file
+		/ not a file
 		<- false
 	}
 	$ track = filename.subset(0, dot_index)
@@ -91,29 +91,29 @@ O
 	$ artist = parts.get(parts.length() - 3)
 	$ album = parts.get(parts.length() - 2)
 
-	! DEBUG
-	!> "Artist: " + artist + " - Album: " + album + " - Track: " + track
+	/ DEBUG
+	/> "Artist: " + artist + " - Album: " + album + " - Track: " + track
 
-	! Ensure the artist is in the DB
+	/ Ensure the artist is in the DB
 	? !db.has(artist)
 		* db.add(artist, index())
 	}
 	$ artist_index = db.get(artist)
 
-	! Ensure the artist has the album
+	/ Ensure the artist has the album
 	? !artist_index.has(album)
 		* artist_index.add(album, list())
 	}
 	$ album_list = artist_index.get(album)
 
-	! Add the track to the album
+	/ Add the track to the album
 	* album_list.add(track)
 
-	! All done
+	/ All done
 	<- true
 }
 
-! Walk the database of artist collections gathering and outputting stats
+/ Walk the database of artist collections gathering and outputting stats
 ~ outputStats(db)
 	$ artists = db.keys()
 	$ album_count = 0
@@ -134,9 +134,9 @@ O
 	}
 }
 
-! Given search terms, return the names of artists that match all terms
+/ Given search terms, return the names of artists that match all terms
 ~ getMatchingArtistNames(db, parts)
-	! Normalize the input, trimmed and lowered
+	/ Normalize the input, trimmed and lowered
 	$ normalized_parts = list()
 	@ part : parts
 		$ normalized_part = trim(toLower(part))
@@ -145,7 +145,7 @@ O
 		}
 	}
 
-	! Walk the artists finding matches
+	/ Walk the artists finding matches
 	$ matching_artists = list()
 	? normalized_parts.length() = 0
 		<- matching_artists
@@ -166,7 +166,7 @@ O
 	<- matching_artists
 }
 
-! Output an artist's collection
+/ Output an artist's collection
 ~ summarizeArtist(db, artist_name)
 	> "Artist: " + artist_name
 	$ artist_albums = db.get(artist_name)

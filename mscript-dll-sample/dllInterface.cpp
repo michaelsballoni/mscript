@@ -1,26 +1,14 @@
 #include "pch.h"
-#include "dllinterface.h"
-
-#include "../mscript-core/module_utils.h"
-#include "../mscript-core/object.h"
-#include "../mscript-core/object_json.h"
-#include "../mscript-core/utils.h"
-#pragma comment(lib, "mscript-core")
 
 using namespace mscript;
 
-static std::vector<double> stringToNumbers(const wchar_t* str)
+static std::vector<double> getNumberParams(const wchar_t* parametersJson)
 {
-	object topObj = objectFromJson(str);
-	if (topObj.type() != object::LIST)
-		throw std::runtime_error("Parameter is not a list");
-
 	std::vector<double> retVal;
-	retVal.reserve(topObj.listVal().size());
-	for (const object& obj : topObj.listVal())
+	for (const object& obj : module_utils::getParams(parametersJson))
 	{
 		if (obj.type() != object::NUMBER)
-			throw std::runtime_error("List entry is not a number");
+			throw std::runtime_error("A param is not a number");
 		else
 			retVal.push_back(obj.numberVal());
 	}
@@ -47,23 +35,22 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 	try
 	{
 		std::wstring funcName = functionName;
-		auto paramNumbers = stringToNumbers(parametersJson);
 		if (funcName == L"ms_sample_sum")
 		{
 			double retVal = 0.0;
-			for (double numVal : paramNumbers)
+			for (double numVal : getNumberParams(parametersJson))
 				retVal += numVal;
 			return module_utils::jsonStr(retVal);
 		}
 		else if (funcName == L"ms_sample_cat")
 		{
 			std::wstring retVal;
-			for (double numVal : paramNumbers)
+			for (double numVal : getNumberParams(parametersJson))
 				retVal += num2wstr(numVal);
 			return module_utils::jsonStr(retVal);
 		}
 		else
-			raiseWError(L"Unknown function: " + funcName);
+			raiseWError(L"Unknown mscript-dll-sample function: " + funcName);
 	}
 	catch (const std::exception& exp)
 	{

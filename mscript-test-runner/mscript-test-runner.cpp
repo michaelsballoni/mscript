@@ -102,14 +102,14 @@ int main(int argc, char* argv[])
 #ifndef _DEBUG
 		catch (const user_exception& exp)
 		{
-			printf("Object ERROR: %S - %S - line: %d\n",
-				exp.obj.toString().c_str(), exp.filename.c_str(), exp.lineNumber);
+			printf("Object ERROR: %S - %S - line: %d: %S\n",
+				exp.obj.toString().c_str(), exp.filename.c_str(), exp.lineNumber, exp.line.c_str());
 			return 1;
 		}
 		catch (const script_exception& exp)
 		{
-			printf("Script ERROR: %s - %S - line: %d\n",
-				exp.what(), exp.filename.c_str(), exp.lineNumber);
+			printf("Script ERROR: %s - %S - line: %d: %S\n",
+				exp.what(), exp.filename.c_str(), exp.lineNumber, exp.line.c_str());
 			return 1;
 		}
 		catch (const std::exception& exp)

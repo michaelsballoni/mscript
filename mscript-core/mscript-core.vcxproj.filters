@@ -33,7 +33,7 @@
     <ClInclude Include="exports.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="module_utils.h">
+    <ClInclude Include="module.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -48,6 +48,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="module.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
