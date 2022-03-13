@@ -39,6 +39,10 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 		else
 			raiseWError(L"Unknown mscript-dll-sample function: " + funcName);
 	}
+	catch (const user_exception& exp)
+	{
+		return module_utils::errorStr(functionName, exp);
+	}
 	catch (const std::exception& exp)
 	{
 		return module_utils::errorStr(functionName, exp);

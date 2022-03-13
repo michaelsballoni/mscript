@@ -44,6 +44,7 @@ namespace mscript
                 table.assign(L"bar", toWideStr("foobar"));
                 Assert::Fail();
             }
+            catch (const user_exception&) {}
             catch (const std::exception&) {}
 
             table.set(L"startsNull", object(object::NOTHING));
@@ -60,6 +61,7 @@ namespace mscript
                 table.assign(L"startsNull", toWideStr("foobar"));
                 Assert::Fail();
             }
+            catch (const user_exception&) {}
             catch (const std::exception&) {}
 
             table.assign(L"startsNull", 11.0);

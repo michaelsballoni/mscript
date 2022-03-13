@@ -51,6 +51,11 @@ namespace mscript
 		return jsonStr(toWideStr(str));
 	}
 
+	wchar_t* module_utils::errorStr(const std::wstring& function, const user_exception& exp)
+	{
+		return module_utils::errorStr(function, std::runtime_error(toNarrowStr(exp.obj.toString()).c_str()));
+	}
+
 	wchar_t* module_utils::errorStr(const std::wstring& function, const std::exception& exp)
 	{
 		std::wstring errorStr = L"mscript EXCEPTION ~~~ mscript_ExecuteFunction(" + function + L"): " + toWideStr(exp.what());

@@ -25,6 +25,7 @@ namespace mscript
 		static wchar_t* jsonStr(const object& obj);
 		static wchar_t* jsonStr(const std::string& str);
 
+		static wchar_t* errorStr(const std::wstring& function, const user_exception& exp);
 		static wchar_t* errorStr(const std::wstring& function, const std::exception& exp);
 
 	private:

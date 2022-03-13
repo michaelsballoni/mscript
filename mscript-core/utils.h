@@ -1,12 +1,13 @@
 #pragma once
 
-#include <stdexcept>
+#include "user_exception.h"
+
 #include <string>
 #include <vector>
 
 // Use macros for exception raising helpers to not pollute the stack trace
-#define raiseError(msg) throw std::runtime_error(std::string(msg).c_str())
-#define raiseWError(msg) throw std::runtime_error(toNarrowStr(msg).c_str())
+#define raiseError(msg) throw mscript::user_exception(toWideStr(msg))
+#define raiseWError(msg) throw mscript::user_exception(std::wstring(msg))
 
 namespace mscript
 {

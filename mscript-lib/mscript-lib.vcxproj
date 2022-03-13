@@ -179,7 +179,6 @@
     <ClInclude Include="script_exception.h" />
     <ClInclude Include="script_processor.h" />
     <ClInclude Include="symbols.h" />
-    <ClInclude Include="user_exception.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="expressions.cpp" />
