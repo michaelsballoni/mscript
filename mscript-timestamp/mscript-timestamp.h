@@ -31,46 +31,40 @@ namespace mscript
 
 		static std::string add(const std::string& dt, const char part, const int amount)
 		{
-			struct tm tm = sysTimeToTm(sysTimeFromString(dt));
+			tm tm = sysTimeToTm(sysTimeFromString(dt));
+			time_t t = mktime(&tm); // local so...
+
 			switch (part)
 			{
-			case 'y': tm.tm_year += amount; break;
-			case 'M': tm.tm_mon += amount; break;
-			case 'd': tm.tm_mday += amount; break;
-
-			case 'h': tm.tm_hour += amount; break;
-			case 'm': tm.tm_min += amount; break;
-			case 's': tm.tm_sec += amount; break;
-
+			case 'd': t += amount * 86400; break;
+			case 'h': t += amount * 3600; break;
+			case 'm': t += amount * 60; break;
+			case 's': t += amount; break;
 			default:
 				std::string c;
 				c += part;
 				raiseError("Invalid date part to add: " + c);
 			}
 
-			SYSTEMTIME st = TimeToSytemTime(mktime(&tm));
-			return sysTimeToString(st);
+			localtime_s(&tm, &t); // ...local again
+			return tmToString(tm);
 		}
 
 		static int64_t diff(const std::string& dt1, const std::string& dt2, const char outputType)
 		{
-			struct tm tm1 = sysTimeToTm(sysTimeFromString(dt1));
+			tm tm1 = sysTimeToTm(sysTimeFromString(dt1));
 			time_t t1 = mktime(&tm1);
 
-			struct tm tm2 = sysTimeToTm(sysTimeFromString(dt2));
+			tm tm2 = sysTimeToTm(sysTimeFromString(dt2));
 			time_t t2 = mktime(&tm2);
 
 			int64_t diff = t1 - t2;
 			switch (outputType)
 			{
-			case 'y': return diff / 365 / 86400;
-			case 'M': return diff / 30 / 86400;
 			case 'd': return diff / 86400;
-
 			case 'h': return diff / 3600;
 			case 'm': return diff / 60;
 			case 's': return diff;
-			
 			default:
 				std::string c;
 				c += outputType;
@@ -83,12 +77,13 @@ namespace mscript
 		{
 			SYSTEMTIME st = sysTimeFromString(dt);
 			std::tm t{};
-			t.tm_year = st.wYear;
-			t.tm_mon = st.wMonth;
+			t.tm_year = st.wYear - 1900;
+			t.tm_mon = st.wMonth - 1;
 			t.tm_mday = st.wDay;
 			t.tm_hour = st.wHour;
 			t.tm_min = st.wMinute;
 			t.tm_sec = st.wSecond;
+			t.tm_isdst = -1;
 
 			std::wstringstream out_ss;
 			out_ss << std::put_time<wchar_t>(&t, fmt.c_str());
@@ -108,23 +103,23 @@ namespace mscript
 
 		static std::string getFileLastModified(const std::wstring& filePath)
 		{
-			FILETIME ftCreate, ftAccess, ftWrite;
-			GetFileTimes(filePath, ftCreate, ftAccess, ftWrite);
-			return fileTimeToString(ftWrite);
+			FILETIME ft;
+			GetFileTimes(filePath, nullptr, nullptr, &ft);
+			return fileTimeToString(ft);
 		}
 
 		static std::string getFileCreated(const std::wstring& filePath)
 		{
-			FILETIME ftCreate, ftAccess, ftWrite;
-			GetFileTimes(filePath, ftCreate, ftAccess, ftWrite);
-			return fileTimeToString(ftCreate);
+			FILETIME ft;
+			GetFileTimes(filePath, &ft, nullptr, nullptr);
+			return fileTimeToString(ft);
 		}
 
 		static std::string getFileLastAccessed(const std::wstring& filePath)
 		{
-			FILETIME ftCreate, ftAccess, ftWrite;
-			GetFileTimes(filePath, ftCreate, ftAccess, ftWrite);
-			return fileTimeToString(ftAccess);
+			FILETIME ft;
+			GetFileTimes(filePath, nullptr, &ft, nullptr);
+			return fileTimeToString(ft);
 		}
 
 		static std::string toUtc(const std::string& str)
@@ -196,11 +191,14 @@ namespace mscript
 		static char convertPartStr(const std::string& part)
 		{
 			char partChar = '\0';
+			/* Too weird
 			if (part == "year")
 				partChar = 'y';
 			else if (part == "month")
 				partChar = 'M';
-			else if (part == "day")
+			else
+			*/
+			if (part == "day")
 				partChar = 'd';
 			else if (part == "hour")
 				partChar = 'h';
@@ -214,13 +212,13 @@ namespace mscript
 		}
 
 	private:
-		static void GetFileTimes(const std::wstring& filePath, FILETIME& ftCreate, FILETIME& ftAccess, FILETIME& ftWrite)
+		static void GetFileTimes(const std::wstring& filePath, FILETIME* ftCreate, FILETIME* ftAccess, FILETIME* ftWrite)
 		{
 			HANDLE hFile =
 				::CreateFile
 				(
 					filePath.c_str(),
-					GENERIC_READ,
+					FILE_READ_ATTRIBUTES,
 					FILE_SHARE_READ,
 					nullptr,
 					OPEN_EXISTING,
@@ -230,7 +228,7 @@ namespace mscript
 			if (hFile == nullptr)
 				raiseError("CreateFile failed");
 
-			BOOL success = ::GetFileTime(hFile, &ftCreate, &ftAccess, &ftWrite);
+			BOOL success = ::GetFileTime(hFile, ftCreate, ftAccess, ftWrite);
 			::CloseHandle(hFile);
 			if (!success)
 				raiseError("GetFileTime failed");
@@ -277,14 +275,28 @@ namespace mscript
 
 		static tm sysTimeToTm(const SYSTEMTIME& st)
 		{
-			struct tm tm {};
+			tm tm {};
 			tm.tm_year = st.wYear - 1900;
-			tm.tm_mon = st.wMonth;
+			tm.tm_mon = st.wMonth - 1;
 			tm.tm_mday = st.wDay;
 			tm.tm_hour = st.wHour;
 			tm.tm_min = st.wMinute;
 			tm.tm_sec = st.wSecond;
+			tm.tm_isdst = -1;
 			return tm;
+		}
+
+		static std::string tmToString(const tm& tm)
+		{
+			std::stringstream msg;
+			msg << (tm.tm_year + 1900)
+				<< "-" << std::setw(2) << std::setfill('0') << (tm.tm_mon + 1)
+				<< "-" << std::setw(2) << std::setfill('0') << tm.tm_mday
+				<< " "
+				<< std::setw(2) << std::setfill('0') << tm.tm_hour
+				<< ":" << std::setw(2) << std::setfill('0') << tm.tm_min
+				<< ":" << std::setw(2) << std::setfill('0') << tm.tm_sec;
+			return msg.str();
 		}
 
 		// https://docs.microsoft.com/en-us/windows/win32/sysinfo/converting-a-time-t-value-to-a-file-time

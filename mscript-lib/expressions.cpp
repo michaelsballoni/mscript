@@ -1369,6 +1369,7 @@ namespace mscript
             if (m_symbols.tryGet(symbol, value))
             {
                 object::list newVals;
+                newVals.reserve(paramList.size() + 1);
                 newVals.push_back(value);
                 newVals.insert(newVals.end(), paramList.begin(), paramList.end());
                 return executeFunction(memberFunc, newVals);

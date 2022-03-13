@@ -22,7 +22,7 @@ namespace mscript
 		~lib();
 
 		const std::wstring& getFilePath() const { return m_filePath; }
-		object executeFunction(const std::wstring& name, const object& param) const;
+		object executeFunction(const std::wstring& name, const object::list& paramList) const;
 
 		static std::shared_ptr<lib> loadLib(const std::wstring& filePath);
 		static std::shared_ptr<lib> getLib(const std::wstring& name);

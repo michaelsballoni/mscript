@@ -13,25 +13,63 @@ $ utc2 = msts_to_utc(local2)
 
 >>
 
+* exec("del test.txt")
+& now = msts_now()
 * writeFile("test.txt", "foobar", "utf-8")
 $ first_last_modified = msts_last_modified("test.txt")
+> "Should be true (last modified 0): " + (first_last_modified = now)
+
 * sleep(1)
+
 & now = msts_now()
 * msts_touch("test.txt")
 $ second_last_modified = msts_last_modified("test.txt")
+> "TRACE: second_last_modified = " + second_last_modified
+
 > "Should be true (last modified 1): " + (second_last_modified <> first_last_modified)
 > "Should be true (last modified 2): " + (second_last_modified = now)
 
-$ start = msts_build(1953, 12, 21)
-& added = msts_add(start, "day", 3)
-> "Should be 1953-12-24 0:0:0: " + added
+>>
+
+{
+$ start = msts_build(1973, 12, 21)
+$ added = msts_add(start, "day", 3)
+> "Should be (1973-12-24 00:00:00): " + added
+}
+
+{
+$ start = msts_build(1973, 12, 21, 9, 15, 7)
+$ added = msts_add(start, "hour", 2)
+> "Should be (1973-12-21 11:15:07): " + added
+}
+
+>>
+
+{
+$ dt1 = "2022-03-12 17:33:00"
+$ dt2 = "2022-03-12 15:33:00"
+$ diff = msts_diff(dt1, dt2, "hour")
+> "Should be 2: " + diff
+}
+
+>>
+
+{
+> "Should be (1973-12-21 11:15:07): " + msts_format("1973-12-21 11:15:07", "%F %T")
+}
 
 ===
 
 Should be true (local): true
 Should be true (utc): true
 
+Should be true (last modified 0): true
 Should be true (last modified 1): true
 Should be true (last modified 2): true
 
-Should be 1953-12-24 0:0:0: 1953-12-24 0:0:0
+Should be (1973-12-24 00:00:00): 1973-12-24 00:00:00
+Should be (1973-12-21 11:15:07): 1973-12-21 11:15:07
+
+Should be 2: 2
+
+Should be (1973-12-21 11:15:07): 1973-12-21 11:15:07

@@ -1,17 +1,14 @@
 + "mscript-dll-sample.dll"
 
-$ test_list = list(1, 2, 3)
-> "Should be [1, 2, 3]: " + test_list
->>
-$ summed = ms_sample_sum(test_list)
+$ summed = ms_sample_sum(1, 2, 3)
 > "Should be 6: " + summed
+
 >>
-$ catted = ms_sample_cat(test_list)
+
+$ catted = ms_sample_cat(1, 2, 3)
 > "Should be 123: " + catted
 
 ===
-
-Should be [1, 2, 3]: [1, 2, 3]
 
 Should be 6: 6
 

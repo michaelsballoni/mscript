@@ -93,9 +93,15 @@ int main(int argc, char* argv[])
 						},
 						symbols,
 						[]() { return L"input"; },
-						[&output](const std::wstring& text) { output += text + L"\n"; }
+						[&output](const std::wstring& text) 
+						{ 
+							if (!startsWith(text, L"TRACE: "))
+								output += text + L"\n";
+							else
+								printf("%S\n", text.c_str());
+						}
 					);
-				processor.process(std::wstring(), it.first.filename().wstring());
+				processor.process(std::wstring(), it.first.filename());
 				output = trim(output);
 			}
 		}
