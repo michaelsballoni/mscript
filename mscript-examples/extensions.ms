@@ -13,16 +13,15 @@ $ dir_path = ""
 / Run the dir command to enumerate all paths
 / The /B gives us a bare list of full paths
 / The /S gives us all paths in the current directory and all subdirectories
+>> Getting file paths...
 $ exec_result = exec('dir /B /S "' + dir_path + '"')
-$ result_code = exec_result.get("exit_code")
-? result_code != 0
-	* error("Running the dir command failed with exit code " + result_code)
-}
 
 / Extract a list of paths from the raw dir output
+>> Processing file paths...
 $ paths = split(replaced(exec_result.get("output"), crlf, lf), lf)
 
 / Loop over the paths collecting extension stats
+/ And index is like a Scripting.Dictionary
 $ ext_stats = index()
 @ path : paths
 	/ Find the last dot
@@ -33,11 +32,10 @@ $ ext_stats = index()
 	}
 	
 	/ Extract the file extension
-	$ ext = path.subset(dot_index + 1)
-	? ext.length() < 2 || ext.get(1) = '.'
+	$ ext = toLower(path.subset(dot_index + 1))
+	? ext.length() < 2 || ext.get(1) = '.' || ext.has('\')
 		^ 
 	}
-	& ext = ext.toLower()
 	
 	/ Add to our stats
 	? ext_stats.has(ext)
@@ -47,14 +45,20 @@ $ ext_stats = index()
 	}
 }
 
+/ Find which extensions have which counts
+$ sorted_counts = reversed(sorted(ext_stats.values()))
+$ unique_counts = index()
+@ count : sorted_counts
+	* unique_counts.set(count, 0)
+}
+
 / Output what we've found
+>>
 > "File extensions: " + ext_stats.length()
-$ sorted_count = reversed(sorted(ext_stats.values()))
-@ count : sorted_count
+@ count : unique_counts
 	@ ext : ext_stats
 		? ext_stats.get(ext) = count
 			> ext + ": " +  count
-			v
 		}
 	}
 }
