@@ -47,15 +47,17 @@ To jump in and see more mscript, check out the [musicdb sample](mscript-examples
 The mscript project is a Visual Studio solution.  mscript has no external dependencies; it statically links the runtime
 
 Here are the projects that make up the solution:
+### mscript-core
+- object
+- utils
+- vectormap
+
 ### mscript-lib
 The mscript-lib project is where expressions and statements are implemented. All the working code in the solution is in this project
 
 - expressions
-- object
 - script_processor
 - symbols
-- utils
-- vectormap
 
 ### mscript-tests
 
