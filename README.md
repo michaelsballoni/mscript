@@ -18,7 +18,7 @@ The thinking is, here's a simple scripting language, if it can solve your proble
 	$ fib_result
 	? n <= 0
 		& fib_result = 0
-	? n = 1 || n = 2
+	? n <= 2
 		& fib_result = 1
 	<>
 		& fib_result = fib(n - 1) + fib(n - 2)
@@ -48,7 +48,11 @@ The mscript project is a Visual Studio solution.  mscript has no external depend
 
 Here are the projects that make up the solution:
 ### mscript-core
+The mscript-core project contains the minimum necessary function for DLL integraions
+
 - object
+- object_json
+- module_utils
 - utils
 - vectormap
 
