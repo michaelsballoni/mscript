@@ -109,6 +109,10 @@ namespace mscript
         {
             symbol_table symbols;
 
+            ValidateExpression("3=3", true, symbols);
+            ValidateExpression("3==3", true, symbols);
+            ValidateExpression("3!=3", false, symbols);
+            ValidateExpression("3<>3", false, symbols);
             ValidateExpression("3<=4", true, symbols);
             ValidateExpression("3<=4 and 3<4", true, symbols);
             ValidateExpression("3<4 and 5 <= 4 or 12<=50 and 6 <= 13", true, symbols);

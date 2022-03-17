@@ -28,6 +28,7 @@ namespace mscript
         ">=",
         "<",
         ">",
+        "==",
         "=",
 
         "%",
@@ -238,7 +239,7 @@ namespace mscript
                             // Handle nulls with equivalent checks
                             if (leftVal.isNull() || rightVal.isNull())
                             {
-                                if (op == "=")
+                                if (op == "=" || op == "==")
                                     value = leftVal == rightVal;
                                 else if (op == "!=" || op == "<>")
                                     value = leftVal != rightVal;
@@ -265,7 +266,9 @@ namespace mscript
                                 }
                                 else
                                 {
-                                    if (op == "!=" || op == "<>")
+                                    if (op == "==")
+                                        value = leftValStr == rightValStr;
+                                    else if (op == "!=" || op == "<>")
                                         value = leftValStr != rightValStr;
                                     else
                                         raiseWError(L"Unrecognized string operator: " + expStr);
@@ -301,7 +304,9 @@ namespace mscript
                                     }
                                     else
                                     {
-                                        if (op == "!=" || op == "<>")
+                                        if (op == "==")
+                                            value = leftNum == rightNum;
+                                        else if (op == "!=" || op == "<>")
                                             value = leftNum != rightNum;
                                         else if (op == "<=")
                                             value = leftNum <= rightNum;
