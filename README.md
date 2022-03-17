@@ -47,6 +47,7 @@ To jump in and see more mscript, check out the [musicdb sample](mscript-examples
 The mscript project is a Visual Studio solution.  mscript has no external dependencies; it statically links the runtime
 
 Here are the projects that make up the solution:
+
 ### mscript-core
 The mscript-core project contains the minimum necessary function for DLL integraions
 
