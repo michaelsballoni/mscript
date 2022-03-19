@@ -58,7 +58,7 @@ namespace mscript
 
 	wchar_t* module_utils::errorStr(const std::wstring& function, const std::exception& exp)
 	{
-		std::wstring errorStr = L"mscript EXCEPTION ~~~ mscript_ExecuteFunction(" + function + L"): " + toWideStr(exp.what());
+		std::wstring errorStr = L"mscript EXCEPTION ~~~ mscript_ExecuteFunction: " + function + L": " + toWideStr(exp.what());
 #if defined(_WIN32) || defined(_WIN64)
 		DWORD dwLastError = ::GetLastError();
 		if (dwLastError != NO_ERROR)

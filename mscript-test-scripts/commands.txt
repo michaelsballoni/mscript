@@ -2,7 +2,7 @@ $ result = exec("echo foobar")
 
 > "Should be true: " + result.get("success")
 > "Should be 0: " + result.get("exit_code")
-> "Should be foobar: " + trim(result.get("output"))
+> "Should be foobar: " + trimmed(result.get("output"))
 
 ===
 

@@ -66,9 +66,6 @@ std::vector<std::wstring> loadScript(const std::wstring& current, const std::wst
 
 static std::wstring getModuleFilePath(const std::wstring& filename)
 {
-	if (fs::exists(filename))
-		return filename;
-
 	const int max_path = 32 * 1024;
 	char* exe_file_path = new char[max_path + 1];
 	exe_file_path[max_path] = '\0';

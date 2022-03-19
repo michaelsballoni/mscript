@@ -73,7 +73,7 @@ O
 / ...if it's a somewhat valid line
 ~ processLine(db, line)
 	/ Split up path, bail if not at least artist\album\track
-	& line = line.trim()
+	& line = line.trimmed()
 	$ parts = line.split('\')
 	? parts.length() < 3
 		/ not deep enough
@@ -139,7 +139,7 @@ O
 	/ Normalize the input, trimmed and lowered
 	$ normalized_parts = list()
 	@ part : parts
-		$ normalized_part = trim(toLower(part))
+		$ normalized_part = trimmed(toLower(part))
 		? normalized_part.length() > 0
 			* normalized_parts.add(normalized_part)
 		}

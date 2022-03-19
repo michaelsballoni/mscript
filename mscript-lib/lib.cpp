@@ -1,12 +1,14 @@
 #include "pch.h"
 #include "lib.h"
 
-#include "utils.h"
+#include "names.h"
 #include "object_json.h"
+#include "utils.h"
 
 namespace mscript
 {
 	std::unordered_map<std::wstring, std::shared_ptr<lib>> lib::s_funcLibs;
+	std::recursive_mutex lib::s_libsMutex;
 
 	lib::lib(const std::wstring& filePath)
 		: m_filePath(filePath)
@@ -16,6 +18,9 @@ namespace mscript
 		, m_module(nullptr)
 #endif
 	{
+		if (!std::filesystem::exists(filePath))
+			raiseWError(L"Library file does not exist: " + m_filePath);
+
 #if defined(_WIN32) || defined(_WIN64)
 		m_module = ::LoadLibrary(m_filePath.c_str());
 		if (m_module == nullptr)
@@ -44,9 +49,10 @@ namespace mscript
 		for (const auto& func_name : exports_list)
 		{
 			std::wstring func_name_trimmed = trim(func_name);
-			if (func_name_trimmed.empty())
-				raiseWError(L"Empty export from funcion mscript_GetExports: " + m_filePath);
+			if (!isName(func_name_trimmed))
+				raiseWError(L"Invalid export from funcion mscript_GetExports: " + m_filePath + L" - "  + func_name_trimmed);
 
+			std::unique_lock<std::recursive_mutex> lock(s_libsMutex);
 			const auto& funcIt = s_funcLibs.find(func_name_trimmed);
 			if (funcIt != s_funcLibs.end())
 			{
@@ -77,6 +83,8 @@ namespace mscript
 
 	std::shared_ptr<lib> lib::loadLib(const std::wstring& filePath)
 	{
+		std::unique_lock<std::recursive_mutex> lock(s_libsMutex);
+
 		for (const auto& funcIt : s_funcLibs)
 		{
 			if (funcIt.second->m_filePath == filePath)
@@ -98,6 +106,7 @@ namespace mscript
 
 	std::shared_ptr<lib> lib::getLib(const std::wstring& name)
 	{
+		std::unique_lock<std::recursive_mutex> lock(s_libsMutex);
 		const auto& funcIt = s_funcLibs.find(name);
 		if (funcIt == s_funcLibs.end())
 			return nullptr;
@@ -119,10 +128,10 @@ namespace mscript
 		object output_obj = objectFromJson(output_json);
 		if (output_obj.type() == object::STRING)
 		{
-			static const wchar_t* expPrefix = L"mscript EXCEPTION ~~~";
+			static const wchar_t* expPrefix = L"mscript EXCEPTION ~~~ mscript_ExecuteFunction: ";
 			static size_t prefixLen = wcslen(expPrefix);
 			if (startsWith(output_obj.stringVal(), expPrefix))
-				raiseWError(L"Executing function failed: " + m_filePath + L" - " + name + L": " + output_obj.stringVal().substr(prefixLen));
+				raiseWError(L"Executing function failed: " + m_filePath + L" - " + output_obj.stringVal().substr(prefixLen));
 		}
 		return output_obj;
 	}

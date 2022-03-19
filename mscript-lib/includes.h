@@ -16,6 +16,7 @@
 #include <charconv>
 #include <cmath>
 #include <codecvt>
+#include <filesystem>
 #include <fstream>
 #include <locale>
 #include <memory>

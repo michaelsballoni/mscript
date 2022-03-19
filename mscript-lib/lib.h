@@ -1,13 +1,9 @@
 #pragma once
 
-#include "exports.h"
 #include "object.h"
 
-#if defined(_WIN32) || defined(_WIN64)
-#include <Windows.h> // HMODULE
-#endif
-
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -15,6 +11,10 @@
 
 namespace mscript
 {
+	typedef wchar_t* (*GetExportsFunction)();
+	typedef void (*FreeStringFunction)(wchar_t* str);
+	typedef wchar_t* (*ExecuteExportFunction)(const wchar_t* functionName, const wchar_t* parametersJson);
+
 	class lib
 	{
 	public:
@@ -39,5 +39,6 @@ namespace mscript
 		std::unordered_set<std::wstring> m_functions;
 
 		static std::unordered_map<std::wstring, std::shared_ptr<lib>> s_funcLibs;
+		static std::recursive_mutex s_libsMutex;
 	};
 }

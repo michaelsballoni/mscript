@@ -1,14 +1,19 @@
 #pragma once
 
 #if defined(_WIN32) || defined(_WIN64)
-#include <Windows.h> // GetLastError
+#include <Windows.h>
 #endif
 
 #include "object.h"
 #include "object_json.h"
 #include "utils.h"
 
-#include "dllinterface.h"
+extern "C"
+{
+	__declspec(dllexport) wchar_t* __cdecl mscript_GetExports();
+	__declspec(dllexport) void __cdecl mscript_FreeString(wchar_t* str);
+	__declspec(dllexport) wchar_t* __cdecl mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* parametersJson);
+}
 
 namespace mscript
 {

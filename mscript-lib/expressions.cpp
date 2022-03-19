@@ -1339,12 +1339,13 @@ namespace mscript
         //
         // Function calls
         //
-        if (m_callable.hasFunction(functionW))
+        if (m_callable.hasFunction(functionW)) // user functions
         {
             object answer = m_callable.callFunction(functionW, paramList);
             return answer;
         }
 
+        // external libraries
         {
             const auto moduleLib = lib::getLib(functionW);
             if (moduleLib != nullptr)
@@ -1354,7 +1355,8 @@ namespace mscript
             }
         }
 
-        if (m_symbols.contains(functionW)) // function name ~= function pointer
+        // function name ~= function pointer
+        if (m_symbols.contains(functionW)) 
         {
             object resolvedFunctionObj = m_symbols.get(functionW);
             if (resolvedFunctionObj.type() != object::STRING)
@@ -1382,6 +1384,6 @@ namespace mscript
         }
 
         // Not a function we know about after all
-        raiseError("Function not defined: " + function);
+        raiseWError(L"Function not defined: " + functionW);
     }
 }

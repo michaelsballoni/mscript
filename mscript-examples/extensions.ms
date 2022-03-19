@@ -1,4 +1,4 @@
-/ This sample computes file count for each extension for files in a directory
+/ This sample computes the file count for each extension of the files in a directory
  
 / Collect our command line parameter for the directory path
 / No parameters -> use current directory

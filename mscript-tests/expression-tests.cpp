@@ -225,12 +225,12 @@ namespace mscript
             ValidateExpression("replaced(\"foo2bar\", \"o2b\", \"y3z\")", toWideStr("foy3zar"), symbols);
             ValidateExpression("replaced(\"foo2bar\", \"Z\", \"y3b\")", toWideStr("foo2bar"), symbols);
 
-            ValidateExpression("trim(\"foobar\")", toWideStr("foobar"), symbols);
-            ValidateExpression("trim(\" foobar \")", toWideStr("foobar"), symbols);
+            ValidateExpression("trimmed(\"foobar\")", toWideStr("foobar"), symbols);
+            ValidateExpression("trimmed(\" foobar \")", toWideStr("foobar"), symbols);
 
-            ValidateExpression("length(trim(\" foobar \"))", 6.0, symbols);
+            ValidateExpression("length(trimmed(\" foobar \"))", 6.0, symbols);
 
-            ValidateExpression("length(replaced(trim(\" foobar \"), \"oo\", \"o\"))", 5.0, symbols);
+            ValidateExpression("length(replaced(trimmed(\" foobar \"), \"oo\", \"o\"))", 5.0, symbols);
 
             ValidateExpression("random(0, 1) >= 0 and random(0, 1) <= 1", true, symbols);
             ValidateExpression("random(0, 1) != random(0, 1)", true, symbols);

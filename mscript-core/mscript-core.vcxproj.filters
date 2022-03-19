@@ -30,9 +30,6 @@
     <ClInclude Include="vectormap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="exports.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="module.h">
       <Filter>Header Files</Filter>
     </ClInclude>
