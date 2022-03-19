@@ -89,6 +89,6 @@ The path to the secondary script is relative to the script doing the importing
 So if you tell the intepreter to run c:\my_scripts\mine.ms, and mine.ms imports yours.ms, yours.ms is looked for in c:\my_scripts, not in the current directory or some such thing
 
 ## next steps
-To see the language reference, visit [mscript.io](mscript.io)
+To see the language reference, visit [mscript.io](https://mscript.io){:target="_blank"}
 
-To read about the development of mscript, go to CodeProject for [version 1.0](https://www.codeproject.com/Articles/5324522/mscript-A-Programming-Language-for-Scripting-Comma)
+To read about the development of mscript, go to CodeProject for [version 1.0](https://www.codeproject.com/Articles/5324522/mscript-A-Programming-Language-for-Scripting-Comma){:target="_blank"}
