@@ -5,6 +5,10 @@ It is useful for scripting that's too much for .bat files, when Powershell or Py
 
 The thinking is, here's a simple scripting language, if it can solve your problem, then there's no need to get a bigger gun
 
+To see the language reference, visit [mscript.io](https://mscript.io)
+
+To read about the development of mscript, go to CodeProject for [version 1.0](https://www.codeproject.com/Articles/5324522/mscript-A-Programming-Language-for-Scripting-Comma) and [version 2.0](https://www.codeproject.com/Articles/5328249/mscript-Version-2-0-Adds-Error-Handling-New-Functi)
+
 ## a little taste
 ```
 / Import the timestamp DLL for working with file timestamps
@@ -70,8 +74,3 @@ mscript-test-runner runs all scripts in the directory and validates that it gets
 ### mscript
 
 This is the script interpreter; all the code is in mscript-core and mscript-lib, so this is just a shell around that project
-
-## next steps
-To see the language reference, visit [mscript.io](https://mscript.io)
-
-To read about the development of mscript, go to CodeProject for [version 1.0](https://www.codeproject.com/Articles/5324522/mscript-A-Programming-Language-for-Scripting-Comma) and [version 2.0](https://www.codeproject.com/Articles/5328249/mscript-Version-2-0-Adds-Error-Handling-New-Functi)
