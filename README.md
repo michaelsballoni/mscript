@@ -7,41 +7,30 @@ The thinking is, here's a simple scripting language, if it can solve your proble
 
 ## a little taste
 ```
-// Caching Fibonacci sequence
-~ fib(n)
-	// Check the cache
-	? fib_cache.has(n)
-		<- fib_cache.get(n)
-	}
-	
-	// Compute the result
-	$ fib_result
-	? n <= 0
-		& fib_result = 0
-	? n <= 2
-		& fib_result = 1
-	<>
-		& fib_result = fib(n - 1) + fib(n - 2)
-	}
-	
-	// Stash the result in the cache
-	* fib_cache.add(n, fib_result)
-	
-	! All done
-	<- fib_result
-}
-// Our cache is an index, a hash table, any-to-any
-$ fib_cache = index()
+/ Import the timestamp DLL for working with file timestamps
++ "mscript-timestamp.dll"
 
-// Print the first 10 values of the Fibonacci series
-// Look, ma!  No keywords!
-# n : 1 -> 10
-	> fib(n)
+/ Make sure we got a file path argument
+? arguments.length() != 1
+	>> Provide the path to the file to touch
+	* exit(0)
 }
+
+/ Report on the file path and its timestamp
+$ file_path = arguments.get(0)
+> "File: " + file_path
+> "Last Modified Be4: " + msts_last_modified(file_path)
+
+/ Do the deed
+* msts_touch(file_path)
+
+/ Report on the new timestamp
+> "Last Modified Now: " + msts_last_modified(file_path)
+
 ```
 It is a line-based, pseudo-object-oriented scripting language that uses symbols instead of keywords
 
-To jump in and see more mscript, check out the [musicdb sample](mscript-examples/musicdb.ms)
+To jump in and see more mscript, check out the  [extensions](mscript-examples/extensions.ms) and [musicdb](mscript-examples/musicdb.ms) samples
 
 ## project layout
 The mscript project is a Visual Studio solution.  mscript has no external dependencies; it statically links the runtime
@@ -74,7 +63,7 @@ You can only do so much with unit tests without the test code getting large and 
 
 Instead of making bad unit tests, I made a set of files with script to execute and results to expect
 
-In mscript-test-scripts you'll find test files, with statements up top and expected results below, separated by ===
+In mscript-test-scripts you'll find test files, with statements up top and expected results below, separated by a === line
 
 mscript-test-runner runs all scripts in the directory and validates that it gets the expected results
 
@@ -85,4 +74,4 @@ This is the script interpreter; all the code is in mscript-core and mscript-lib,
 ## next steps
 To see the language reference, visit [mscript.io](https://mscript.io)
 
-To read about the development of mscript, go to CodeProject for [version 1.0](https://www.codeproject.com/Articles/5324522/mscript-A-Programming-Language-for-Scripting-Comma)
+To read about the development of mscript, go to CodeProject for [version 1.0](https://www.codeproject.com/Articles/5324522/mscript-A-Programming-Language-for-Scripting-Comma) and [version 2.0](https://www.codeproject.com/Articles/5328249/mscript-Version-2-0-Adds-Error-Handling-New-Functi)
