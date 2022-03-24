@@ -11,21 +11,25 @@ namespace mscript
 	std::recursive_mutex lib::s_libsMutex;
 
 	lib::lib(const std::wstring& filePath)
-		: m_filePath(std::filesystem::canonical(filePath))
+		: m_filePath(filePath)
 		, m_executer(nullptr)
 		, m_freer(nullptr)
 #if defined(_WIN32) || defined(_WIN64)
 		, m_module(nullptr)
 #endif
 	{
-		if (!std::filesystem::exists(m_filePath))
-			raiseWError(L"Library file does not exist: " + m_filePath);
 #if defined(_WIN32) || defined(_WIN64)
-		m_module = ::LoadLibraryEx(m_filePath.c_str(), nullptr
-#ifndef _DEBUG
-			, LOAD_LIBRARY_REQUIRE_SIGNED_TARGET
-#endif
+#ifdef _DEBUG
+		m_module = ::LoadLibrary(m_filePath.c_str());
+#else
+		m_module = 
+			::LoadLibraryEx
+			(
+				m_filePath.c_str(), 
+				nullptr, 
+				LOAD_LIBRARY_SEARCH_APPLICATION_DIR
 			);
+#endif
 		if (m_module == nullptr)
 			raiseWError(L"Loading library failed: " + m_filePath);
 

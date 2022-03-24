@@ -87,12 +87,6 @@ int wmain(int argc, wchar_t* argv[])
 	}
 	try
 	{
-#if defined(_WIN32) || defined(_WIN64)
-		if (!SetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE | BASE_SEARCH_PATH_PERMANENT))
-			raiseError("Setting path search mode failed: " + num2str(::GetLastError()));
-		if (!SetDllDirectory(L""))
-			raiseError("Setting the DLL directory failed: " + num2str(::GetLastError()));
-#endif
 		std::wstring scriptPath = argv[1];
 
 		object::list arguments;

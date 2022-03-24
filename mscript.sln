@@ -40,6 +40,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mscript-dll-sample", "mscri
 		{415BC572-48CB-4FB1-8090-B49C172EADD7} = {415BC572-48CB-4FB1-8090-B49C172EADD7}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mscript-registry", "mscript-registry\mscript-registry.vcxproj", "{0EBB352C-066A-45FC-B56C-5165B0307B33}"
+	ProjectSection(ProjectDependencies) = postProject
+		{415BC572-48CB-4FB1-8090-B49C172EADD7} = {415BC572-48CB-4FB1-8090-B49C172EADD7}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -104,6 +109,14 @@ Global
 		{24D37482-9533-4171-81B4-63FDAE5EDBA8}.Release|x64.Build.0 = Release|x64
 		{24D37482-9533-4171-81B4-63FDAE5EDBA8}.Release|x86.ActiveCfg = Release|Win32
 		{24D37482-9533-4171-81B4-63FDAE5EDBA8}.Release|x86.Build.0 = Release|Win32
+		{0EBB352C-066A-45FC-B56C-5165B0307B33}.Debug|x64.ActiveCfg = Debug|x64
+		{0EBB352C-066A-45FC-B56C-5165B0307B33}.Debug|x64.Build.0 = Debug|x64
+		{0EBB352C-066A-45FC-B56C-5165B0307B33}.Debug|x86.ActiveCfg = Debug|Win32
+		{0EBB352C-066A-45FC-B56C-5165B0307B33}.Debug|x86.Build.0 = Debug|Win32
+		{0EBB352C-066A-45FC-B56C-5165B0307B33}.Release|x64.ActiveCfg = Release|x64
+		{0EBB352C-066A-45FC-B56C-5165B0307B33}.Release|x64.Build.0 = Release|x64
+		{0EBB352C-066A-45FC-B56C-5165B0307B33}.Release|x86.ActiveCfg = Release|Win32
+		{0EBB352C-066A-45FC-B56C-5165B0307B33}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

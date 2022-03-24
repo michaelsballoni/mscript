@@ -1355,16 +1355,6 @@ namespace mscript
             }
         }
 
-        // function name ~= function pointer
-        if (m_symbols.contains(functionW)) 
-        {
-            object resolvedFunctionObj = m_symbols.get(functionW);
-            if (resolvedFunctionObj.type() != object::STRING)
-                raiseWError(L"Function name not a string: " + resolvedFunctionObj.toString());
-            std::wstring resolvedFunction = resolvedFunctionObj.stringVal();
-            return executeFunction(resolvedFunction, paramList);
-        }
-
         // Do object-like member function-ish expression processing
         size_t dotIndex = function.find('.');
         if (dotIndex != std::string::npos)
