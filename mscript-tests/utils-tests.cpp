@@ -22,6 +22,13 @@ namespace mscript
 			Assert::AreEqual(toWideStr("ab"), toLower(L"Ab"));
 			Assert::AreEqual(toWideStr("ab"), toLower(L"AB"));
 			Assert::AreEqual(toWideStr("ab"), toLower(L"aB"));
+
+			Assert::AreEqual(toWideStr(""), toUpper(L""));
+			Assert::AreEqual(toWideStr("A"), toUpper(L"a"));
+			Assert::AreEqual(toWideStr("A"), toUpper(L"A"));
+			Assert::AreEqual(toWideStr("AB"), toUpper(L"Ab"));
+			Assert::AreEqual(toWideStr("AB"), toUpper(L"AB"));
+			Assert::AreEqual(toWideStr("AB"), toUpper(L"aB"));
 		}
 
 		TEST_METHOD(NameTests)

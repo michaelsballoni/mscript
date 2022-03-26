@@ -88,8 +88,18 @@ namespace mscript
     std::wstring mscript::toLower(const std::wstring& str)
     {
         std::wstring retVal;
+        retVal.reserve(str.size());
         for (auto c : str)
             retVal += towlower(c);
+        return retVal;
+    }
+
+    std::wstring mscript::toUpper(const std::wstring& str)
+    {
+        std::wstring retVal;
+        retVal.reserve(str.size());
+        for (auto c : str)
+            retVal += towupper(c);
         return retVal;
     }
 
