@@ -220,3 +220,33 @@ std::vector<std::wstring> mscript::split(std::wstring str, const wchar_t* sepera
     return retVal;
 }
 
+#if defined(_WIN32) || defined(_WIN64)
+std::wstring mscript::getLastErrorMsg(DWORD dwErrorCode)
+{
+    wchar_t* error_str = nullptr;
+    if
+    (
+        !FormatMessage
+        (
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+            NULL,
+            dwErrorCode,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPWSTR)&error_str,
+            0,
+            NULL
+        )
+    )
+    {
+        return L"getLastErrorMsg failed: " + std::to_wstring(dwErrorCode);
+    }
+
+    std::wstring output = 
+        std::wstring(error_str) + L" (" + std::to_wstring(dwErrorCode) + L")";
+
+    LocalFree(error_str);
+    error_str = nullptr;
+
+    return output;
+}
+#endif

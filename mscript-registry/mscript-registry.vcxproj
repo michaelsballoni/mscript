@@ -170,6 +170,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="registry.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllinterface.cpp" />

@@ -135,10 +135,13 @@ namespace mscript
 		object output_obj = objectFromJson(output_json);
 		if (output_obj.type() == object::STRING)
 		{
-			static const wchar_t* expPrefix = L"mscript EXCEPTION ~~~ mscript_ExecuteFunction: ";
-			static size_t prefixLen = wcslen(expPrefix);
+			static const std::wstring expPrefix = 
+				L"mscript EXCEPTION ~~~ mscript_ExecuteFunction: ";
 			if (startsWith(output_obj.stringVal(), expPrefix))
-				raiseWError(L"Executing function failed: " + m_filePath + L" - " + output_obj.stringVal().substr(prefixLen));
+			{
+				raiseWError(L"Executing function failed: " + m_filePath \
+							+ L" - " + output_obj.stringVal().substr(expPrefix.size()));
+			}
 		}
 		return output_obj;
 	}

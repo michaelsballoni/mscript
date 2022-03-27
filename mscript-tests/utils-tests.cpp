@@ -135,5 +135,18 @@ namespace mscript
 			Assert::AreEqual(toWideStr("foo, bar"), join(split(L"foo bar", L" "), L", "));
 			Assert::AreEqual(toWideStr("foo, bar"), join(split(L"foo//bar", L"//"), L", "));
 		}
+
+		TEST_METHOD(LastErrorTests)
+		{
+			std::wstring msg;
+
+			msg = toLower(getLastErrorMsg(ERROR_SUCCESS));
+			Assert::IsTrue(msg.find(L"success") != std::wstring::npos);
+
+			msg = toLower(getLastErrorMsg(ERROR_ACCESS_DENIED));
+			Assert::IsTrue(msg.find(L"access") != std::wstring::npos);
+			Assert::IsTrue(msg.find(L"denied") != std::wstring::npos);
+			Assert::IsTrue(msg.find(L"(5)") != std::wstring::npos);
+		}
 	};
 }

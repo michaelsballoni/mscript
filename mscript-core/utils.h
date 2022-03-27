@@ -2,6 +2,10 @@
 
 #include "user_exception.h"
 
+#if defined(_WIN32) || defined(_WIN64)
+#include <Windows.h>
+#endif
+
 #include <string>
 #include <vector>
 
@@ -30,4 +34,8 @@ namespace mscript
 
     bool startsWith(const std::wstring& str, const std::wstring& starter);
     bool endsWith(const std::wstring& str, const std::wstring& finisher);
+
+#if defined(_WIN32) || defined(_WIN64)
+    std::wstring getLastErrorMsg(DWORD dwErrorCode = ::GetLastError());
+#endif
 }
