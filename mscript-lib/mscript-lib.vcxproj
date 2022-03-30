@@ -169,6 +169,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="bin_crypt.h" />
     <ClInclude Include="callable.h" />
     <ClInclude Include="expressions.h" />
     <ClInclude Include="functions.h" />
@@ -181,6 +182,7 @@
     <ClInclude Include="symbols.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="bin_crypt.cpp" />
     <ClCompile Include="expressions.cpp" />
     <ClCompile Include="lib.cpp" />
     <ClCompile Include="names.cpp" />

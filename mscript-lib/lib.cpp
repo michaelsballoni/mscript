@@ -19,17 +19,7 @@ namespace mscript
 #endif
 	{
 #if defined(_WIN32) || defined(_WIN64)
-#ifdef _DEBUG
 		m_module = ::LoadLibrary(m_filePath.c_str());
-#else
-		m_module = 
-			::LoadLibraryEx
-			(
-				m_filePath.c_str(), 
-				nullptr, 
-				LOAD_LIBRARY_SEARCH_APPLICATION_DIR
-			);
-#endif
 		if (m_module == nullptr)
 			raiseWError(L"Loading library failed: " + m_filePath);
 

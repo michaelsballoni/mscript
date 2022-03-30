@@ -1,7 +1,11 @@
+#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#define _CRT_SECURE_NO_WARNINGS
+
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
 #endif
 
+#include "bin_crypt.h"
 #include "includes.h"
 #include "script_processor.h"
 #include "utils.h"
@@ -66,6 +70,18 @@ std::vector<std::wstring> loadScript(const std::wstring& current, const std::wst
 
 static std::wstring getModuleFilePath(const std::wstring& filename)
 {
+	if 
+	(
+		filename.find('/') != std::wstring::npos 
+		|| 
+		filename.find('\\') != std::wstring::npos 
+		||
+		filename.find(L"..") != std::wstring::npos
+	)
+	{
+		raiseWError(L"Invalid module file path: " + filename);
+	}
+
 	const int max_path = 32 * 1024;
 	char* exe_file_path = new char[max_path + 1];
 	exe_file_path[max_path] = '\0';
@@ -75,6 +91,11 @@ static std::wstring getModuleFilePath(const std::wstring& filename)
 #endif
 	fs::path exe_dir_path = fs::path(exe_file_path).parent_path();
 	fs::path module_file_path = exe_dir_path.append(filename);
+#ifndef _DEBUG
+	bin_crypt_info crypt_info = getBinCryptInfo(module_file_path);
+	printf("Subject:   %S\n", crypt_info.subject.c_str()); // FORNOW
+	printf("Publisher: %S\n", crypt_info.publisher.c_str()); // FORNOW
+#endif
 	return module_file_path;
 }
 
