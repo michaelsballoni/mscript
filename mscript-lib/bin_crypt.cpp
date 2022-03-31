@@ -42,7 +42,7 @@ mscript::bin_crypt_info mscript::getBinCryptInfo(const std::wstring & filePath)
             NULL
         );
     if (!fResult)
-        BIN_CRYPT_ERR("Querying for binary security data failed");
+        return crypt_info;
 
     // Get signer info
     fResult = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &dwSignerInfo);

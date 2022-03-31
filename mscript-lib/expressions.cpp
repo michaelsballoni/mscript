@@ -1132,10 +1132,10 @@ namespace mscript
         if (function == "exec")
         {
             if (paramList.size() < 1 || paramList[0].type() != object::STRING)
-                raiseError("process() works with a command string");
+                raiseError("exec() works with a command string");
 
             if (paramList.size() == 2 && paramList[1].type() != object::INDEX)
-                raiseError("process() works with a command string and an optional index");
+                raiseError("exec() works with a command string and an optional index");
 
             object::index options;
             if (paramList.size() >= 2)
@@ -1152,11 +1152,23 @@ namespace mscript
                 if (options.tryGet("method", methodObj))
                 {
                     if (methodObj.type() != object::STRING)
-                        raiseError("process() method option value must be a string");
+                        raiseError("exec() method option must be a string, popen or system");
                     method = methodObj.stringVal();
                 }
             }
 
+            bool ignore_errors = false;
+            {
+                object flagObj;
+                if (options.tryGet("ignore_errors", flagObj))
+                {
+                    if (flagObj.type() != object::BOOL)
+                        raiseError("exec() ignore_errors option must be true or false");
+                    ignore_errors = flagObj.boolVal();
+                }
+            }
+
+            int exit_code = -1;
             if (method.empty() || method == L"popen")
             {
                 FILE* file = _wpopen(paramList[0].stringVal().c_str(), L"rt");
@@ -1171,18 +1183,27 @@ namespace mscript
 
                 retVal.set(toWideStr("success"), bool(feof(file)));
 
-                int result = _pclose(file);
-                retVal.set(toWideStr("exit_code"), double(result));
+                exit_code = _pclose(file);
                 file = nullptr;
             }
             else if (method == L"system")
             {
-                int exit_code = ::system(toNarrowStr(paramList[0].stringVal()).c_str());
+                exit_code = ::system(toNarrowStr(paramList[0].stringVal()).c_str());
                 retVal.set(toWideStr("success"), true);
-                retVal.set(toWideStr("exit_code"), double(exit_code));
             }
             else
                 raiseError("exec() invalid method, must be popen or system");
+
+            retVal.set(toWideStr("exit_code"), double(exit_code));
+
+            if (!ignore_errors)
+            {
+                if (!retVal.get(toWideStr("success")).boolVal())
+                    raiseError("exec() failed executing command");
+                else if (exit_code != 0)
+                    raiseError("exec() failed with exit code " + std::to_string(exit_code));
+            }
+
             return retVal;
         }
 
