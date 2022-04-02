@@ -89,20 +89,27 @@ static std::wstring getModuleFilePath(const std::wstring& filename)
 	if (GetModuleFileName(NULL, exe_file_path.get(), max_path) == 0)
 		raiseError("Loading mscript.exe file path failed");
 #endif
-	bin_crypt_info exe_crypt_info = getBinCryptInfo(exe_file_path.get());
-
 	fs::path exe_dir_path = fs::path(exe_file_path.get()).parent_path();
 	fs::path module_file_path = exe_dir_path.append(filename);
 
-	bin_crypt_info module_crypt_info = getBinCryptInfo(module_file_path);
-	if 
+	const bin_crypt_info exe_crypt_info = getBinCryptInfo(exe_file_path.get());
+	if
 	(
-		module_crypt_info.subject != exe_crypt_info.subject
-		||
-		module_crypt_info.publisher != exe_crypt_info.publisher
+		!exe_crypt_info.subject.empty() 
+		&&
+		!exe_crypt_info.publisher.empty()
 	)
 	{
-		raiseWError(L"Invalid module signing: " + filename);
+		const bin_crypt_info module_crypt_info = getBinCryptInfo(module_file_path);
+		if 
+		(
+			module_crypt_info.subject != exe_crypt_info.subject
+			||
+			module_crypt_info.publisher != exe_crypt_info.publisher
+		)
+		{
+			raiseWError(L"Invalid module signing: " + module_file_path.wstring());
+		}
 	}
 
 	return module_file_path;
