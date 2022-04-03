@@ -9,6 +9,7 @@ wchar_t* __cdecl mscript_GetExports()
 	{
 		L"msreg_create_key",
 		L"msreg_delete_key",
+		L"msreg_get_sub_keys",
 
 		L"msreg_put_settings",
 		L"msreg_get_settings",
@@ -37,6 +38,11 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 		else if (funcName == L"msreg_delete_key")
 		{
 			reg.deleteKey();
+		}
+		else if (funcName == L"msreg_get_sub_keys")
+		{
+			object::list ret_val = reg.getSubKeys();
+			return module_utils::jsonStr(ret_val);
 		}
 		else if (funcName == L"msreg_put_settings")
 		{

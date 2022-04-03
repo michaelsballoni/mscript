@@ -14,27 +14,19 @@ public:
 		if (m_params.empty() || m_params[0].type() != object::STRING)
 			raiseError("Registry functions take a first registry key string parameter");
 		m_input_path = m_params[0].stringVal();
-		// DEBUG
-		//printf("m_input_path: %S\n", m_input_path.c_str());
 
 		size_t first_slash = m_input_path.find('\\');
 		if (first_slash == std::wstring::npos)
 			raiseWError(L"Invalid registry key (no slash): " + m_input_path);
-		// DEBUG
-		//printf("first_slash: %u\n", first_slash);
 
 		m_path = m_input_path.substr(first_slash + 1);
 		if (m_path.empty())
 			raiseWError(L"Invalid registry key (empty key): " + m_input_path);
-		// DEBUG
-		//printf("m_path: %S\n", m_path.c_str());
 
 		std::wstring reg_root;
 		reg_root = toUpper(m_input_path.substr(0, first_slash));
 		if (reg_root.empty())
 			raiseWError(L"Invalid registry key (invalid m_root_key): " + m_input_path);
-		// DEBUG
-		//printf("reg_root: %S\n", reg_root.c_str());
 
 		if (reg_root == L"HKCR" || reg_root == L"HKEY_CLASSES_ROOT")
 			m_root_key = HKEY_CLASSES_ROOT;
@@ -44,7 +36,7 @@ public:
 			m_root_key = HKEY_CURRENT_USER;
 		else if (reg_root == L"HKLM" || reg_root == L"HKEY_LOCAL_MACHINE")
 			m_root_key = HKEY_LOCAL_MACHINE;
-		else if (reg_root == L"HCU" || reg_root == L"HKEY_USERS")
+		else if (reg_root == L"HKU" || reg_root == L"HKEY_USERS")
 			m_root_key = HKEY_USERS;
 		else
 			raiseWError(L"Invalid registry key (unknown root): " + m_input_path + L" (" + reg_root + L")");
@@ -65,9 +57,42 @@ public:
 
 	void deleteKey()
 	{
-		DWORD dwError = ::RegDeleteKey(m_root_key, m_path.c_str());
-		if (dwError != ERROR_SUCCESS && dwError != ERROR_FILE_NOT_FOUND && dwError != ERROR_TOO_MANY_OPEN_FILES)
-			raiseWError(L"Deleting key failed: " + m_input_path + L": " + getLastErrorMsg(dwError));
+		{
+			DWORD dwError = ::RegOpenKey(m_root_key, m_path.c_str(), &m_local_key);
+			if (dwError != ERROR_SUCCESS)
+				raiseWError(L"Opening key failed: " + m_input_path + L": " + getLastErrorMsg(dwError));
+		}
+
+		{
+			DWORD dwError = ::RegDeleteTree(m_local_key, m_path.c_str());
+			if (dwError != ERROR_SUCCESS && dwError != ERROR_FILE_NOT_FOUND && dwError != ERROR_TOO_MANY_OPEN_FILES)
+				raiseWError(L"Deleting key failed: " + m_input_path + L": " + getLastErrorMsg(dwError));
+		}
+	}
+
+	object::list getSubKeys()
+	{
+		DWORD dwError = ::RegOpenKey(m_root_key, m_path.c_str(), &m_local_key);
+		if (dwError != ERROR_SUCCESS)
+			raiseWError(L"Opening key failed: " + m_input_path + L": " + getLastErrorMsg(dwError));
+
+		const size_t MAX_VALUE_LEN = 16 * 1024;
+		std::unique_ptr<wchar_t[]> value_name(new wchar_t[MAX_VALUE_LEN + 1]);
+		value_name[MAX_VALUE_LEN] = '\0';
+
+		object::list retVal;
+		DWORD result = ERROR_SUCCESS;
+		for (DWORD e = 0; ; ++e)
+		{
+			result = ::RegEnumKey(m_local_key, e, value_name.get(), MAX_VALUE_LEN);
+			if (result == ERROR_NO_MORE_ITEMS)
+				break;
+			else if (result == ERROR_SUCCESS)
+				retVal.push_back(std::wstring(value_name.get()));
+			else
+				raiseWError(L"Enumerating key failed: " + m_input_path + L": " + getLastErrorMsg(dwError));
+		}
+		return retVal;
 	}
 
 	void putKeySettings()
@@ -151,7 +176,7 @@ public:
 					raiseWError(L"Getting DWORD value failed: " + m_input_path + L": " + getLastErrorMsg(dwError));
 				ret_val.set(std::wstring(value_name.get()), double(data_val));
 			}
-			else if (type == REG_SZ)
+			else if (type == REG_SZ || type == REG_EXPAND_SZ || type == REG_MULTI_SZ)
 			{
 				std::unique_ptr<wchar_t[]> value(new wchar_t[data_len + 1]);
 				dwError =

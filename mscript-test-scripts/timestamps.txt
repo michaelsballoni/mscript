@@ -24,7 +24,6 @@ $ first_last_modified = msts_last_modified("test.txt")
 & now = msts_now()
 * msts_touch("test.txt")
 $ second_last_modified = msts_last_modified("test.txt")
-> "TRACE: second_last_modified = " + second_last_modified
 
 > "Should be true (last modified 1): " + (second_last_modified <> first_last_modified)
 > "Should be true (last modified 2): " + (second_last_modified = now)
