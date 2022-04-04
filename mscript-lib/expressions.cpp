@@ -331,6 +331,10 @@ namespace mscript
                                     value = leftBool || rightBool;
                                 else if (op == "||")
                                     value = leftBool || rightBool;
+                                else if (op == "==" || op == "=")
+                                    value = leftBool == rightBool;
+                                else if (op == "!=" || op == "<>")
+                                    value = leftBool != rightBool;
                                 else
                                     raiseWError(L"Unrecognized boolean operator: " + expStr);
                             }
@@ -1149,22 +1153,24 @@ namespace mscript
             std::wstring method;
             {
                 object methodObj;
-                if (options.tryGet("method", methodObj))
+                if (options.tryGet(toWideStr("method"), methodObj))
                 {
                     if (methodObj.type() != object::STRING)
                         raiseError("exec() method option must be a string, popen or system");
-                    method = methodObj.stringVal();
+                    else
+                        method = methodObj.stringVal();
                 }
             }
 
             bool ignore_errors = false;
             {
                 object flagObj;
-                if (options.tryGet("ignore_errors", flagObj))
+                if (options.tryGet(toWideStr("ignore_errors"), flagObj))
                 {
                     if (flagObj.type() != object::BOOL)
                         raiseError("exec() ignore_errors option must be true or false");
-                    ignore_errors = flagObj.boolVal();
+                    else
+                        ignore_errors = flagObj.boolVal();
                 }
             }
 
