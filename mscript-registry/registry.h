@@ -176,7 +176,7 @@ public:
 					raiseWError(L"Getting DWORD value failed: " + m_input_path + L": " + getLastErrorMsg(dwError));
 				ret_val.set(std::wstring(value_name.get()), double(data_val));
 			}
-			else if (type == REG_SZ || type == REG_EXPAND_SZ || type == REG_MULTI_SZ)
+			else if (type == REG_SZ)
 			{
 				std::unique_ptr<wchar_t[]> value(new wchar_t[data_len + 1]);
 				dwError =
@@ -185,10 +185,7 @@ public:
 					raiseWError(L"Getting string value failed: " + m_input_path + L": " + getLastErrorMsg(dwError));
 				ret_val.set(std::wstring(value_name.get()), std::wstring(value.get()));
 			}
-			else
-			{
-				raiseWError(L"Unhandled registry value type: " + m_input_path + L": " + std::to_wstring(type));
-			}
+			//else - omitted
 		}
 
 		return ret_val;
