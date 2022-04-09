@@ -133,7 +133,7 @@ public:
 			}
 			else if (val.type() == object::STRING)
 			{
-				dwError = ::RegSetKeyValue(m_local_key, nullptr, name.stringVal().c_str(), REG_SZ, val.stringVal().c_str(), (val.stringVal().length() + 1) * sizeof(wchar_t));
+				dwError = ::RegSetKeyValue(m_local_key, nullptr, name.stringVal().c_str(), REG_SZ, val.stringVal().c_str(), DWORD((val.stringVal().length() + 1) * sizeof(wchar_t)));
 				if (dwError != ERROR_SUCCESS)
 					raiseWError(L"Setting string value failed: " + m_input_path + L": " + name.stringVal() + L": " + getLastErrorMsg(dwError));
 			}
