@@ -4,8 +4,21 @@ $ result = exec("echo foobar")
 > "Should be 0: " + result.get("exit_code")
 > "Should be foobar: " + trimmed(result.get("output"))
 
+>>
+
+* setEnv("foo", "bar")
+& result = exec("echo %foo%")
+
+> "Should be true: " + result.get("success")
+> "Should be 0: " + result.get("exit_code")
+> "Should be bar: " + trimmed(result.get("output"))
+
 ===
 
 Should be true: true
 Should be 0: 0
 Should be foobar: foobar
+
+Should be true: true
+Should be 0: 0
+Should be bar: bar

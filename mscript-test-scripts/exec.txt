@@ -1,4 +1,4 @@
-$ ignore_errors = index("ignore_errors", true)
-* exec("foo bar", ignore_errors)
+$ options = index("ignore_errors", true, "method", "system")
+* exec("foo bar", options)
 
 ===

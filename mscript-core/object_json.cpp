@@ -157,7 +157,10 @@ namespace mscript
 		{
 			std::wstring str = obj.stringVal();
 			str = replace(str, L"\\", L"\\\\");
+			str = replace(str, L"/", L"\\/");
 			str = replace(str, L"\"", L"\\\"");
+			str = replace(str, L"\b", L"\\b");
+			str = replace(str, L"\f", L"\\f");
 			str = replace(str, L"\n", L"\\n");
 			str = replace(str, L"\r", L"\\r");
 			str = replace(str, L"\t", L"\\t");

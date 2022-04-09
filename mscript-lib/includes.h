@@ -17,6 +17,7 @@
 #include <cmath>
 #include <codecvt>
 #include <fstream>
+#include <functional>
 #include <locale>
 #include <memory>
 #include <optional>

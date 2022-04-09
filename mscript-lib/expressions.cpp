@@ -562,811 +562,795 @@ namespace mscript
 
         object first = paramList.size() == 0 ? object::NOTHING : paramList[0];
 
-        //
-        // Math
-        //
-        if (function == "abs") return abs(getOneDouble(paramList, "abs"));
-
-        if (function == "sqrt") return sqrt(getOneDouble(paramList, "sqrt"));
-        if (function == "ceil") return ceil(getOneDouble(paramList, "ceil"));
-        if (function == "floor") return floor(getOneDouble(paramList, "floor"));
-
-        if (function == "exp") return exp(getOneDouble(paramList, "exp"));
-        if (function == "log") return log(getOneDouble(paramList, "log"));
-        if (function == "log2") return log2(getOneDouble(paramList, "log2"));
-        if (function == "log10") return log10(getOneDouble(paramList, "log10"));
-
-        if (function == "sin") return sin(getOneDouble(paramList, "sin"));
-        if (function == "cos") return cos(getOneDouble(paramList, "cos"));
-        if (function == "tan") return tan(getOneDouble(paramList, "tan"));
-
-        if (function == "asin") return asin(getOneDouble(paramList, "asin"));
-        if (function == "acos") return acos(getOneDouble(paramList, "acos"));
-        if (function == "atan") return atan(getOneDouble(paramList, "atan"));
-
-        if (function == "sinh") return sinh(getOneDouble(paramList, "sinh"));
-        if (function == "cosh") return cosh(getOneDouble(paramList, "cosh"));
-        if (function == "tanh") return tanh(getOneDouble(paramList, "tanh"));
-
-        if (function == "round")
+        typedef std::function<object(object first, const object::list& paramList)> msFunc;
+        static std::unordered_map<std::string, msFunc> functions
         {
-            if (paramList.size() == 1)
-                return round(getOneDouble(paramList, "round"));
-            if (paramList.size() != 2 || paramList[0].type() != object::NUMBER || paramList[1].type() != object::NUMBER)
-                raiseError("round() works with a number and a number of places to round to");
-            
-            int slider = int(pow(10, int(paramList[1].numberVal())));
-            return floor(paramList[0].numberVal() * slider) / slider;
-        }
+            //
+            // Math
+            //
+            { "abs", [](object first, const object::list& paramList) -> object { return abs(getOneDouble(paramList, "abs")); }},
+            { "sqrt", [](object first, const object::list& paramList) -> object { return sqrt(getOneDouble(paramList, "sqrt")); }},
 
-        //
-        // Type Operations
-        //
-        if (function == "getType")
-        {
-            if (paramList.size() != 1)
-                raiseError("getType() takes one parameter");
-            return toWideStr(first.typeStr());
-        }
+            { "ceil", [](object first, const object::list& paramList) -> object { return ceil(getOneDouble(paramList, "ceil")); }},
+            { "floor", [](object first, const object::list& paramList) -> object { return floor(getOneDouble(paramList, "floor")); }},
 
-        if (function == "number")
-        {
-            if (paramList.size() != 1)
-                raiseError("number() takes one parameter");
-            return first.toNumber();
-        }
+            { "exp", [](object first, const object::list& paramList) -> object { return exp(getOneDouble(paramList, "exp")); }},
+            { "log", [](object first, const object::list& paramList) -> object { return log(getOneDouble(paramList, "log")); }},
+            { "log2", [](object first, const object::list& paramList) -> object { return log2(getOneDouble(paramList, "log2")); }},
+            { "log10", [](object first, const object::list& paramList) -> object { return log10(getOneDouble(paramList, "log10")); }},
 
-        if (function == "string")
-        {
-            if (paramList.size() != 1)
-                raiseError("string() takes one parameter");
-            return first.toString();
-        }
+            { "sin", [](object first, const object::list& paramList) -> object { return sin(getOneDouble(paramList, "sin")); }},
+            { "cos", [](object first, const object::list& paramList) -> object { return cos(getOneDouble(paramList, "cos")); }},
+            { "tan", [](object first, const object::list& paramList) -> object { return tan(getOneDouble(paramList, "tan")); }},
 
-        if (function == "list")
-            return object::list(paramList);
+            { "asin", [](object first, const object::list& paramList) -> object { return asin(getOneDouble(paramList, "asin")); }},
+            { "acos", [](object first, const object::list& paramList) -> object { return acos(getOneDouble(paramList, "acos")); }},
+            { "atan", [](object first, const object::list& paramList) -> object { return atan(getOneDouble(paramList, "atan")); }},
 
-        if (function == "index")
-        {
-            if ((paramList.size() % 2) != 0)
-                raiseError("index() parameters must be an even count, key-value pairs");
+            { "sinh", [](object first, const object::list& paramList) -> object { return sinh(getOneDouble(paramList, "sinh")); }},
+            { "cosh", [](object first, const object::list& paramList) -> object { return cosh(getOneDouble(paramList, "cosh")); }},
+            { "tanh", [](object first, const object::list& paramList) -> object { return tanh(getOneDouble(paramList, "tanh")); }},
 
-            object::index newIndex;
-            for (size_t i = 0; i < paramList.size(); i += 2)
-            {
-                if (newIndex.contains(paramList[i]))
-                    raiseError("index() key repeated: " + num2str(double(i)));
-                newIndex.set(paramList[i], paramList[i + 1]);
-            }
-            return newIndex;
-        }
+            { "round", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() == 1)
+                    return round(getOneDouble(paramList, "round"));
+                if (paramList.size() != 2 || paramList[0].type() != object::NUMBER || paramList[1].type() != object::NUMBER)
+                    raiseError("round() works with a number and a number of places to round to");
 
-        if (function == "clone")
-        {
-            if (paramList.size() != 1)
-                raiseError("clone() takes one parameter");
-            return first.clone();
-        }
+                int slider = int(pow(10, int(paramList[1].numberVal())));
+                return floor(paramList[0].numberVal() * slider) / slider;
+            }},
 
-        //
-        // Collection Operations
-        //
-        if (function == "length")
-        {
-            if (paramList.size() != 1)
-                raiseError("length() takes one parameter");
-            return double(first.length());
-        }
+            //
+            // Type Operations
+            //
+            { "getType", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1)
+                    raiseError("getType() takes one parameter");
+                return toWideStr(first.typeStr());
+            }},
 
-        if (function == "add")
-        {
-            if (first.type() == object::STRING)
-            {
-                for (int v = 1; v < int(paramList.size()); ++v)
-                    first.stringVal() += paramList[v].toString();
-                return first;
-            }
-            else if (first.type() == object::LIST)
-            {
-                auto& list = first.listVal();
-                for (int v = 1; v < int(paramList.size()); ++v)
-                    list.push_back(paramList[v]);
-                return first;
-            }
-            else if (first.type() == object::INDEX)
-            {
-                if (((paramList.size() - 1) % 2) != 0)
-                    raiseError("add() parameters for index must be an even count");
+            { "number", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1)
+                    raiseError("number() takes one parameter");
+                return first.toNumber();
+            }},
 
-                auto& index = first.indexVal();
-                for (int a = 1; a < int(paramList.size()); a += 2)
-                {
-                    if (index.contains(paramList[a]))
-                        raiseError("add() index key repeated: " + num2str(a));
-                    index.set(paramList[a], paramList[a + 1]);
-                }
-                return first;
-            }
-            else
-                raiseError("add() only works with string, list, and index");
-        }
+            { "string", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1)
+                    raiseError("string() takes one parameter");
+                return first.toString();
+            }},
 
-        if (function == "set")
-        {
-            if (paramList.size() != 3)
-                raiseError("set() works with an item, a key, and a value");
+            { "list", [](object first, const object::list& paramList) -> object {
+                return object::list(paramList);
+            }},
 
-            if (first.type() != object::INDEX && paramList[1].type() != object::NUMBER)
-                raiseError("set() key must be a numeric index");
-
-            if (first.type() == object::STRING)
-            {
-                size_t idx = size_t(paramList[1].numberVal());
-                if (idx >= first.stringVal().size())
-                    raiseError("set() out of range");
-                if (paramList[2].type() != object::STRING || paramList[2].stringVal().size() > 1)
-                    raiseError("set() value must be a single character");
-                first.stringVal()[idx] = paramList[2].stringVal()[0];
-            }
-            else if (first.type() == object::LIST)
-            {
-                size_t idx = size_t(paramList[1].numberVal());
-                if (idx >= first.listVal().size())
-                    raiseError("set() out of range");
-                first.listVal()[idx] = paramList[2];
-            }
-            else if (first.type() == object::INDEX)
-            {
-                first.indexVal().set(paramList[1], paramList[2]);
-            }
-            else
-                raiseError("set() only works with string, list, and index");
-            return first;
-        }
-
-        if (function == "get")
-        {
-            if (paramList.size() != 2)
-                raiseError("get() invalid argument count");
-            
-            if (first.type() == object::INDEX)
-            {
-                object key = paramList[1];
-                auto& index = first.indexVal();
-                if (!index.contains(key))
-                    raiseError("get() key not found");
-                return index.get(key);
-            }
-
-            if (paramList[1].type() != object::NUMBER)
-                raiseError("get() parameter is not a number");
-
-            int idx = int(paramList[1].numberVal());
-
-            if (idx < 0 || idx >= int(first.length()))
-                raiseError("get() index is out of range");
-            
-            switch (first.type())
-            {
-            case object::STRING: return std::wstring{ first.stringVal()[idx] };
-            case object::LIST: return first.listVal()[idx];
-            default: raiseError("get() function only works with string, list, and index");
-            }
-        }
-
-        if (function == "has")
-        {
-            if (paramList.size() != 2)
-                raiseError("has() invalid parameter count");
-            if (first.type() == object::STRING)
-                return first.stringVal().find(paramList[1].toString()) != std::wstring::npos;
-            else if (first.type() == object::LIST)
-                return std::find(first.listVal().begin(), first.listVal().end(), paramList[1]) != first.listVal().end();
-            else if (first.type() == object::INDEX)
-                return first.indexVal().contains(paramList[1]);
-            else
-                raiseError("has() only works with string, list, and index");
-        }
-
-        if (function == "keys")
-        {
-            if (paramList.size() != 1)
-                raiseError("keys() works with one index");
-            if (first.type() != object::INDEX)
-                raiseError("keys() works with index");
-            return first.indexVal().keys(); // list == vector<object>, types match
-        }
-
-        if (function == "values")
-        {
-            if (paramList.size() != 1)
-                raiseError("values() works with one index");
-            if (first.type() != object::INDEX)
-                raiseError("values() works with index");
-            return first.indexVal().values(); // list == vector<object>, types match
-        }
-
-        if (function == "reversed")
-        {
-            if (paramList.size() != 1)
-                raiseError("reversed() works with one item");
-
-            if (first.type() == object::STRING)
-            {
-                auto copy = first.stringVal();
-                std::reverse(copy.begin(), copy.end());
-                return copy;
-            }
-            else if (first.type() == object::LIST)
-            {
-                auto copy = first.listVal();
-                std::reverse(copy.begin(), copy.end());
-                return copy;
-            }
-            else if (first.type() == object::INDEX)
-            {
-                auto keys = first.indexVal().keys();
-                std::reverse(keys.begin(), keys.end());
+            { "index", [](object first, const object::list& paramList) -> object {
+                if ((paramList.size() % 2) != 0)
+                    raiseError("index() parameters must be an even count, key-value pairs");
 
                 object::index newIndex;
-                for (const auto& key : keys)
-                    newIndex.set(key, first.indexVal().get(key));
-                return newIndex;
-            }
-            else
-                raiseError("reversed() only works with string, list, and index");
-        }
-
-        if (function == "sorted")
-        {
-            if (paramList.size() != 1)
-                raiseError("sorted() works with one item");
-            if (first.type() == object::STRING)
-            {
-                auto copy = first.stringVal();
-                std::sort(copy.begin(), copy.end());
-                return copy;
-            }
-            else if (first.type() == object::LIST)
-            {
-                auto copy = first.listVal();
-                std::sort(copy.begin(), copy.end());
-                return copy;
-            }
-            else if (first.type() == object::INDEX)
-            {
-                auto keys = first.indexVal().keys();
-                std::sort(keys.begin(), keys.end());
-
-                object::index newIndex;
-                for (const auto& key : keys)
-                    newIndex.set(key, first.indexVal().get(key));
-                return newIndex;
-            }
-            else
-                raiseError("sorted() only works with string, list, and index");
-        }
-
-        //
-        // Strings
-        //
-        if (function == "join")
-        {
-            if (paramList.size() > 2)
-                raiseError("join() takes item to work with, and optional separator");
-            if (first.type() != object::LIST)
-                raiseError("join() only works with list");
-
-            std::wstring separator = paramList.size() == 2 ? paramList[1].toString() : L"";
-            std::vector<std::wstring> strings;
-            strings.reserve(first.listVal().size());
-            for (const auto& obj : first.listVal())
-                strings.push_back(obj.toString());
-            return join(strings, separator.c_str());
-        }
-
-        if (function == "split")
-        {
-            if
-            (
-                paramList.size() != 2 
-                || 
-                first.type() != object::STRING 
-                || 
-                paramList[1].type() != object::STRING
-            )
-            {
-                raiseError("split() works with an item and separator");
-            }
-
-            std::wstring separator = paramList[1].stringVal();
-            auto splitted = split(first.stringVal(), separator.c_str());
-            object::list splittedObjs;
-            splittedObjs.reserve(splitted.size());
-            for (const auto& str : splitted)
-                splittedObjs.push_back(str);
-            return splittedObjs;
-        }
-
-        if (function == "trim" || function == "trimmed")
-        {
-            if (paramList.size() != 1 || first.type() != object::STRING)
-                raiseError("trimmed() works one string");
-            return trim(first.stringVal());
-        }
-
-        if (function == "toUpper")
-        {
-            if (paramList.size() != 1 || first.type() != object::STRING)
-                raiseError("toUpper() works with one string");
-            auto str = first.stringVal();
-            for (auto& c : str)
-                c = towupper(c);
-            return str;
-        }
-
-        if (function == "toLower")
-        {
-            if (paramList.size() != 1 || first.type() != object::STRING)
-                raiseError("toLower() works with one string");
-            auto str = first.stringVal();
-            for (auto& c : str)
-                c = towlower(c);
-            return str;
-        }
-
-        if (function == "replaced")
-        {
-            if
-            (
-                paramList.size() != 3
-                ||
-                (paramList[0].type() != object::STRING)
-                ||
-                (paramList[1].type() != object::STRING)
-                ||
-                (paramList[2].type() != object::STRING)
-            )
-            {
-                raiseError("replaced() takes a string, a string to find, and a string to replace it with");
-            }
-
-            std::wstring input = paramList[0].stringVal();
-            std::wstring toFind = paramList[1].stringVal();
-            std::wstring toReplaceWith = paramList[2].stringVal();
-            input = replace(input, toFind, toReplaceWith);
-            return input;
-        }
-
-        if (function == "random")
-        {
-            if
-            (
-                paramList.size() != 2
-                ||
-                paramList[0].type() != object::NUMBER
-                ||
-                paramList[1].type() != object::NUMBER
-            )
-            {
-                raiseError("random() takes two number parameters, min and max");
-            }
-
-            double parm1 = paramList[0].numberVal();
-            double parm2 = paramList[1].numberVal();
- 
-            double min = std::min(parm1, parm2);
-            double max = std::max(parm1, parm2);
-            
-            double rnd = (double(rand()) / RAND_MAX) * (max - min) + min;
-            return rnd;
-        }
-
-        //
-        // Searching and Slicing
-        //
-        if (function == "firstLocation")
-        {
-            if (paramList.size() != 2)
-                raiseError("firstLocation() works with an item to look in and a key to look for");
-
-            if (first.type() == object::STRING)
-            {
-                if (paramList[1].type() != object::STRING)
-                    raiseError("firstLocation() invalid parameter");
-                size_t idx = first.stringVal().find(paramList[1].stringVal());
-                if (idx == std::wstring::npos)
-                    return double(-1);
-                else
-                    return double(idx);
-            }
-            else if (first.type() == object::LIST)
-            {
-                const auto& l = first.listVal();
-                for (size_t i = 0; i < l.size(); ++i)
+                for (size_t i = 0; i < paramList.size(); i += 2)
                 {
-                    if (l[i] == paramList[1])
-                        return double(i);
+                    if (newIndex.contains(paramList[i]))
+                        raiseError("index() key repeated: " + num2str(double(i)));
+                    newIndex.set(paramList[i], paramList[i + 1]);
                 }
-                return double(-1);
-            }
-            else
-                raiseError("firstLocation() only works with string and list");
-        }
+                return newIndex;
+            }},
 
-        if (function == "lastLocation")
-        {
-            if (paramList.size() != 2)
-                raiseError("lastLocation() works with an item to look in and a key to look for");
+            { "clone", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1)
+                    raiseError("clone() takes one parameter");
+                return first.clone();
+            }},
 
-            if (first.type() == object::STRING)
-            {
-                if (paramList[1].type() != object::STRING)
-                    raiseError("lastLocation() invalid parameter");
-                size_t idx = first.stringVal().rfind(paramList[1].stringVal());
-                if (idx == std::wstring::npos)
-                    return double(-1);
-                else
-                    return double(idx);
-            }
-            else if (first.type() == object::LIST)
-            {
-                const auto& l = first.listVal();
-                for (int i = int(l.size()) - 1; i >= 0; --i)
+            //
+            // Collection Operations
+            //
+            { "length", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1)
+                    raiseError("length() takes one parameter");
+                return double(first.length());
+            }},
+
+            { "add", [](object first, const object::list& paramList) -> object {
+                if (first.type() == object::STRING)
                 {
-                    if (l[i] == paramList[1])
-                        return double(i);
+                    for (int v = 1; v < int(paramList.size()); ++v)
+                        first.stringVal() += paramList[v].toString();
+                    return first;
                 }
-                return double(-1);
-            }
-            else
-                raiseError("lastLocation() only works with string and list");
-        }
+                else if (first.type() == object::LIST)
+                {
+                    auto& list = first.listVal();
+                    for (int v = 1; v < int(paramList.size()); ++v)
+                        list.push_back(paramList[v]);
+                    return first;
+                }
+                else if (first.type() == object::INDEX)
+                {
+                    if (((paramList.size() - 1) % 2) != 0)
+                        raiseError("add() parameters for index must be an even count");
 
-        if (function == "subset")
-        {
-            if (paramList.size() != 2 && paramList.size() != 3)
-                raiseError("subset() works with an item and a start index and an optional length");
+                    auto& index = first.indexVal();
+                    for (int a = 1; a < int(paramList.size()); a += 2)
+                    {
+                        if (index.contains(paramList[a]))
+                            raiseError("add() index key repeated: " + num2str(a));
+                        index.set(paramList[a], paramList[a + 1]);
+                    }
+                    return first;
+                }
+                else
+                    raiseError("add() only works with string, list, and index");
+
+                if (paramList.size() != 1)
+                    raiseError("length() takes one parameter");
+                return double(first.length());
+            }},
             
-            int startIndex;
-            {
+            { "set", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 3)
+                    raiseError("set() works with an item, a key, and a value");
+
+                if (first.type() != object::INDEX && paramList[1].type() != object::NUMBER)
+                    raiseError("set() key must be a numeric index");
+
+                if (first.type() == object::STRING)
+                {
+                    size_t idx = size_t(paramList[1].numberVal());
+                    if (idx >= first.stringVal().size())
+                        raiseError("set() out of range");
+                    if (paramList[2].type() != object::STRING || paramList[2].stringVal().size() > 1)
+                        raiseError("set() value must be a single character");
+                    first.stringVal()[idx] = paramList[2].stringVal()[0];
+                }
+                else if (first.type() == object::LIST)
+                {
+                    size_t idx = size_t(paramList[1].numberVal());
+                    if (idx >= first.listVal().size())
+                        raiseError("set() out of range");
+                    first.listVal()[idx] = paramList[2];
+                }
+                else if (first.type() == object::INDEX)
+                {
+                    first.indexVal().set(paramList[1], paramList[2]);
+                }
+                else
+                    raiseError("set() only works with string, list, and index");
+                return first;
+            }},
+
+            { "get", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 2)
+                    raiseError("get() invalid argument count");
+
+                if (first.type() == object::INDEX)
+                {
+                    object key = paramList[1];
+                    auto& index = first.indexVal();
+                    if (!index.contains(key))
+                        raiseError("get() key not found");
+                    return index.get(key);
+                }
+
                 if (paramList[1].type() != object::NUMBER)
-                    raiseError("subset() start index must be number");
-                startIndex = int(paramList[1].numberVal());
-                if (startIndex < 0)
-                    raiseError("subset() start index must be greater than or equal zero");
-            }
+                    raiseError("get() parameter is not a number");
 
-            if (paramList.size() == 2)
-            {
+                int idx = int(paramList[1].numberVal());
+
+                if (idx < 0 || idx >= int(first.length()))
+                    raiseError("get() index is out of range");
+
+                switch (first.type())
+                {
+                case object::STRING: return object(std::wstring{ first.stringVal()[idx] });
+                case object::LIST: return first.listVal()[idx];
+                default: raiseError("get() function only works with string, list, and index");
+                }
+            } },
+
+            { "has", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 2)
+                    raiseError("has() invalid parameter count");
+                if (first.type() == object::STRING)
+                    return first.stringVal().find(paramList[1].toString()) != std::wstring::npos;
+                else if (first.type() == object::LIST)
+                    return std::find(first.listVal().begin(), first.listVal().end(), paramList[1]) != first.listVal().end();
+                else if (first.type() == object::INDEX)
+                    return first.indexVal().contains(paramList[1]);
+                else
+                    raiseError("has() only works with string, list, and index");
+            }},
+
+            { "keys", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::INDEX)
+                    raiseError("keys() works with one index");
+                else
+                    return first.indexVal().keys(); // list == vector<object>, types match
+            }},
+
+            { "values", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::INDEX)
+                    raiseError("values() works with one index");
+                else
+                    return first.indexVal().values(); // list == vector<object>, types match
+            } },
+
+            { "reversed", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1)
+                    raiseError("reversed() works with one item");
+
                 if (first.type() == object::STRING)
                 {
-                    const auto& s = first.stringVal();
-                    if (startIndex >= int(s.size()))
-                        raiseError("subset() start index must be less than the length of the string");
-                    return s.substr(startIndex);
+                    auto copy = first.stringVal();
+                    std::reverse(copy.begin(), copy.end());
+                    return copy;
                 }
                 else if (first.type() == object::LIST)
                 {
-                    const auto& list = first.listVal();
-                    if (startIndex >= int(list.size()))
-                        raiseError("subset() start index must be less than the length of the list");
-                    object::list subset;
-                    for (int i = startIndex; i < int(list.size()); ++i)
-                        subset.push_back(list[i]);
-                    return subset;
+                    auto copy = first.listVal();
+                    std::reverse(copy.begin(), copy.end());
+                    return copy;
+                }
+                else if (first.type() == object::INDEX)
+                {
+                    auto keys = first.indexVal().keys();
+                    std::reverse(keys.begin(), keys.end());
+
+                    object::index newIndex;
+                    for (const auto& key : keys)
+                        newIndex.set(key, first.indexVal().get(key));
+                    return newIndex;
                 }
                 else
-                    raiseError("subset() works with string and list");
-            }
-            else
-            {
-                int length;
-                {
-                    if (paramList[2].type() != object::NUMBER)
-                        raiseError("substring() invalid arguments");
-                    length = int(paramList[2].numberVal());
-                    if (length < 0)
-                        raiseError("subset() length must be greater than or equal zero");
-                }
+                    raiseError("reversed() only works with string, list, and index");
+            }},
 
+            { "sorted", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1)
+                    raiseError("sorted() works with one item");
                 if (first.type() == object::STRING)
                 {
-                    const auto& s = first.stringVal();
-                    if (startIndex >= int(s.size()))
-                        raiseError("subset() start index must be less than the length of the string");
-                    return s.substr(startIndex, length);
+                    auto copy = first.stringVal();
+                    std::sort(copy.begin(), copy.end());
+                    return copy;
                 }
                 else if (first.type() == object::LIST)
                 {
-                    const auto& list = first.listVal();
-                    if (startIndex >= int(list.size()))
-                        raiseError("subset() start index must be less than the length of the list");
-                    object::list subset;
-                    int endIndex = std::min(int(list.size()) - 1, startIndex + length - 1);
-                    if (endIndex >= int(list.size()))
-                        raiseError("subset() end index must be less than the length of the list");
-                    for (int i = startIndex; i <= endIndex; ++i)
-                        subset.push_back(list[i]);
-                    return subset;
+                    auto copy = first.listVal();
+                    std::sort(copy.begin(), copy.end());
+                    return copy;
+                }
+                else if (first.type() == object::INDEX)
+                {
+                    auto keys = first.indexVal().keys();
+                    std::sort(keys.begin(), keys.end());
+
+                    object::index newIndex;
+                    for (const auto& key : keys)
+                        newIndex.set(key, first.indexVal().get(key));
+                    return newIndex;
                 }
                 else
-                    raiseError("subset() works with string and list");
-            }
-        }
+                    raiseError("sorted() only works with string, list, and index");
+            }},
 
-        //
-        // Regular Expressions
-        //
-        if (function == "isMatch")
-        {
-            if (paramList.size() != 2)
-                raiseError("isMatch() works string to match and pattern");
-            if (paramList[0].type() != object::STRING)
-                raiseError("isMatch() only works with string input");
-            if (paramList[1].type() != object::STRING)
-                raiseError("isMatch() only works with string input");
+            //
+            // Strings
+            //
+            { "join", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() > 2)
+                    raiseError("join() takes item to work with, and optional separator");
+                if (first.type() != object::LIST)
+                    raiseError("join() only works with list");
 
-            std::wregex re(paramList[1].stringVal());
-            return std::regex_match(paramList[0].stringVal(), re);
-        }
+                std::wstring separator = paramList.size() == 2 ? paramList[1].toString() : L"";
+                std::vector<std::wstring> strings;
+                strings.reserve(first.listVal().size());
+                for (const auto& obj : first.listVal())
+                    strings.push_back(obj.toString());
+                return join(strings, separator.c_str());
+            } },
 
-        if (function == "getMatches")
-        {
-            if (paramList.size() != 2)
-                raiseError("getMatches() works string to match and pattern");
-            if (paramList[0].type() != object::STRING)
-                raiseError("getMatches() only works with string input");
-            if (paramList[1].type() != object::STRING)
-                raiseError("getMatches() only works with string input");
-                
-            std::wregex re(paramList[1].stringVal());
-
-            object::list output;
-            std::wsmatch sm;
-            std::regex_match(paramList[0].stringVal(), sm, re);
-            for (const auto& m : sm)
-                output.push_back(m.str());
-            return output;
-        }
-
-        //
-        // Process Control
-        //
-        if (function == "exec")
-        {
-            if (paramList.size() < 1 || paramList[0].type() != object::STRING)
-                raiseError("exec() works with a command string");
-
-            if (paramList.size() == 2 && paramList[1].type() != object::INDEX)
-                raiseError("exec() works with a command string and an optional index");
-
-            object::index options;
-            if (paramList.size() >= 2)
-                options = paramList[1].indexVal();
-
-            object::index retVal;
-            retVal.set(toWideStr("success"), false);
-            retVal.set(toWideStr("exit_code"), -1.0);
-            retVal.set(toWideStr("output"), toWideStr(""));
-
-            std::wstring method;
-            {
-                object methodObj;
-                if (options.tryGet(toWideStr("method"), methodObj))
+            { "split", [](object first, const object::list& paramList) -> object {
+                if
+                (
+                    paramList.size() != 2
+                    ||
+                    first.type() != object::STRING
+                    ||
+                    paramList[1].type() != object::STRING
+                )
                 {
-                    if (methodObj.type() != object::STRING)
-                        raiseError("exec() method option must be a string, popen or system");
-                    else
-                        method = methodObj.stringVal();
+                    raiseError("split() works with an item and separator");
                 }
-            }
 
-            bool ignore_errors = false;
-            {
-                object flagObj;
-                if (options.tryGet(toWideStr("ignore_errors"), flagObj))
+                std::wstring separator = paramList[1].stringVal();
+                auto splitted = split(first.stringVal(), separator.c_str());
+                object::list splittedObjs;
+                splittedObjs.reserve(splitted.size());
+                for (const auto& str : splitted)
+                    splittedObjs.push_back(str);
+                return splittedObjs;
+            } },
+
+            { "trimmed", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::STRING)
+                    raiseError("trimmed() works with one string");
+                return trim(first.stringVal());
+            }},
+
+            { "toUpper", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::STRING)
+                    raiseError("toUpper() works with one string");
+                auto str = first.stringVal();
+                for (auto& c : str)
+                    c = towupper(c);
+                return str;
+            } },
+
+            { "toLower", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::STRING)
+                    raiseError("toLower() works with one string");
+                auto str = first.stringVal();
+                for (auto& c : str)
+                    c = towlower(c);
+                return str;
+            } },
+
+            { "replaced", [](object first, const object::list& paramList) -> object {
+                if
+                (
+                    paramList.size() != 3
+                    ||
+                    (paramList[0].type() != object::STRING)
+                    ||
+                    (paramList[1].type() != object::STRING)
+                    ||
+                    (paramList[2].type() != object::STRING)
+                )
                 {
-                    if (flagObj.type() != object::BOOL)
-                        raiseError("exec() ignore_errors option must be true or false");
-                    else
-                        ignore_errors = flagObj.boolVal();
+                    raiseError("replaced() takes a string, a string to find, and a string to replace it with");
                 }
-            }
 
-            int exit_code = -1;
-            if (method.empty() || method == L"popen")
-            {
-                FILE* file = _wpopen(paramList[0].stringVal().c_str(), L"rt");
-                if (file == nullptr)
-                    return retVal;
+                std::wstring input = paramList[0].stringVal();
+                std::wstring toFind = paramList[1].stringVal();
+                std::wstring toReplaceWith = paramList[2].stringVal();
+                input = replace(input, toFind, toReplaceWith);
+                return input;
+            } },
 
-                char buffer[4096];
-                std::string output;
-                while (fgets(buffer, sizeof(buffer), file))
-                    output.append(buffer);
-                retVal.set(toWideStr("output"), toWideStr(output));
+            { "random", [](object first, const object::list& paramList) -> object {
+                if
+                (
+                    paramList.size() != 2
+                    ||
+                    paramList[0].type() != object::NUMBER
+                    ||
+                    paramList[1].type() != object::NUMBER
+                )
+                {
+                    raiseError("random() takes two number parameters, min and max");
+                }
 
-                retVal.set(toWideStr("success"), bool(feof(file)));
+                double parm1 = paramList[0].numberVal();
+                double parm2 = paramList[1].numberVal();
 
-                exit_code = _pclose(file);
-                file = nullptr;
-            }
-            else if (method == L"system")
-            {
-                exit_code = ::system(toNarrowStr(paramList[0].stringVal()).c_str());
-                retVal.set(toWideStr("success"), true);
-            }
-            else
-                raiseError("exec() invalid method, must be popen or system");
+                double min = std::min(parm1, parm2);
+                double max = std::max(parm1, parm2);
 
-            retVal.set(toWideStr("exit_code"), double(exit_code));
+                double rnd = (double(rand()) / RAND_MAX) * (max - min) + min;
+                return rnd;
+            } },
 
-            if (!ignore_errors)
-            {
-                if (!retVal.get(toWideStr("success")).boolVal())
-                    raiseError("exec() failed executing command");
-                else if (exit_code != 0)
-                    raiseError("exec() failed with exit code " + std::to_string(exit_code));
-            }
+            //
+            // Searching and Slicing
+            //
+            { "firstLocation", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 2)
+                    raiseError("firstLocation() works with an item to look in and a key to look for");
 
-            return retVal;
-        }
+                if (first.type() == object::STRING)
+                {
+                    if (paramList[1].type() != object::STRING)
+                        raiseError("firstLocation() invalid parameter");
+                    size_t idx = first.stringVal().find(paramList[1].stringVal());
+                    if (idx == std::wstring::npos)
+                        return double(-1);
+                    else
+                        return double(idx);
+                }
+                else if (first.type() == object::LIST)
+                {
+                    const auto& l = first.listVal();
+                    for (size_t i = 0; i < l.size(); ++i)
+                    {
+                        if (l[i] == paramList[1])
+                            return double(i);
+                    }
+                    return double(-1);
+                }
+                else
+                    raiseError("firstLocation() only works with string and list");
+            } },
 
-        if (function == "setEnv")
-        {
-            if (paramList.size() != 2 || paramList[0].type() != object::STRING || paramList[1].type() != object::STRING)
-                raiseError("setEnv() works with name and value string parameters");
+            { "lastLocation", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 2)
+                    raiseError("lastLocation() works with an item to look in and a key to look for");
 
-            if (_wputenv((paramList[0].stringVal() + L"=" + paramList[1].stringVal()).c_str()) != 0)
-                raiseError("setEnv() setting environment variable failed");
+                if (first.type() == object::STRING)
+                {
+                    if (paramList[1].type() != object::STRING)
+                        raiseError("lastLocation() invalid parameter");
+                    size_t idx = first.stringVal().rfind(paramList[1].stringVal());
+                    if (idx == std::wstring::npos)
+                        return double(-1);
+                    else
+                        return double(idx);
+                }
+                else if (first.type() == object::LIST)
+                {
+                    const auto& l = first.listVal();
+                    for (int i = int(l.size()) - 1; i >= 0; --i)
+                    {
+                        if (l[i] == paramList[1])
+                            return double(i);
+                    }
+                    return double(-1);
+                }
+                else
+                    raiseError("lastLocation() only works with string and list");
+            } },
 
-            return object();
-        }
+            { "subset", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 2 && paramList.size() != 3)
+                    raiseError("subset() works with an item and a start index and an optional length");
 
-        if (function == "getEnv")
-        {
-            if (paramList.size() != 1 || paramList[0].type() != object::STRING)
-                raiseError("getEnv() works with one name string parameter");
+                int startIndex;
+                {
+                    if (paramList[1].type() != object::NUMBER)
+                        raiseError("subset() start index must be number");
+                    startIndex = int(paramList[1].numberVal());
+                    if (startIndex < 0)
+                        raiseError("subset() start index must be greater than or equal zero");
+                }
 
-            std::wstring envValStr;
-            {
-                const wchar_t* envVal = _wgetenv(paramList[0].stringVal().c_str());
-                if (envVal != nullptr)
-                    envValStr = envVal;
-            }
-            return envValStr;
-        }
+                if (paramList.size() == 2)
+                {
+                    if (first.type() == object::STRING)
+                    {
+                        const auto& s = first.stringVal();
+                        if (startIndex >= int(s.size()))
+                            raiseError("subset() start index must be less than the length of the string");
+                        else
+                            return s.substr(startIndex);
+                    }
+                    else if (first.type() == object::LIST)
+                    {
+                        const auto& list = first.listVal();
+                        if (startIndex >= int(list.size()))
+                            raiseError("subset() start index must be less than the length of the list");
+                        object::list subset;
+                        for (int i = startIndex; i < int(list.size()); ++i)
+                            subset.push_back(list[i]);
+                        return subset;
+                    }
+                    else
+                        raiseError("subset() works with string and list");
+                }
+                else
+                {
+                    int length;
+                    {
+                        if (paramList[2].type() != object::NUMBER)
+                            raiseError("substring() invalid arguments");
+                        length = int(paramList[2].numberVal());
+                        if (length < 0)
+                            raiseError("subset() length must be greater than or equal zero");
+                    }
 
-        if (function == "exit")
-        {
-            if (paramList.size() != 1 || first.type() != object::NUMBER)
-                raiseError("exit() works with one exit code number");
-            exit(int(first.numberVal()));
-        }
+                    if (first.type() == object::STRING)
+                    {
+                        const auto& s = first.stringVal();
+                        if (startIndex >= int(s.size()))
+                            raiseError("subset() start index must be less than the length of the string");
+                        else
+                            return s.substr(startIndex, length);
+                    }
+                    else if (first.type() == object::LIST)
+                    {
+                        const auto& list = first.listVal();
+                        if (startIndex >= int(list.size()))
+                            raiseError("subset() start index must be less than the length of the list");
+                        object::list subset;
+                        int endIndex = std::min(int(list.size()) - 1, startIndex + length - 1);
+                        if (endIndex >= int(list.size()))
+                            raiseError("subset() end index must be less than the length of the list");
+                        for (int i = startIndex; i <= endIndex; ++i)
+                            subset.push_back(list[i]);
+                        return subset;
+                    }
+                    else
+                        raiseError("subset() works with string and list");
+                }
+            } },
 
-        if (function == "error")
-        {
-            if (paramList.size() != 1)
-                raiseError("error() works with one object for error handling");
-            throw user_exception(first);
-        }
+            //
+            // Regular Expressions
+            //
+            { "isMatch", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 2)
+                    raiseError("isMatch() works string to match and pattern");
+                if (paramList[0].type() != object::STRING)
+                    raiseError("isMatch() only works with string input");
+                if (paramList[1].type() != object::STRING)
+                    raiseError("isMatch() only works with string input");
 
-        if (function == "sleep")
-        {
-            if (paramList.size() != 1 || first.type() != object::NUMBER)
-                raiseError("sleep() works with one parameter, the number of seconds to sleep");
-            std::this_thread::sleep_for(std::chrono::seconds(int(first.numberVal())));
-            return true;
-        }
+                std::wregex re(paramList[1].stringVal());
+                return std::regex_match(paramList[0].stringVal(), re);
+            } },
 
-        //
-        // File I/O
-        //
-        if (function == "readFile")
-        {
-            if (paramList.size() != 2
-                || paramList[0].type() != object::STRING
-                || paramList[1].type() != object::STRING)
-            {
-                raiseError("readFile() works with a file path string and an encoding string");
-            }
+            { "getMatches", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 2)
+                    raiseError("getMatches() works string to match and pattern");
+                if (paramList[0].type() != object::STRING)
+                    raiseError("getMatches() only works with string input");
+                if (paramList[1].type() != object::STRING)
+                    raiseError("getMatches() only works with string input");
 
-            std::wstring filePath = paramList[0].stringVal();
-            std::wstring encoding = paramList[1].stringVal();
+                std::wregex re(paramList[1].stringVal());
 
-            if (encoding == L"ascii")
-            {
-                std::ifstream file(filePath);
-                if (!file)
-                    return object();
-
-                std::stringstream stream;
-                stream << file.rdbuf();
-                
-                std::string output = stream.str();
-                return toWideStr(output);
-            }
-
-            if (encoding == L"utf-8" || encoding == L"utf-16")
-            {
-                std::wifstream file(filePath);
-                if (encoding == L"utf-8")
-                    file.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
-                if (!file)
-                    return object();
-
-                std::wstringstream stream;
-                stream << file.rdbuf();
-
-                std::wstring output = stream.str();
+                object::list output;
+                std::wsmatch sm;
+                std::regex_match(paramList[0].stringVal(), sm, re);
+                for (const auto& m : sm)
+                    output.push_back(m.str());
                 return output;
-            }
 
-            raiseError("Unsupported readFile() encoding: must be ascii, utf-8, or utf-16");
-        }
+            } },
 
-        if (function == "writeFile")
-        {
-            if (paramList.size() != 3
-                || paramList[0].type() != object::STRING
-                || paramList[1].type() != object::STRING
-                || paramList[2].type() != object::STRING)
-            {
-                raiseError("writeFile() works with a file path string, file contents string, and an encoding string");
-            }
+            //
+            // Process Control
+            //
+            { "exec", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() < 1 || paramList[0].type() != object::STRING)
+                    raiseError("exec() works with a command string");
 
-            std::wstring filePath = paramList[0].stringVal();
-            std::wstring contents = paramList[1].stringVal();
-            std::wstring encoding = paramList[2].stringVal();
+                if (paramList.size() == 2 && paramList[1].type() != object::INDEX)
+                    raiseError("exec() works with a command string and an optional index");
 
-            if (encoding == L"ascii")
-            {
-                std::ofstream file(filePath, std::ofstream::trunc);
-                if (!file)
-                    return false;
+                object::index options;
+                if (paramList.size() >= 2)
+                    options = paramList[1].indexVal();
 
-                std::string narrow = toNarrowStr(contents);
-                file.write(narrow.c_str(), narrow.size());
+                object::index retVal;
+                retVal.set(toWideStr("success"), false);
+                retVal.set(toWideStr("exit_code"), -1.0);
+                retVal.set(toWideStr("output"), toWideStr(""));
+
+                std::wstring method;
+                bool ignore_errors = false;
+                for (auto option : options.vec())
+                {
+                    if (option.first.type() != object::STRING)
+                        raiseWError(L"Invalid option for exec() function; key is not a string: " + option.first.toString());
+
+                    std::string optionName = toNarrowStr(option.first.stringVal());
+                    if (optionName == "method")
+                    {
+                        object methodObj = option.second;
+                        if (methodObj.type() != object::STRING)
+                            raiseError("exec() method option must be a string, popen or system");
+                        else
+                            method = methodObj.stringVal();
+                    }
+                    else if (optionName == "ignore_errors")
+                    {
+                        object flagObj = option.second;
+                        if (flagObj.type() != object::BOOL)
+                            raiseError("exec() ignore_errors option must be true or false");
+                        else
+                            ignore_errors = flagObj.boolVal();
+                    }
+                    else
+                        raiseError("Invalid option to exec(): " + optionName);
+                }
+
+                int exit_code = -1;
+                if (method.empty() || method == L"popen")
+                {
+                    FILE* file = _wpopen(paramList[0].stringVal().c_str(), L"rt");
+                    if (file == nullptr)
+                        return retVal;
+
+                    char buffer[4096];
+                    std::string output;
+                    while (fgets(buffer, sizeof(buffer), file))
+                        output.append(buffer);
+                    retVal.set(toWideStr("output"), toWideStr(output));
+
+                    retVal.set(toWideStr("success"), bool(feof(file)));
+
+                    exit_code = _pclose(file);
+                    file = nullptr;
+                }
+                else if (method == L"system")
+                {
+                    exit_code = ::system(toNarrowStr(paramList[0].stringVal()).c_str());
+                    retVal.set(toWideStr("success"), true);
+                }
+                else
+                    raiseError("exec() invalid method, must be popen or system");
+
+                retVal.set(toWideStr("exit_code"), double(exit_code));
+
+                if (!ignore_errors)
+                {
+                    if (!retVal.get(toWideStr("success")).boolVal())
+                        raiseError("exec() failed executing command");
+                    else if (exit_code != 0)
+                        raiseError("exec() failed with exit code " + std::to_string(exit_code));
+                }
+
+                return retVal;
+            } },
+
+            { "setEnv", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 2 || paramList[0].type() != object::STRING || paramList[1].type() != object::STRING)
+                    raiseError("setEnv() works with name and value string parameters");
+
+                if (_wputenv((paramList[0].stringVal() + L"=" + paramList[1].stringVal()).c_str()) != 0)
+                    raiseError("setEnv() setting environment variable failed");
+
+                return object();
+            } },
+
+            { "getEnv", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || paramList[0].type() != object::STRING)
+                    raiseError("getEnv() works with one name string parameter");
+
+                std::wstring envValStr;
+                {
+                    const wchar_t* envVal = _wgetenv(paramList[0].stringVal().c_str());
+                    if (envVal != nullptr)
+                        envValStr = envVal;
+                }
+                return envValStr;
+            } },
+
+            { "exit", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::NUMBER)
+                    raiseError("exit() works with one exit code number");
+                exit(int(first.numberVal()));
+            } },
+
+            { "error", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1)
+                    raiseError("error() works with one object for error handling");
+                throw user_exception(first);
+            } },
+
+            { "sleep", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::NUMBER)
+                    raiseError("sleep() works with one parameter, the number of seconds to sleep");
+                std::this_thread::sleep_for(std::chrono::seconds(int(first.numberVal())));
                 return true;
-            }
+            } },
 
-            if (encoding == L"utf-8" || encoding == L"utf-16")
-            {
-                std::wofstream file(filePath, std::wofstream::trunc);
-                if (encoding == L"utf-8")
-                    file.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
-                if (!file)
-                    return false;
-                file.write(contents.c_str(), contents.size());
-                file.close();
-                return true;
-            }
+            //
+            // File I/O
+            //
+            { "readFile", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 2
+                    || paramList[0].type() != object::STRING
+                    || paramList[1].type() != object::STRING)
+                {
+                    raiseError("readFile() works with a file path string and an encoding string");
+                }
 
-            raiseError("Unsupported writeFile() encoding: must be ascii, utf-8, or utf-16");
-        }
+                std::wstring filePath = paramList[0].stringVal();
+                std::wstring encoding = paramList[1].stringVal();
 
-        //
-        // JSON
-        //
-        if (function == "toJson")
-        {
-            if (paramList.size() != 1)
-                raiseError("toJson() takes one object to turn into JSON");
-            return objectToJson(paramList[0]);
-        }
+                if (encoding == L"ascii")
+                {
+                    std::ifstream file(filePath);
+                    if (!file)
+                        return object();
 
-        if (function == "fromJson")
-        {
-            if (paramList.size() != 1 || paramList[0].type() != object::STRING)
-                raiseError("fromJson() takes one JSON string to turn into an object");
-            return objectFromJson(paramList[0].stringVal());
-        }
+                    std::stringstream stream;
+                    stream << file.rdbuf();
+
+                    std::string output = stream.str();
+                    return toWideStr(output);
+                }
+
+                if (encoding == L"utf-8" || encoding == L"utf-16")
+                {
+                    std::wifstream file(filePath);
+                    if (encoding == L"utf-8")
+                        file.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
+                    if (!file)
+                        return object();
+
+                    std::wstringstream stream;
+                    stream << file.rdbuf();
+
+                    std::wstring output = stream.str();
+                    return object(output);
+                }
+
+                raiseError("Unsupported readFile() encoding: must be ascii, utf-8, or utf-16");
+            } },
+
+            { "writeFile", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 3
+                    || paramList[0].type() != object::STRING
+                    || paramList[1].type() != object::STRING
+                    || paramList[2].type() != object::STRING)
+                {
+                    raiseError("writeFile() works with a file path string, file contents string, and an encoding string");
+                }
+
+                std::wstring filePath = paramList[0].stringVal();
+                std::wstring contents = paramList[1].stringVal();
+                std::wstring encoding = paramList[2].stringVal();
+
+                if (encoding == L"ascii")
+                {
+                    std::ofstream file(filePath, std::ofstream::trunc);
+                    if (!file)
+                        return false;
+
+                    std::string narrow = toNarrowStr(contents);
+                    file.write(narrow.c_str(), narrow.size());
+                    return true;
+                }
+
+                if (encoding == L"utf-8" || encoding == L"utf-16")
+                {
+                    std::wofstream file(filePath, std::wofstream::trunc);
+                    if (encoding == L"utf-8")
+                        file.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
+                    if (!file)
+                        return false;
+                    file.write(contents.c_str(), contents.size());
+                    file.close();
+                    return true;
+                }
+
+                raiseError("Unsupported writeFile() encoding: must be ascii, utf-8, or utf-16");
+            } },
+
+            //
+            // JSON
+            //
+            { "toJson", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1)
+                    raiseError("toJson() takes one object to turn into JSON");
+                return objectToJson(paramList[0]);
+            } },
+
+            { "fromJson", [](object first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || paramList[0].type() != object::STRING)
+                    raiseError("fromJson() takes one JSON string to turn into an object");
+                return objectFromJson(paramList[0].stringVal());
+            } },
+        };
 
         //
         // Function calls
         //
-        if (m_callable.hasFunction(functionW)) // user functions
+
+        // built in functions
+        const auto& funcIt = functions.find(function);
+        if (funcIt != functions.end())
+            return funcIt->second(first, paramList);
+
+        // user functions
+        if (m_callable.hasFunction(functionW)) 
         {
             object answer = m_callable.callFunction(functionW, paramList);
             return answer;
