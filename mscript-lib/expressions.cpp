@@ -1297,7 +1297,7 @@ namespace mscript
                     {
                         raiseError("curDir() drive must be a letter and an optional :");
                     }
-                    int drive = 1 + (int(first.stringVal()[0]) - int('A'));
+                    int drive = 1 + (int(toUpper(first.stringVal())[0]) - int('A'));
                     wchar_t* buffer = _wgetdcwd(drive, nullptr, 0);
                     if (buffer != nullptr)
                     {
