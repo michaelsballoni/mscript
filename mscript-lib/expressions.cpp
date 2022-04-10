@@ -562,71 +562,73 @@ namespace mscript
 
         object first = paramList.size() == 0 ? object::NOTHING : paramList[0];
 
-        typedef std::function<object(object first, const object::list& paramList)> msFunc;
-        static std::unordered_map<std::string, msFunc> functions
+        static std::unordered_map<std::string, std::function<object(object& first, const object::list& paramList)>> functions
         {
             //
             // Math
             //
-            { "abs", [](object first, const object::list& paramList) -> object { return abs(getOneDouble(paramList, "abs")); }},
-            { "sqrt", [](object first, const object::list& paramList) -> object { return sqrt(getOneDouble(paramList, "sqrt")); }},
+            { "abs", [](object& first, const object::list& paramList) -> object { (void)first; return abs(getOneDouble(paramList, "abs")); }},
+            { "sqrt", [](object& first, const object::list& paramList) -> object { (void)first; return sqrt(getOneDouble(paramList, "sqrt")); }},
 
-            { "ceil", [](object first, const object::list& paramList) -> object { return ceil(getOneDouble(paramList, "ceil")); }},
-            { "floor", [](object first, const object::list& paramList) -> object { return floor(getOneDouble(paramList, "floor")); }},
+            { "ceil", [](object& first, const object::list& paramList) -> object { (void)first; return ceil(getOneDouble(paramList, "ceil")); }},
+            { "floor", [](object& first, const object::list& paramList) -> object { (void)first; return floor(getOneDouble(paramList, "floor")); }},
 
-            { "exp", [](object first, const object::list& paramList) -> object { return exp(getOneDouble(paramList, "exp")); }},
-            { "log", [](object first, const object::list& paramList) -> object { return log(getOneDouble(paramList, "log")); }},
-            { "log2", [](object first, const object::list& paramList) -> object { return log2(getOneDouble(paramList, "log2")); }},
-            { "log10", [](object first, const object::list& paramList) -> object { return log10(getOneDouble(paramList, "log10")); }},
+            { "exp", [](object& first, const object::list& paramList) -> object { (void)first; return exp(getOneDouble(paramList, "exp")); }},
+            { "log", [](object& first, const object::list& paramList) -> object { (void)first; return log(getOneDouble(paramList, "log")); }},
+            { "log2", [](object& first, const object::list& paramList) -> object { (void)first; return log2(getOneDouble(paramList, "log2")); }},
+            { "log10", [](object& first, const object::list& paramList) -> object { (void)first; return log10(getOneDouble(paramList, "log10")); }},
 
-            { "sin", [](object first, const object::list& paramList) -> object { return sin(getOneDouble(paramList, "sin")); }},
-            { "cos", [](object first, const object::list& paramList) -> object { return cos(getOneDouble(paramList, "cos")); }},
-            { "tan", [](object first, const object::list& paramList) -> object { return tan(getOneDouble(paramList, "tan")); }},
+            { "sin", [](object& first, const object::list& paramList) -> object { (void)first; return sin(getOneDouble(paramList, "sin")); }},
+            { "cos", [](object& first, const object::list& paramList) -> object { (void)first; return cos(getOneDouble(paramList, "cos")); }},
+            { "tan", [](object& first, const object::list& paramList) -> object { (void)first; return tan(getOneDouble(paramList, "tan")); }},
 
-            { "asin", [](object first, const object::list& paramList) -> object { return asin(getOneDouble(paramList, "asin")); }},
-            { "acos", [](object first, const object::list& paramList) -> object { return acos(getOneDouble(paramList, "acos")); }},
-            { "atan", [](object first, const object::list& paramList) -> object { return atan(getOneDouble(paramList, "atan")); }},
+            { "asin", [](object& first, const object::list& paramList) -> object { (void)first; return asin(getOneDouble(paramList, "asin")); }},
+            { "acos", [](object& first, const object::list& paramList) -> object { (void)first; return acos(getOneDouble(paramList, "acos")); }},
+            { "atan", [](object& first, const object::list& paramList) -> object { (void)first; return atan(getOneDouble(paramList, "atan")); }},
 
-            { "sinh", [](object first, const object::list& paramList) -> object { return sinh(getOneDouble(paramList, "sinh")); }},
-            { "cosh", [](object first, const object::list& paramList) -> object { return cosh(getOneDouble(paramList, "cosh")); }},
-            { "tanh", [](object first, const object::list& paramList) -> object { return tanh(getOneDouble(paramList, "tanh")); }},
+            { "sinh", [](object& first, const object::list& paramList) -> object { (void)first; return sinh(getOneDouble(paramList, "sinh")); }},
+            { "cosh", [](object& first, const object::list& paramList) -> object { (void)first; return cosh(getOneDouble(paramList, "cosh")); }},
+            { "tanh", [](object& first, const object::list& paramList) -> object { (void)first; return tanh(getOneDouble(paramList, "tanh")); }},
 
-            { "round", [](object first, const object::list& paramList) -> object {
+            { "round", [](object& first, const object::list& paramList) -> object {
+                (void)first;
                 if (paramList.size() == 1)
                     return round(getOneDouble(paramList, "round"));
-                if (paramList.size() != 2 || paramList[0].type() != object::NUMBER || paramList[1].type() != object::NUMBER)
+                if (paramList.size() != 2 || first.type() != object::NUMBER || paramList[1].type() != object::NUMBER)
                     raiseError("round() works with a number and a number of places to round to");
 
                 int slider = int(pow(10, int(paramList[1].numberVal())));
-                return floor(paramList[0].numberVal() * slider) / slider;
+                return floor(first.numberVal() * slider) / slider;
             }},
 
             //
             // Type Operations
             //
-            { "getType", [](object first, const object::list& paramList) -> object {
+            { "getType", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1)
                     raiseError("getType() takes one parameter");
                 return toWideStr(first.typeStr());
             }},
 
-            { "number", [](object first, const object::list& paramList) -> object {
+            { "number", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1)
                     raiseError("number() takes one parameter");
                 return first.toNumber();
             }},
 
-            { "string", [](object first, const object::list& paramList) -> object {
+            { "string", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1)
                     raiseError("string() takes one parameter");
                 return first.toString();
             }},
 
-            { "list", [](object first, const object::list& paramList) -> object {
+            { "list", [](object& first, const object::list& paramList) -> object {
+                (void)first;
                 return object::list(paramList);
             }},
 
-            { "index", [](object first, const object::list& paramList) -> object {
+            { "index", [](object& first, const object::list& paramList) -> object {
+                (void)first;
                 if ((paramList.size() % 2) != 0)
                     raiseError("index() parameters must be an even count, key-value pairs");
 
@@ -640,7 +642,7 @@ namespace mscript
                 return newIndex;
             }},
 
-            { "clone", [](object first, const object::list& paramList) -> object {
+            { "clone", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1)
                     raiseError("clone() takes one parameter");
                 return first.clone();
@@ -649,13 +651,13 @@ namespace mscript
             //
             // Collection Operations
             //
-            { "length", [](object first, const object::list& paramList) -> object {
+            { "length", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1)
                     raiseError("length() takes one parameter");
                 return double(first.length());
             }},
 
-            { "add", [](object first, const object::list& paramList) -> object {
+            { "add", [](object& first, const object::list& paramList) -> object {
                 if (first.type() == object::STRING)
                 {
                     for (int v = 1; v < int(paramList.size()); ++v)
@@ -691,7 +693,7 @@ namespace mscript
                 return double(first.length());
             }},
             
-            { "set", [](object first, const object::list& paramList) -> object {
+            { "set", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 3)
                     raiseError("set() works with an item, a key, and a value");
 
@@ -723,7 +725,7 @@ namespace mscript
                 return first;
             }},
 
-            { "get", [](object first, const object::list& paramList) -> object {
+            { "get", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 2)
                     raiseError("get() invalid argument count");
 
@@ -752,7 +754,7 @@ namespace mscript
                 }
             } },
 
-            { "has", [](object first, const object::list& paramList) -> object {
+            { "has", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 2)
                     raiseError("has() invalid parameter count");
                 if (first.type() == object::STRING)
@@ -765,21 +767,21 @@ namespace mscript
                     raiseError("has() only works with string, list, and index");
             }},
 
-            { "keys", [](object first, const object::list& paramList) -> object {
+            { "keys", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1 || first.type() != object::INDEX)
                     raiseError("keys() works with one index");
                 else
                     return first.indexVal().keys(); // list == vector<object>, types match
             }},
 
-            { "values", [](object first, const object::list& paramList) -> object {
+            { "values", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1 || first.type() != object::INDEX)
                     raiseError("values() works with one index");
                 else
                     return first.indexVal().values(); // list == vector<object>, types match
             } },
 
-            { "reversed", [](object first, const object::list& paramList) -> object {
+            { "reversed", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1)
                     raiseError("reversed() works with one item");
 
@@ -809,7 +811,7 @@ namespace mscript
                     raiseError("reversed() only works with string, list, and index");
             }},
 
-            { "sorted", [](object first, const object::list& paramList) -> object {
+            { "sorted", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1)
                     raiseError("sorted() works with one item");
                 if (first.type() == object::STRING)
@@ -841,7 +843,7 @@ namespace mscript
             //
             // Strings
             //
-            { "join", [](object first, const object::list& paramList) -> object {
+            { "join", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() > 2)
                     raiseError("join() takes item to work with, and optional separator");
                 if (first.type() != object::LIST)
@@ -855,7 +857,7 @@ namespace mscript
                 return join(strings, separator.c_str());
             } },
 
-            { "split", [](object first, const object::list& paramList) -> object {
+            { "split", [](object& first, const object::list& paramList) -> object {
                 if
                 (
                     paramList.size() != 2
@@ -877,13 +879,13 @@ namespace mscript
                 return splittedObjs;
             } },
 
-            { "trimmed", [](object first, const object::list& paramList) -> object {
+            { "trimmed", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("trimmed() works with one string");
                 return trim(first.stringVal());
             }},
 
-            { "toUpper", [](object first, const object::list& paramList) -> object {
+            { "toUpper", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("toUpper() works with one string");
                 auto str = first.stringVal();
@@ -892,7 +894,7 @@ namespace mscript
                 return str;
             } },
 
-            { "toLower", [](object first, const object::list& paramList) -> object {
+            { "toLower", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("toLower() works with one string");
                 auto str = first.stringVal();
@@ -901,7 +903,8 @@ namespace mscript
                 return str;
             } },
 
-            { "replaced", [](object first, const object::list& paramList) -> object {
+            { "replaced", [](object& first, const object::list& paramList) -> object {
+                (void)first;
                 if
                 (
                     paramList.size() != 3
@@ -923,7 +926,8 @@ namespace mscript
                 return input;
             } },
 
-            { "random", [](object first, const object::list& paramList) -> object {
+            { "random", [](object& first, const object::list& paramList) -> object {
+                (void)first;
                 if
                 (
                     paramList.size() != 2
@@ -946,10 +950,19 @@ namespace mscript
                 return rnd;
             } },
 
+            { "fmt", [](object& first, const object::list& paramList) -> object {
+                if (paramList.size() < 1 || first.type() != object::STRING)
+                    raiseError("fmt() one string, and other parameters to insert");
+                std::wstring format = first.stringVal();
+                for (size_t p = 1; p < paramList.size(); ++p)
+                    format = replace(format, L"{" + std::to_wstring(p - 1) + L"}", paramList[p].toString());
+                return format;
+            } },
+                
             //
             // Searching and Slicing
             //
-            { "firstLocation", [](object first, const object::list& paramList) -> object {
+            { "firstLocation", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 2)
                     raiseError("firstLocation() works with an item to look in and a key to look for");
 
@@ -977,7 +990,7 @@ namespace mscript
                     raiseError("firstLocation() only works with string and list");
             } },
 
-            { "lastLocation", [](object first, const object::list& paramList) -> object {
+            { "lastLocation", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 2)
                     raiseError("lastLocation() works with an item to look in and a key to look for");
 
@@ -1005,7 +1018,7 @@ namespace mscript
                     raiseError("lastLocation() only works with string and list");
             } },
 
-            { "subset", [](object first, const object::list& paramList) -> object {
+            { "subset", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 2 && paramList.size() != 3)
                     raiseError("subset() works with an item and a start index and an optional length");
 
@@ -1081,7 +1094,8 @@ namespace mscript
             //
             // Regular Expressions
             //
-            { "isMatch", [](object first, const object::list& paramList) -> object {
+            { "isMatch", [](object& first, const object::list& paramList) -> object {
+                (void)first;
                 if (paramList.size() != 2)
                     raiseError("isMatch() works string to match and pattern");
                 if (paramList[0].type() != object::STRING)
@@ -1090,10 +1104,11 @@ namespace mscript
                     raiseError("isMatch() only works with string input");
 
                 std::wregex re(paramList[1].stringVal());
-                return std::regex_match(paramList[0].stringVal(), re);
+                return std::regex_match(first.stringVal(), re);
             } },
 
-            { "getMatches", [](object first, const object::list& paramList) -> object {
+            { "getMatches", [](object& first, const object::list& paramList) -> object {
+                (void)first;
                 if (paramList.size() != 2)
                     raiseError("getMatches() works string to match and pattern");
                 if (paramList[0].type() != object::STRING)
@@ -1105,7 +1120,7 @@ namespace mscript
 
                 object::list output;
                 std::wsmatch sm;
-                std::regex_match(paramList[0].stringVal(), sm, re);
+                std::regex_match(first.stringVal(), sm, re);
                 for (const auto& m : sm)
                     output.push_back(m.str());
                 return output;
@@ -1115,8 +1130,9 @@ namespace mscript
             //
             // Process Control
             //
-            { "exec", [](object first, const object::list& paramList) -> object {
-                if (paramList.size() < 1 || paramList[0].type() != object::STRING)
+            { "exec", [](object& first, const object::list& paramList) -> object {
+                (void)first;
+                if (paramList.size() < 1 || first.type() != object::STRING)
                     raiseError("exec() works with a command string");
 
                 if (paramList.size() == 2 && paramList[1].type() != object::INDEX)
@@ -1162,7 +1178,7 @@ namespace mscript
                 int exit_code = -1;
                 if (method.empty() || method == L"popen")
                 {
-                    FILE* file = _wpopen(paramList[0].stringVal().c_str(), L"rt");
+                    FILE* file = _wpopen(first.stringVal().c_str(), L"rt");
                     if (file == nullptr)
                         return retVal;
 
@@ -1179,7 +1195,7 @@ namespace mscript
                 }
                 else if (method == L"system")
                 {
-                    exit_code = ::system(toNarrowStr(paramList[0].stringVal()).c_str());
+                    exit_code = ::system(toNarrowStr(first.stringVal()).c_str());
                     retVal.set(toWideStr("success"), true);
                 }
                 else
@@ -1198,42 +1214,44 @@ namespace mscript
                 return retVal;
             } },
 
-            { "setEnv", [](object first, const object::list& paramList) -> object {
-                if (paramList.size() != 2 || paramList[0].type() != object::STRING || paramList[1].type() != object::STRING)
+            { "setEnv", [](object& first, const object::list& paramList) -> object {
+                (void)first;
+                if (paramList.size() != 2 || first.type() != object::STRING || paramList[1].type() != object::STRING)
                     raiseError("setEnv() works with name and value string parameters");
 
-                if (_wputenv((paramList[0].stringVal() + L"=" + paramList[1].stringVal()).c_str()) != 0)
+                if (_wputenv((first.stringVal() + L"=" + paramList[1].stringVal()).c_str()) != 0)
                     raiseError("setEnv() setting environment variable failed");
 
                 return object();
             } },
 
-            { "getEnv", [](object first, const object::list& paramList) -> object {
-                if (paramList.size() != 1 || paramList[0].type() != object::STRING)
+            { "getEnv", [](object& first, const object::list& paramList) -> object {
+                (void)first;
+                if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("getEnv() works with one name string parameter");
 
                 std::wstring envValStr;
                 {
-                    const wchar_t* envVal = _wgetenv(paramList[0].stringVal().c_str());
+                    const wchar_t* envVal = _wgetenv(first.stringVal().c_str());
                     if (envVal != nullptr)
                         envValStr = envVal;
                 }
                 return envValStr;
             } },
 
-            { "exit", [](object first, const object::list& paramList) -> object {
+            { "exit", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1 || first.type() != object::NUMBER)
                     raiseError("exit() works with one exit code number");
                 exit(int(first.numberVal()));
             } },
 
-            { "error", [](object first, const object::list& paramList) -> object {
+            { "error", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1)
                     raiseError("error() works with one object for error handling");
                 throw user_exception(first);
             } },
 
-            { "sleep", [](object first, const object::list& paramList) -> object {
+            { "sleep", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1 || first.type() != object::NUMBER)
                     raiseError("sleep() works with one parameter, the number of seconds to sleep");
                 std::this_thread::sleep_for(std::chrono::seconds(int(first.numberVal())));
@@ -1243,15 +1261,16 @@ namespace mscript
             //
             // File I/O
             //
-            { "readFile", [](object first, const object::list& paramList) -> object {
+            { "readFile", [](object& first, const object::list& paramList) -> object {
+                (void)first;
                 if (paramList.size() != 2
-                    || paramList[0].type() != object::STRING
+                    || first.type() != object::STRING
                     || paramList[1].type() != object::STRING)
                 {
                     raiseError("readFile() works with a file path string and an encoding string");
                 }
 
-                std::wstring filePath = paramList[0].stringVal();
+                std::wstring filePath = first.stringVal();
                 std::wstring encoding = paramList[1].stringVal();
 
                 if (encoding == L"ascii")
@@ -1285,16 +1304,17 @@ namespace mscript
                 raiseError("Unsupported readFile() encoding: must be ascii, utf-8, or utf-16");
             } },
 
-            { "writeFile", [](object first, const object::list& paramList) -> object {
+            { "writeFile", [](object& first, const object::list& paramList) -> object {
+                (void)first;
                 if (paramList.size() != 3
-                    || paramList[0].type() != object::STRING
+                    || first.type() != object::STRING
                     || paramList[1].type() != object::STRING
                     || paramList[2].type() != object::STRING)
                 {
                     raiseError("writeFile() works with a file path string, file contents string, and an encoding string");
                 }
 
-                std::wstring filePath = paramList[0].stringVal();
+                std::wstring filePath = first.stringVal();
                 std::wstring contents = paramList[1].stringVal();
                 std::wstring encoding = paramList[2].stringVal();
 
@@ -1327,16 +1347,18 @@ namespace mscript
             //
             // JSON
             //
-            { "toJson", [](object first, const object::list& paramList) -> object {
+            { "toJson", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1)
                     raiseError("toJson() takes one object to turn into JSON");
-                return objectToJson(paramList[0]);
+                else
+                    return objectToJson(first);
             } },
 
-            { "fromJson", [](object first, const object::list& paramList) -> object {
-                if (paramList.size() != 1 || paramList[0].type() != object::STRING)
+            { "fromJson", [](object& first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("fromJson() takes one JSON string to turn into an object");
-                return objectFromJson(paramList[0].stringVal());
+                else
+                    return objectFromJson(first.stringVal());
             } },
         };
 

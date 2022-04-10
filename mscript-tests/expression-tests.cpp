@@ -257,6 +257,13 @@ namespace mscript
 
             ValidateExpression("toJson(list(1,2,3))", toWideStr("[1, 2, 3]"), symbols);
             ValidateExpression("fromJson(\"[1, 2, 3]\")", object::list{ 1.0, 2.0, 3.0 }, symbols);
+
+            ValidateExpression("fmt(\"\")", toWideStr(""), symbols);
+            ValidateExpression("fmt(\"{0} - {1}\")", toWideStr("{0} - {1}"), symbols);
+            ValidateExpression("fmt(\"foobar\")", toWideStr("foobar"), symbols);
+            ValidateExpression("fmt(\"foo{0}bar\", \"\")", toWideStr("foobar"), symbols);
+            ValidateExpression("fmt(\"foo{0}bar\", \"123\")", toWideStr("foo123bar"), symbols);
+            ValidateExpression("fmt(\"foo{0}bar{1}\", \"123\", 14)", toWideStr("foo123bar14"), symbols);
         }
     };
 }

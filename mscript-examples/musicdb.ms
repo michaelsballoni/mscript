@@ -29,7 +29,7 @@ O
 	>> Enter artist name search string, as much as you'd like, however you'd like:
 	$ matching_artists = getMatchingArtistNames(db, split(input(), " "))
 
-	> "Matching Artists: (" + matching_artists.length() + ")"
+	> fmt("Matching Artists: ({0})", matching_artists.length())
 	? matching_artists.length() > 0
 		> matching_artists.join(lf)
 	}
@@ -45,7 +45,7 @@ O
 ~ loadLines()
 	$ result_index = exec('dir /B /S "C:\Users\%USERNAME%\Music"')
 	? !result_index.get("success")
-		> "Running the dir command failed with exit code " + result_index.get("exit_code")
+		> fmt("Running the dir command failed with exit code {0}", result_index.get("exit_code"))
 		<- list()
 	}
 	<- split(replaced(result_index.get("output"), crlf, lf), lf)
@@ -91,9 +91,6 @@ O
 	$ artist = parts.get(parts.length() - 3)
 	$ album = parts.get(parts.length() - 2)
 
-	/ DEBUG
-	/> "Artist: " + artist + " - Album: " + album + " - Track: " + track
-
 	/ Ensure the artist is in the DB
 	? !db.has(artist)
 		* db.add(artist, index())
@@ -127,10 +124,10 @@ O
 		}
 	}
 	>>
-	> "Artists: " + artists.length()
+	> fmt("Artists: {0}", artists.length())
 	? artists.length() > 0
-		> "Albums:  " + album_count + " - albums / artist = " + round(album_count / artists.length())
-		> "Tracks:  " + track_count + " - tracks / album = " + round(track_count / album_count)
+		> fmt("Albums: {0} - albums / artist = {1}", album_count, round(album_count / artists.length()))
+		> fmt("Tracks: {0} - tracks / album = {1}", track_count, round(track_count / album_count))
 	}
 }
 
@@ -168,10 +165,10 @@ O
 
 / Output an artist's collection
 ~ summarizeArtist(db, artist_name)
-	> "Artist: " + artist_name
+	> fmt("Artist: {0}", artist_name)
 	$ artist_albums = db.get(artist_name)
 	@ album : artist_albums.keys()
-		> "  Album: " + album
+		> fmt("  Album: {0}", album)
 		$ album_tracks = artist_albums.get(album)
 		@ album_track : album_tracks
 			> "    " + album_track
