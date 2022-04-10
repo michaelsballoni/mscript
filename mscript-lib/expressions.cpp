@@ -128,6 +128,9 @@ namespace mscript
         if (narrow == "tab")
             return toWideStr("\t");
 
+        if (narrow == "cr")
+            return toWideStr("\f");
+
         if (narrow == "lf")
             return toWideStr("\n");
 
@@ -1255,6 +1258,59 @@ namespace mscript
                 if (paramList.size() != 1 || first.type() != object::NUMBER)
                     raiseError("sleep() works with one parameter, the number of seconds to sleep");
                 std::this_thread::sleep_for(std::chrono::seconds(int(first.numberVal())));
+                return true;
+            } },
+
+            { "cd", [](object& first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::STRING)
+                    raiseError("cd() works with one parameter, the directory to change to");
+                _wchdir(first.stringVal().c_str());
+                return true;
+            } },
+
+            { "curDir", [](object& first, const object::list& paramList) -> object {
+                if (paramList.size() == 0)
+                {
+                    wchar_t* buffer = _wgetcwd(nullptr, 0);
+                    if (buffer != nullptr)
+                    {
+                        object retVal = std::wstring(buffer);
+                        ::free(buffer);
+                        buffer = nullptr;
+                        return retVal;
+                    }
+                    else
+                        raiseError("curDir() failed to get the current directory");
+                }
+                else if (paramList.size() == 1)
+                {
+                    if
+                    (
+                        first.type() != object::STRING
+                        || 
+                        first.stringVal().size() > 2 
+                        || 
+                        !iswalpha(first.stringVal()[0])
+                        ||
+                        (first.stringVal().length() == 2 && first.stringVal()[1] != ':')
+                    )
+                    {
+                        raiseError("curDir() drive must be a letter and an optional :");
+                    }
+                    int drive = 1 + (int(first.stringVal()[0]) - int('A'));
+                    wchar_t* buffer = _wgetdcwd(drive, nullptr, 0);
+                    if (buffer != nullptr)
+                    {
+                        object retVal = std::wstring(buffer);
+                        ::free(buffer);
+                        buffer = nullptr;
+                        return retVal;
+                    }
+                    else
+                        raiseWError(L"curDir() failed to get the current directory for drive " + drive);
+                }
+                else
+                    raiseError("curDir() works with no parameter, or the drive to get the current directory for");
                 return true;
             } },
 
