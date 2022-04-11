@@ -690,10 +690,6 @@ namespace mscript
                 }
                 else
                     raiseError("add() only works with string, list, and index");
-
-                if (paramList.size() != 1)
-                    raiseError("length() takes one parameter");
-                return double(first.length());
             }},
             
             { "set", [](object& first, const object::list& paramList) -> object {
@@ -1311,7 +1307,6 @@ namespace mscript
                 }
                 else
                     raiseError("curDir() works with no parameter, or the drive to get the current directory for");
-                return true;
             } },
 
             //
