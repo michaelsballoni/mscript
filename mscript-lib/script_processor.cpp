@@ -779,6 +779,7 @@ namespace mscript
         raiseError("End of statement not found");
     }
 
+    // Return a list of line numbers that mark the ?'s and <> in the lines
     std::vector<int> script_processor::findElses(const std::vector<std::wstring>& lines, int startIndex, int endIndex)
     {
         std::vector<int> retVal;
@@ -787,24 +788,21 @@ namespace mscript
         for (int i = startIndex; i <= endIndex; ++i)
         {
             std::wstring line = trim(lines[i]);
-            bool isWhenBegin =
-                line == L"<>"
-                ||
-                startsWith(line, L"? ");
+
+            bool isWhenBegin = startsWith(line, L"? ");
 
             bool isEnd = line == L"}";
 
             std::wstring blockIn = blockingLines.empty() ? L"" : blockingLines.back();
-            bool inWhenBlock =
-                !blockIn.empty()
-                &&
-                (
-                    blockIn == L"<>"
-                    ||
-                    startsWith(blockIn, L"? ")
-                );
 
-            if (isLineBlockBegin(line))
+            bool inWhenBlock = startsWith(blockIn, L"? ");
+
+            if (line == L"<>")
+            {
+                if (inWhenBlock)
+                    blockingLines.back() = L"<>";
+            }
+            else if (isLineBlockBegin(line))
             {
                 if (!(inWhenBlock && isWhenBegin))
                     blockingLines.push_back(line);
@@ -814,7 +812,7 @@ namespace mscript
 
             if (blockingLines.size() == 1)
             {
-                if (isWhenBegin)
+                if (isWhenBegin || line == L"<>")
                     retVal.push_back(i);
             }
             else if (blockingLines.empty())
