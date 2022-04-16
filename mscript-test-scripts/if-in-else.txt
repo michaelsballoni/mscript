@@ -1,14 +1,18 @@
 $ idx = 0
-? idx >= 2
-	> fmt("idx too big: {0}", idx)
-<>
-	> fmt("idx: {0}", idx)
-	? idx < 1
-		> idx + " is zero"
-	}
-}
+O
+    ? idx >= 2
+        V
+    <>
+        > "idx:" + idx
+        ? idx < 1
+            > idx + "it is zero"
+        }
+    }
+    & idx = idx + 1
+} 
 
 ===
 
-idx: 0
-0 is zero
+idx:0
+0it is zero
+idx:1

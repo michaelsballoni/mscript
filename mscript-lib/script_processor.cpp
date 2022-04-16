@@ -749,30 +749,32 @@ namespace mscript
 
     int script_processor::findMatchingEnd(const std::vector<std::wstring>& lines, int startIndex, int endIndex)
     {
-        int blockCount = 0;
-        bool lastBlockBeginWasWhen = false;
+        std::vector<std::wstring> blockingLines;
         for (int i = startIndex; i <= endIndex; ++i)
         {
             std::wstring line = trim(lines[i]);
+            bool isWhenBegin = startsWith(line, L"? ");
+            bool isWhenEnd = line == L"<>";
+            std::wstring blockIn = blockingLines.empty() ? L"" : blockingLines.back();
+            bool inWhenBlock = startsWith(blockIn, L"? ");
             if (line == L"}")
             {
-                --blockCount;
-                lastBlockBeginWasWhen = false;
+                if (blockingLines.empty())
+                    raiseError("Too many } found");
+                blockingLines.pop_back();
+            }
+            else if (isWhenEnd)
+            {
+                if (inWhenBlock && !blockingLines.empty())
+                    blockingLines.back() = L"<>";
             }
             else if (isLineBlockBegin(line))
             {
-                bool isWhen = startsWith(line, L"? ");
-                if (!(isWhen && lastBlockBeginWasWhen))
-                {
-                    ++blockCount;
-                    lastBlockBeginWasWhen = isWhen;
-                }
+                if (!(isWhenBegin && inWhenBlock))
+                    blockingLines.push_back(line);
             }
 
-            if (blockCount < 0)
-                raiseError("Too many } found");
-
-            if (blockCount == 0)
+            if (blockingLines.empty())
                 return i;
         }
 
@@ -790,6 +792,7 @@ namespace mscript
             std::wstring line = trim(lines[i]);
 
             bool isWhenBegin = startsWith(line, L"? ");
+            bool isWhenEnd = line == L"<>";
 
             bool isEnd = line == L"}";
 
@@ -797,9 +800,9 @@ namespace mscript
 
             bool inWhenBlock = startsWith(blockIn, L"? ");
 
-            if (line == L"<>")
+            if (isWhenEnd)
             {
-                if (inWhenBlock)
+                if (inWhenBlock && !blockingLines.empty())
                     blockingLines.back() = L"<>";
             }
             else if (isLineBlockBegin(line))
@@ -812,7 +815,7 @@ namespace mscript
 
             if (blockingLines.size() == 1)
             {
-                if (isWhenBegin || line == L"<>")
+                if (isWhenBegin || isWhenEnd)
                     retVal.push_back(i);
             }
             else if (blockingLines.empty())
