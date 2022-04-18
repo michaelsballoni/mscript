@@ -1,0 +1,27 @@
+> "top"
+> "line 3" // after
+
+/*
+> "inside"
+*/
+/  > "line 1
+// > "line 2
+
+@ n : list(1, 2, 3)
+	/*
+	header
+	*/
+	> n // shouldn't matter
+	/*
+	footer
+	*/
+}
+
+
+===
+
+top
+line 3
+1
+2
+3

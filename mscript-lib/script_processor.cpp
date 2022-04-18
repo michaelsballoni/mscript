@@ -14,7 +14,52 @@ namespace mscript
         if (m_linesDb.find(newFilename) != m_linesDb.end())
             return object();
 
-        m_linesDb.insert({ newFilename, m_scriptLoader(currentFilename, newFilename) });
+        std::vector<std::wstring> lines = m_scriptLoader(currentFilename, newFilename);
+        
+        // Pre-process comments to avoid machinations in the script processor
+        bool inBlockComment = false;
+        for (auto& line : lines)
+        {
+            if (line.empty())
+                continue;
+
+            line.assign(trim(line)); // trim once and for all
+            if (line.empty())
+                continue;
+
+            size_t lineCommentStart = line.find(L"//");
+            if (lineCommentStart == 0)
+                line.clear();
+            else if (lineCommentStart != std::wstring::npos) // keep leading up to start of comment
+                line.assign(trim(line.substr(0, lineCommentStart))); 
+
+            if (!inBlockComment) // don't start new block comment when in existing
+            {
+                size_t blockCommentStart = line.find(L"/*");
+                if (blockCommentStart != std::wstring::npos)
+                {
+                    line.clear();
+                    inBlockComment = true;
+                    continue;
+                }
+            }
+
+            if (inBlockComment)
+            {
+                size_t blockCommentEnd = line.find(L"*/");
+                if (blockCommentEnd != std::wstring::npos)
+                    inBlockComment = false;
+                line.clear();
+                continue;
+            }
+
+            if (line[0] == '/') // traditional single-line comment
+                line.clear();
+        }
+        if (inBlockComment)
+            raiseError("Incomplete block comment");
+
+        m_linesDb.emplace(newFilename, lines);
 
         preprocessFunctions(currentFilename, newFilename); // scan for functions first
 
@@ -28,24 +73,13 @@ namespace mscript
         int lineCount = int(lines.size());
         for (int l = 0; l < lineCount; ++l)
         {
-            std::wstring line = trim(lines[l]);
+            const std::wstring& line = lines[l];
             if (line.empty())
                 continue;
 #ifndef _DEBUG
             try
 #endif
             {
-                if (line == L"/*")
-                {
-                    ++l;
-                    while (trim(lines[l]) != L"*/")
-                    {
-                        ++l;
-                        if (l >= lineCount)
-                            raiseError("Unfinished block comment");
-                    }
-                }
-
                 if (line[0] != '~')
                     continue;
 
@@ -120,31 +154,17 @@ namespace mscript
         const int lineCount = int(lines.size());
         for (int l = startLine; l <= endLine; ++l)
         {
-            std::wstring line = trim(lines[l]);
+            std::wstring line = lines[l];
             if (line.empty()) // skip blank lines
                 continue;
 
             auto first = line[0];
             try
             {
-                if (startsWith(line, L"/*")) // block comment
+                if (line == L"{>>") // block verbatim print
                 {
                     ++l;
-                    while (trim(lines[l]) != L"*/")
-                    {
-                        ++l;
-                        if (l >= lineCount)
-                            raiseError("Unfinished block comment");
-                    }
-                }
-                else if (first == '/') // single line comment
-                {
-                    // No op
-                }
-                else if (line == L"{>>") // block verbatim print
-                {
-                    ++l;
-                    while (trim(lines[l]) != L">>}")
+                    while (lines[l] != L">>}")
                     {
                         m_output(lines[l]);
                         ++l;
@@ -346,7 +366,7 @@ namespace mscript
                 else if (first == '?') // if else
                 {
                     bool seenQuestion = false;
-                    bool seenPlainElse = false;
+                    bool seenEndingElse = false;
                     
                     auto markers = findElses(lines, l, endLine);
 
@@ -356,34 +376,37 @@ namespace mscript
                     for (int m = 0; m < int(markers.size()); ++m)
                     {
                         int marker = markers[m];
+                        const std::wstring& markerLine = lines[marker];
+
                         int nextMarker = markers[std::min(m + 1, int(markers.size()) - 1)];
-                        std::wstring markerLine = trim(lines[marker]);
 
                         object answer;
-                        size_t spaceIndex = markerLine.find(' ');
-                        if (spaceIndex == std::wstring::npos)
-                        {
-                            if (seenPlainElse)
-                                raiseError("Already seen <> statement");
-
-                            if (!seenQuestion)
-                                raiseError("No ? statement before <> statement");
-
-                            seenPlainElse = true;
-                            answer = true;
-                        }
-                        else
+                        if (startsWith(markerLine, L"? "))
                         {
                             seenQuestion = true;
 
-                            if (seenPlainElse)
+                            if (seenEndingElse)
                                 raiseError("Already seen <> statement");
 
+                            size_t spaceIndex = markerLine.find(' ');
                             std::wstring criteria = markerLine.substr(spaceIndex + 1);
                             answer = evaluate(criteria, callDepth);
                             if (answer.type() != object::BOOL)
                                 raiseError("? expression does not evaluate to true or false");
                         }
+                        else if (markerLine == L"<>")
+                        {
+                            if (seenEndingElse)
+                                raiseError("Already seen <> statement");
+
+                            if (!seenQuestion)
+                                raiseError("No ? statement before <> statement");
+
+                            seenEndingElse = true;
+                            answer = true;
+                        }
+                        else
+                            raiseWError(L"Invalid line, not ? or <>: " + markerLine);
 
                         if (!answer.boolVal())
                             continue;
@@ -625,11 +648,8 @@ namespace mscript
                 // execute code with a side-effect, like some_list.add("something")
                 else if (first == '*')
                 {
-                    if (line != L"*/") // weird block comment ending at end of loop
-                    {
-                        std::wstring valueStr = trim(line.substr(1));
-                        evaluate(valueStr, callDepth);
-                    }
+                    std::wstring valueStr = trim(line.substr(1));
+                    evaluate(valueStr, callDepth);
                 }
                 else
                 {
@@ -655,18 +675,7 @@ namespace mscript
                 bool foundHandler = false;
                 while (++l < endLine)
                 {
-                    if (trim(lines[l]) == L"/*")
-                    {
-                        ++l;
-                        while (trim(lines[l]) != L"*/")
-                        {
-                            ++l;
-                            if (l >= endLine)
-                                raiseError("Unfinished block comment");
-                        }
-                    }
-
-                    if (startsWith(trim(lines[l]), L"!"))
+                    if (lines[l][0] == '!')
                     {
                         --l;
                         foundHandler = true;
@@ -749,32 +758,26 @@ namespace mscript
 
     int script_processor::findMatchingEnd(const std::vector<std::wstring>& lines, int startIndex, int endIndex)
     {
-        std::vector<std::wstring> blockingLines;
+        if (startsWith(lines[startIndex], L"? ")) // keep it simple
+            return findElses(lines, startIndex, endIndex).back();
+
+        int block_depth = 0;
         for (int i = startIndex; i <= endIndex; ++i)
         {
-            std::wstring line = trim(lines[i]);
-            bool isWhenBegin = startsWith(line, L"? ");
-            bool isWhenEnd = line == L"<>";
-            std::wstring blockIn = blockingLines.empty() ? L"" : blockingLines.back();
-            bool inWhenBlock = startsWith(blockIn, L"? ");
-            if (line == L"}")
-            {
-                if (blockingLines.empty())
-                    raiseError("Too many } found");
-                blockingLines.pop_back();
-            }
-            else if (isWhenEnd)
-            {
-                if (inWhenBlock && !blockingLines.empty())
-                    blockingLines.back() = L"<>";
-            }
-            else if (isLineBlockBegin(line))
-            {
-                if (!(isWhenBegin && inWhenBlock))
-                    blockingLines.push_back(line);
-            }
+            const std::wstring& line = lines[i];
 
-            if (blockingLines.empty())
+            bool isEnd = line == L"}";
+
+            bool is_block_begin = isLineBlockBegin(line);
+
+            if (is_block_begin)
+                ++block_depth;
+            else if (isEnd)
+                --block_depth;
+            if (block_depth < 0)
+                raiseError("Too many } found");
+
+            if (block_depth == 0 && isEnd)
                 return i;
         }
 
@@ -784,64 +787,82 @@ namespace mscript
     // Return a list of line numbers that mark the ?'s and <> in the lines
     std::vector<int> script_processor::findElses(const std::vector<std::wstring>& lines, int startIndex, int endIndex)
     {
-        std::vector<int> retVal;
+        int block_depth = 0;
 
-        std::vector<std::wstring> blockingLines;
+        bool last_when_start = false;
+        bool last_when_end = false;
+        bool last_other_start = false;
+        
+        std::vector<int> retVal;
         for (int i = startIndex; i <= endIndex; ++i)
         {
-            std::wstring line = trim(lines[i]);
-
-            bool isWhenBegin = startsWith(line, L"? ");
-            bool isWhenEnd = line == L"<>";
+            const std::wstring& line = lines[i];
 
             bool isEnd = line == L"}";
 
-            std::wstring blockIn = blockingLines.empty() ? L"" : blockingLines.back();
+            bool is_block_begin = isLineBlockBegin(line);
 
-            bool inWhenBlock = startsWith(blockIn, L"? ");
-
-            if (isWhenEnd)
-            {
-                if (inWhenBlock && !blockingLines.empty())
-                    blockingLines.back() = L"<>";
-            }
-            else if (isLineBlockBegin(line))
-            {
-                if (!(inWhenBlock && isWhenBegin))
-                    blockingLines.push_back(line);
-            }
+            if (is_block_begin)
+                ++block_depth;
             else if (isEnd)
-                blockingLines.pop_back();
+                --block_depth;
 
-            if (blockingLines.size() == 1)
+            if (block_depth == 1)
             {
-                if (isWhenBegin || isWhenEnd)
-                    retVal.push_back(i);
+                bool is_when_start = startsWith(line, L"? ");
+                bool is_when_end = line == L"<>";
+
+                if (is_when_start)
+                {
+                    if (last_when_end || last_other_start) 
+                        break;
+                    else // fresh ?
+                        retVal.push_back(i);
+
+                    last_when_start = true;
+                    last_when_end = false;
+                    last_other_start = false;
+                }
+                else if (is_when_end)
+                {
+                    if (!last_when_start)
+                        raiseError("No ? found for <>");
+                    else // fresh <>
+                        retVal.push_back(i);
+
+                    last_when_start = false;
+                    last_when_end = true;
+                    last_other_start = false;
+                }
             }
-            else if (blockingLines.empty())
+            else if (block_depth == 0)
             {
                 if (isEnd)
                 {
-                    retVal.push_back(i);
-                    return retVal;
+                    if (last_when_start || last_when_end)
+                        retVal.push_back(i);
                 }
+                else
+                    last_other_start = true;
             }
         }
 
-        raiseError("End of statement not found");
+        if (retVal.empty())
+            raiseError("End of ? / <> statement not found");
+
+        return retVal;
     }
 
-    bool script_processor::isLineBlockBegin(std::wstring line)
+    bool script_processor::isLineBlockBegin(const std::wstring& line)
     {
-        line = trim(line);
+        if (line.empty())
+            return false;
 
-        if (line == L"O" || line == L"{")
-            return true;
-
-        static std::vector<std::wstring> blockBeginnings{ L"?", L"@", L"#", L"~", L"!" };
-        for (const auto& begin : blockBeginnings)
+        wchar_t startC = line[0];
+        static std::vector<char> blockBeginnings{ '?', '@', '#', '~', '!', 'O', 'o', '0', '{', '<' };
+        for (char blockC : blockBeginnings)
         {
-            if (startsWith(line, begin))
+            if (startC == blockC)
                 return true;
         }
         return false;

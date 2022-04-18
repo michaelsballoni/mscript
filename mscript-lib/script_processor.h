@@ -91,7 +91,7 @@ namespace mscript
 
         static int findMatchingEnd(const std::vector<std::wstring>& lines, int startIndex, int endIndex);
         static std::vector<int> findElses(const std::vector<std::wstring>& lines, int startIndex, int endIndex);
-        static bool isLineBlockBegin(std::wstring line);
+        static bool isLineBlockBegin(const std::wstring& line);
 
     private:
         std::function<std::vector<std::wstring>(const std::wstring& current, const std::wstring& filename)> m_scriptLoader;

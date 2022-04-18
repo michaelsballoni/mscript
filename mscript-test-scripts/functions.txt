@@ -12,8 +12,10 @@ Function Definitions
 ~ fib(n)
 	? n <= 0
 		<- 0
+	}
 	? n <= 2
 		<- 1
+	}
 	<>
 		<- fib(n - 2) + fib(n - 1)
 	}
@@ -23,6 +25,7 @@ Function Definitions
 	# cur : low -> high
 		? cur < 3
 			^
+		}
 		? cur > 5
 			v
 		}
@@ -33,8 +36,10 @@ Function Definitions
 ~ ager(whenny)
 	? whenny < 13
 		> "kid"
+	}
 	? whenny >= 18
 		> "adult"
+	}
 	<>
 		> "teen"
 	}
@@ -89,6 +94,7 @@ Test Blocks
 		$ str = val + ": "
 		? iseven2(val)
 			& str = str + "even"
+		}
 		<>
 			& str = str + "odd"
 		}

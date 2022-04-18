@@ -1,0 +1,10 @@
+? true
+	> "Should be true"
+}
+<>
+	* error("? was true")
+}
+
+===
+
+Should be true

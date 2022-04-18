@@ -23,6 +23,7 @@
 		$ str = val + ": "
 		? (val % 2) = 0
 			& str = str + "even"
+		}
 		<>
 			& str = str + "odd"
 		}

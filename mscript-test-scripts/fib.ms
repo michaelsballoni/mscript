@@ -5,8 +5,10 @@
 	$ fib_result = 0
 	? n <= 0
 		& fib_result = 0
+	}
 	? n <= 2
 		& fib_result = 1
+	}
 	<>
 		& fib_result = fib(n - 1) + fib(n - 2)
 	}

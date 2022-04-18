@@ -18,6 +18,7 @@ $ afterBlockComment = 2
 	$ flowValue = null
 	? 14 > 17
 		& flowValue = "false"
+	}
 	<>
 		& flowValue = "true"
 	}
@@ -49,8 +50,10 @@ $ afterBlockComment = 2
 	$ whenny = 13
 	? whenny < 13
 		> "kid"
+	}
 	? whenny >= 18
 		> "adult"
+	}
 	<>
 		> "teen"
 	}
