@@ -6,6 +6,9 @@
 #undef min
 #undef max
 
+// FORNOW
+//#define CATCH_SCRIPT_EXCEPTIONS
+
 namespace mscript
 {
     object script_processor::process(const std::wstring& currentFilename, const std::wstring& newFilename)
@@ -159,7 +162,9 @@ namespace mscript
                 continue;
 
             auto first = line[0];
+#ifdef CATCH_SCRIPT_EXCEPTIONS
             try
+#endif
             {
                 if (line == L"{>>") // block verbatim print
                 {
@@ -373,12 +378,18 @@ namespace mscript
                     int endMarker = markers.back();
                     l = endMarker;
 
-                    for (int m = 0; m < int(markers.size()); ++m)
+                    const int max_markers_idx = int(markers.size()) - 1;
+
+                    for (int m = 0; m <= max_markers_idx; ++m)
                     {
-                        int marker = markers[m];
+                        const int marker = markers[m];
                         const std::wstring& markerLine = lines[marker];
 
-                        int nextMarker = markers[std::min(m + 1, int(markers.size()) - 1)];
+                        // FORNOW - Fix this!
+                        const int nextMarker = 
+                            markerLine == L"}"
+                            ? markers[m]
+                            : markers[m + 1] - 1;
 
                         object answer;
                         if (startsWith(markerLine, L"? "))
@@ -658,6 +669,7 @@ namespace mscript
 
                 curException.obj = object();
             }
+#ifdef CATCH_SCRIPT_EXCEPTIONS
             catch (const user_exception& userExp)
             {
                 if (curException.obj.type() != object::NOTHING)
@@ -687,6 +699,7 @@ namespace mscript
                 else
                     throw curException;
             }
+#endif
 #ifndef _DEBUG
             catch (const std::exception& exp)
             {
@@ -758,8 +771,13 @@ namespace mscript
 
     int script_processor::findMatchingEnd(const std::vector<std::wstring>& lines, int startIndex, int endIndex)
     {
-        if (startsWith(lines[startIndex], L"? ")) // keep it simple
-            return findElses(lines, startIndex, endIndex).back();
+        if (startsWith(lines[startIndex], L"? "))
+        {
+            auto markers = findElses(lines, startIndex, endIndex);
+            if (markers.empty())
+                raiseError("No } found in ? statement");
+            return markers.back();
+        }
 
         int block_depth = 0;
         for (int i = startIndex; i <= endIndex; ++i)

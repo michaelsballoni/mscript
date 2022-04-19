@@ -63,9 +63,9 @@ namespace mscript
 			obj2 = objectFromJson(str);
 			Assert::IsTrue(obj2 == obj);
 
-			obj = toWideStr("foo\nbar\tsome\"thing");
+			obj = toWideStr("foo\nbar\tsome\"th\\ing");
 			str = objectToJson(obj);
-			Assert::AreEqual(toWideStr("\"foo\\nbar\\tsome\\\"thing\""), str);
+			Assert::AreEqual(toWideStr("\"foo\\nbar\\tsome\\\"th\\\\ing\""), str);
 			obj2 = objectFromJson(str);
 			Assert::IsTrue(obj2 == obj);
 

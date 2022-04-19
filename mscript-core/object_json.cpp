@@ -3,6 +3,8 @@
 #include "utils.h"
 #include "../../json/single_include/nlohmann/json.hpp"
 
+#undef max
+
 using json = nlohmann::json;
 
 namespace mscript
@@ -155,16 +157,26 @@ namespace mscript
 			return num2wstr(obj.numberVal());
 		case object::STRING:
 		{
-			std::wstring str = obj.stringVal();
-			str = replace(str, L"\\", L"\\\\");
-			str = replace(str, L"/", L"\\/");
-			str = replace(str, L"\"", L"\\\"");
-			str = replace(str, L"\b", L"\\b");
-			str = replace(str, L"\f", L"\\f");
-			str = replace(str, L"\n", L"\\n");
-			str = replace(str, L"\r", L"\\r");
-			str = replace(str, L"\t", L"\\t");
-			return L"\"" + str + L"\"";
+			std::wstring out_str;
+			out_str.reserve(std::max(2U, obj.stringVal().capacity() * 2U));
+			out_str += L"\"";
+			for (wchar_t c : obj.stringVal())
+			{
+				switch (c)
+				{
+				case '\\': out_str += L"\\\\"; break;
+				case '/': out_str += L"\\/"; break;
+				case '\"': out_str += L"\\\""; break;
+				case '\b': out_str += L"\\b"; break;
+				case '\f': out_str += L"\\f"; break;
+				case '\n': out_str += L"\\n"; break;
+				case '\r': out_str += L"\\r"; break;
+				case '\t': out_str += L"\\t"; break;
+				default: out_str += c;
+				}
+			}
+			out_str += L"\"";
+			return out_str;
 		}
 		case object::LIST:
 		{
