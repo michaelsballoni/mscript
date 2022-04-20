@@ -86,6 +86,7 @@ $ got_there = false
 	@ a : list("a")
 		> "something"
 	}
+}
 <>
 	& got_there = true
 }

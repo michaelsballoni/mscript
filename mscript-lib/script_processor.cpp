@@ -6,8 +6,8 @@
 #undef min
 #undef max
 
-// FORNOW
-//#define CATCH_SCRIPT_EXCEPTIONS
+// DEBUG
+#define CATCH_SCRIPT_EXCEPTIONS
 
 namespace mscript
 {
@@ -384,7 +384,7 @@ namespace mscript
                         const int marker_line_idx = markers[m];
                         const std::wstring& marker_line = lines[marker_line_idx];
                         if (marker_line == L"}")
-                            break;
+                            continue;
 
                         if (m >= max_markers_idx)
                             raiseError("No ? or <> at end of statement");
@@ -777,7 +777,7 @@ namespace mscript
         if (startsWith(lines[startIndex], L"? "))
         {
             auto markers = findElses(lines, startIndex, endIndex);
-            if (markers.empty())
+            if (markers.empty() || lines[markers.back()] != L"}")
                 raiseError("No } found in ? statement");
             return markers.back();
         }
@@ -788,17 +788,17 @@ namespace mscript
             const std::wstring& line = lines[i];
 
             bool isEnd = line == L"}";
-
             bool is_block_begin = isLineBlockBegin(line);
 
             if (is_block_begin)
                 ++block_depth;
             else if (isEnd)
                 --block_depth;
+
             if (block_depth < 0)
                 raiseError("Too many } found");
 
-            if (block_depth == 0 && isEnd)
+            if (block_depth == 0)
                 return i;
         }
 
@@ -875,12 +875,16 @@ namespace mscript
             return false;
 
         wchar_t startC = line[0];
-        static std::vector<char> blockBeginnings{ '?', '@', '#', '~', '!', 'O', 'o', '0', '{', '<' };
+        static std::vector<char> blockBeginnings{ '?', '@', '#', '~', '!' };
         for (char blockC : blockBeginnings)
         {
             if (startC == blockC)
                 return true;
         }
+
+        if (line == L"<>" || line == L"{" || line == L"O")
+            return true;
+
         return false;
     }
 }
