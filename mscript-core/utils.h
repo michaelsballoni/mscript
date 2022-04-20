@@ -28,7 +28,7 @@ namespace mscript
 
     std::wstring trim(const std::wstring& str);
 
-    std::vector<std::wstring> split(std::wstring str, const wchar_t* seperator);
+    std::vector<std::wstring> split(const std::wstring& str, const wchar_t seperator);
 
     std::wstring replace(const std::wstring& str, const std::wstring& from, const std::wstring& to);
 

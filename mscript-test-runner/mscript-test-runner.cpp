@@ -81,10 +81,10 @@ int main(int argc, char* argv[])
 							{
 								std::string externalFilePath = toNarrowStr(fs::path(testDirPath).append(filename));
 								std::wstring externalScript = trim(replace(readFileIntoString(externalFilePath), L"\r\n", L"\n"));
-								return split(externalScript, L"\n");
+								return split(externalScript, '\n');
 							}
 							else
-								return split(script, L"\n");
+								return split(script, '\n');
 						},
 						[=](const std::wstring& filename)
 						{
@@ -133,8 +133,8 @@ int main(int argc, char* argv[])
 		{
 			printf("\nERROR: Test fails!\n");
 
-			auto expectedLines = split(expected, L"\n");
-			auto outputLines = split(output, L"\n");
+			auto expectedLines = split(expected, '\n');
+			auto outputLines = split(output, '\n"');
 
 			size_t lineCount = std::min(expectedLines.size(), outputLines.size());
 			for (size_t idx = 0; idx < lineCount; ++idx)

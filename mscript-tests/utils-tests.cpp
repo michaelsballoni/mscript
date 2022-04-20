@@ -130,10 +130,10 @@ namespace mscript
 
 		TEST_METHOD(SplitTests)
 		{
-			Assert::AreEqual(toWideStr(""), join(split(L"", L""), L", "));
-			Assert::AreEqual(toWideStr(""), join(split(L"foo", L""), L", "));
-			Assert::AreEqual(toWideStr("foo, bar"), join(split(L"foo bar", L" "), L", "));
-			Assert::AreEqual(toWideStr("foo, bar"), join(split(L"foo//bar", L"//"), L", "));
+			Assert::AreEqual(toWideStr(""), join(split(L"", ' '), L", "));
+			Assert::AreEqual(toWideStr("foo"), join(split(L"foo", ' '), L" "));
+			Assert::AreEqual(toWideStr("foo bar"), join(split(L"foo bar", ' '), L" "));
+			Assert::AreEqual(toWideStr("foo bar"), join(split(L"foo/bar", '/'), L" "));
 		}
 
 		TEST_METHOD(LastErrorTests)

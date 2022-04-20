@@ -5,6 +5,14 @@
 	* error("? was true")
 }
 
+? false
+	* error("? was false")
+}
+<>
+	> "Should be false"
+}
+
 ===
 
 Should be true
+Should be false

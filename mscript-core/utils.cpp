@@ -204,19 +204,25 @@ bool mscript::endsWith(const std::wstring& str, const std::wstring& finisher)
     return true;
 }
 
-std::vector<std::wstring> mscript::split(std::wstring str, const wchar_t* seperator)
+std::vector<std::wstring> mscript::split(const std::wstring& str, const wchar_t seperator)
 {
     std::vector<std::wstring> retVal;
-    if (str.empty() || *seperator == 0)
-        return retVal;
 
-    wchar_t* pt = nullptr;
-    wchar_t* token = wcstok_s(str.data(), seperator, &pt);
-    while (token != nullptr)
+    std::wstring acc;
+    for (wchar_t c : str)
     {
-        retVal.push_back(token);
-        token = wcstok_s(nullptr, seperator, &pt);
+        if (c == seperator)
+        {
+            retVal.push_back(acc);
+            acc.clear();
+        }
+        else
+            acc.push_back(c);
     }
+    
+    if (!acc.empty())
+        retVal.push_back(acc);
+
     return retVal;
 }
 

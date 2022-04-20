@@ -105,7 +105,7 @@ namespace mscript
                 std::wstring paramListStr = line.substr(openParen);
                 paramListStr = replace(paramListStr, L"(", L"");
                 paramListStr = replace(paramListStr, L")", L"");
-                auto paramList = split(paramListStr, L",");
+                auto paramList = split(paramListStr, ',');
                 for (auto& param : paramList)
                     param = trim(param);
                 if (paramList.size() == 1 && paramList[0].empty())
@@ -379,33 +379,36 @@ namespace mscript
                     l = endMarker;
 
                     const int max_markers_idx = int(markers.size()) - 1;
-
                     for (int m = 0; m <= max_markers_idx; ++m)
                     {
-                        const int marker = markers[m];
-                        const std::wstring& markerLine = lines[marker];
+                        const int marker_line_idx = markers[m];
+                        const std::wstring& marker_line = lines[marker_line_idx];
+                        if (marker_line == L"}")
+                            break;
 
-                        // FORNOW - Fix this!
-                        const int nextMarker = 
-                            markerLine == L"}"
-                            ? markers[m]
-                            : markers[m + 1] - 1;
+                        if (m >= max_markers_idx)
+                            raiseError("No ? or <> at end of statement");
+
+                        int next_marker_line_idx = markers[m + 1];
+                        const std::wstring& next_marker_line = lines[next_marker_line_idx];
+                        if (next_marker_line != L"}")
+                            --next_marker_line_idx;
 
                         object answer;
-                        if (startsWith(markerLine, L"? "))
+                        if (startsWith(marker_line, L"? "))
                         {
                             seenQuestion = true;
 
                             if (seenEndingElse)
                                 raiseError("Already seen <> statement");
 
-                            size_t spaceIndex = markerLine.find(' ');
-                            std::wstring criteria = markerLine.substr(spaceIndex + 1);
+                            size_t spaceIndex = marker_line.find(' ');
+                            std::wstring criteria = marker_line.substr(spaceIndex + 1);
                             answer = evaluate(criteria, callDepth);
                             if (answer.type() != object::BOOL)
                                 raiseError("? expression does not evaluate to true or false");
                         }
-                        else if (markerLine == L"<>")
+                        else if (marker_line == L"<>")
                         {
                             if (seenEndingElse)
                                 raiseError("Already seen <> statement");
@@ -417,7 +420,7 @@ namespace mscript
                             answer = true;
                         }
                         else
-                            raiseWError(L"Invalid line, not ? or <>: " + markerLine);
+                            raiseWError(L"Invalid line, not ? or <>: " + marker_line);
 
                         if (!answer.boolVal())
                             continue;
@@ -428,8 +431,8 @@ namespace mscript
                         (
                             previousFilename,
                             filename,
-                            marker + 1,
-                            nextMarker - 1,
+                            marker_line_idx + 1,
+                            next_marker_line_idx - 1,
                             ourOutcome,
                             callDepth + 1
                         );
@@ -809,7 +812,6 @@ namespace mscript
 
         bool last_when_start = false;
         bool last_when_end = false;
-        bool last_other_start = false;
         
         std::vector<int> retVal;
         for (int i = startIndex; i <= endIndex; ++i)
@@ -817,7 +819,6 @@ namespace mscript
             const std::wstring& line = lines[i];
 
             bool isEnd = line == L"}";
-
             bool is_block_begin = isLineBlockBegin(line);
 
             if (is_block_begin)
@@ -827,21 +828,17 @@ namespace mscript
 
             if (block_depth == 1)
             {
-                bool is_when_start = startsWith(line, L"? ");
-                bool is_when_end = line == L"<>";
-
-                if (is_when_start)
+                if (startsWith(line, L"? "))
                 {
-                    if (last_when_end || last_other_start) 
+                    if (last_when_end) 
                         break;
                     else // fresh ?
                         retVal.push_back(i);
 
                     last_when_start = true;
                     last_when_end = false;
-                    last_other_start = false;
                 }
-                else if (is_when_end)
+                else if (line == L"<>")
                 {
                     if (!last_when_start)
                         raiseError("No ? found for <>");
@@ -850,7 +847,6 @@ namespace mscript
 
                     last_when_start = false;
                     last_when_end = true;
-                    last_other_start = false;
                 }
             }
             else if (block_depth == 0)
@@ -859,16 +855,18 @@ namespace mscript
                 {
                     if (last_when_start || last_when_end)
                         retVal.push_back(i);
+                    else
+                        break;
                 }
                 else
-                    last_other_start = true;
+                    break;
             }
         }
 
-        if (retVal.empty())
+        if (retVal.size() < 2)
             raiseError("End of ? / <> statement not found");
-
-        return retVal;
+        else
+            return retVal;
     }
 
     bool script_processor::isLineBlockBegin(const std::wstring& line)

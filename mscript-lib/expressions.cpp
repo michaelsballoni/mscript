@@ -864,13 +864,15 @@ namespace mscript
                     first.type() != object::STRING
                     ||
                     paramList[1].type() != object::STRING
+                    ||
+                    paramList[1].stringVal().length() != 1
                 )
                 {
-                    raiseError("split() works with an item and separator");
+                    raiseError("split() works with an item and a one character separator");
                 }
 
-                std::wstring separator = paramList[1].stringVal();
-                auto splitted = split(first.stringVal(), separator.c_str());
+                wchar_t separator = paramList[1].stringVal()[0];
+                auto splitted = split(first.stringVal(), separator);
                 object::list splittedObjs;
                 splittedObjs.reserve(splitted.size());
                 for (const auto& str : splitted)
@@ -1260,7 +1262,7 @@ namespace mscript
             { "cd", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("cd() works with one parameter, the directory to change to");
-                _wchdir(first.stringVal().c_str());
+                (void)_wchdir(first.stringVal().c_str());
                 return true;
             } },
 
