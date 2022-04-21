@@ -12,7 +12,19 @@
 	> "Should be false"
 }
 
+? false
+	* error("? was false")
+}
+? true
+	> "Should be second ?"
+}
+<>
+	* error("? was true")
+}
+
+
 ===
 
 Should be true
 Should be false
+Should be second ?

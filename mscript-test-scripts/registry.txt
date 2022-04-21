@@ -52,6 +52,7 @@ $ found_some = false
 }
 ? !found_blet
 	* error("blet not found")
+}
 ? !found_some
 	* error("some not found")
 }

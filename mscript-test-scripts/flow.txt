@@ -5,6 +5,9 @@ another commented line
 /
 / line comment
 /
+//
+// line comment
+//
 
 $ beforeBlockComment = 1
 /*
@@ -12,6 +15,7 @@ foobar
 */
 $ afterBlockComment = 2
 > "Should be 3: " + (beforeBlockComment + afterBlockComment)
+
 >>
 
 {
@@ -24,7 +28,9 @@ $ afterBlockComment = 2
 	}
 	> "flowValue should be 'true': " + flowValue
 }
+
 >>
+
 {
 	>> Print Set Update
 	> "foobar"
@@ -33,7 +39,9 @@ $ afterBlockComment = 2
 	& blet = "barry"
 	> blet
 }
+
 >>
+
 {
 	>> Begin
 	$ outer = 75
@@ -44,7 +52,9 @@ $ afterBlockComment = 2
 	$ inner = "65"
 	> inner
 }
+
 >>
+
 {
 	>> When
 	$ whenny = 13
@@ -57,18 +67,6 @@ $ afterBlockComment = 2
 	<>
 		> "teen"
 	}
-}
->>
-{
-	>> Printing
-{>>
-one
->>}
-
-{>>
-	printed
-	deep
->>}
 }
 
 >>
@@ -109,11 +107,6 @@ Begin
 
 When
 teen
-
-Printing
-one
-	printed
-	deep
 
 Should be foo: 12
 Should be bar: 13

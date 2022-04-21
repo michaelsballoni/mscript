@@ -1,6 +1,6 @@
-/*
-Function Definitions
-*/
+/
+/ Function Definitions
+/
 ~ addone2(toAddTo)
 	<- toAddTo + 1
 }
@@ -45,12 +45,6 @@ Function Definitions
 	}
 }
 
-~ printBlock()
-{>>
-	test output
->>}
-}
-
 ~ colors ()
 	$ command = "command"
 	? command = "Reset Colors"
@@ -80,14 +74,16 @@ $ global = 14
 }
 
 
-/*
-Test Blocks
-*/
+/
+/ Test Blocks
+/
 {
 	$ addedTo2 = addone2(10)
 	> "addedTo2 should be 11: " + addedTo2
 }
+
 >>
+
 {
 	>> Evens and Odds
 	@ val in list(5, 6, 7, 8)
@@ -101,19 +97,25 @@ Test Blocks
 		> str
 	}
 }
+
 >>
+
 {
 	>> Fib
 	# n : 1 -> 10
 		> fib(n)
 	}
 }
+
 >>
+
 {
 	>> Process Function Continue Break
 	* ranger(1, 7)
 }
+
 >>
+
 {
 	>> Ager
 	* ager(1)
@@ -126,17 +128,16 @@ Test Blocks
 	* ager(20)
 	* ager(70)
 }
+
 >>
-{
-	>> Print Block
-	* printBlock()
-}
->>
+
 {
 	>> Color Function
 	* colors()
 }
+
 >>
+
 {
 	>> Inner Outer
 	* outer(1)
@@ -179,9 +180,6 @@ adult
 adult
 adult
 adult
-
-Print Block
-	test output
 
 Color Function
 color

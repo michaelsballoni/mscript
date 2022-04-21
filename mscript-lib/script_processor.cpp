@@ -39,7 +39,7 @@ namespace mscript
             if (!inBlockComment) // don't start new block comment when in existing
             {
                 size_t blockCommentStart = line.find(L"/*");
-                if (blockCommentStart != std::wstring::npos)
+                if (blockCommentStart == 0)
                 {
                     line.clear();
                     inBlockComment = true;
@@ -50,7 +50,7 @@ namespace mscript
             if (inBlockComment)
             {
                 size_t blockCommentEnd = line.find(L"*/");
-                if (blockCommentEnd != std::wstring::npos)
+                if (blockCommentEnd == 0)
                     inBlockComment = false;
                 line.clear();
                 continue;
@@ -154,7 +154,6 @@ namespace mscript
     {
         user_exception curException;
         const std::vector<std::wstring>& lines = m_linesDb[filename];
-        const int lineCount = int(lines.size());
         for (int l = startLine; l <= endLine; ++l)
         {
             std::wstring line = lines[l];
@@ -166,18 +165,7 @@ namespace mscript
             try
 #endif
             {
-                if (line == L"{>>") // block verbatim print
-                {
-                    ++l;
-                    while (lines[l] != L">>}")
-                    {
-                        m_output(lines[l]);
-                        ++l;
-                        if (l >= lineCount)
-                            raiseError("Unfinished block print");
-                    }
-                }
-                else if (startsWith(line, L">>")) // single line verbatim print
+                if (startsWith(line, L">>")) // single line verbatim print
                 {
                     static size_t verbLen = strlen(">>");
                     std::wstring valueStr = trim(line.substr(verbLen));
@@ -263,7 +251,7 @@ namespace mscript
                         }
                     }
                 }
-                else if (line == L"O" || line == L"o" || line == L"0") // infinite loop
+                else if (line == L"O") // infinite loop
                 {
                     int loopEnd = findMatchingEnd(lines, l, endLine);
                     int loopStart = l;
@@ -659,7 +647,7 @@ namespace mscript
                     outcome.Leave = true;
                     return object();
                 }
-                // execute code with a side-effect, like some_list.add("something")
+                // execute code with a side-effect, like *some_list.add('something')
                 else if (first == '*')
                 {
                     std::wstring valueStr = trim(line.substr(1));
@@ -777,9 +765,10 @@ namespace mscript
         if (startsWith(lines[startIndex], L"? "))
         {
             auto markers = findElses(lines, startIndex, endIndex);
-            if (markers.empty() || lines[markers.back()] != L"}")
+            if (markers.empty())
                 raiseError("No } found in ? statement");
-            return markers.back();
+            else
+                return markers.back();
         }
 
         int block_depth = 0;
@@ -794,9 +783,6 @@ namespace mscript
                 ++block_depth;
             else if (isEnd)
                 --block_depth;
-
-            if (block_depth < 0)
-                raiseError("Too many } found");
 
             if (block_depth == 0)
                 return i;
