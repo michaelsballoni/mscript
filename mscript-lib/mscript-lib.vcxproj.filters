@@ -48,6 +48,9 @@
     <ClInclude Include="bin_crypt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="preprocess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -69,6 +72,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="bin_crypt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="preprocess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

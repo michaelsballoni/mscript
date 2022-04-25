@@ -1,11 +1,14 @@
 > "top"
 > "line 3" // after
+> "after"
 
 /*
 > "inside"
 */
 /  > "line 1
 // > "line 2
+
+>>
 
 @ n : list(1, 2, 3)
 	/*
@@ -17,11 +20,23 @@
 	*/
 }
 
+>>
+
+/* should not matter
+here either */
+
+> "foobar" /* should not matter
+here either */ > "blet monkey"
 
 ===
 
 top
 line 3
+after
+
 1
 2
 3
+
+foobar
+blet monkey

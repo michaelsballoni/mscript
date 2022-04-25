@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "script_processor.h"
+#include "preprocess.h"
 #include "names.h"
 #include "lib.h"
 
@@ -19,55 +20,24 @@ namespace mscript
 
         std::vector<std::wstring> lines = m_scriptLoader(currentFilename, newFilename);
         
-        // Pre-process comments to avoid machinations in the script processor
-        bool inBlockComment = false;
-        for (auto& line : lines)
-        {
-            if (line.empty())
-                continue;
-
-            line.assign(trim(line)); // trim once and for all
-            if (line.empty())
-                continue;
-
-            size_t lineCommentStart = line.find(L"//");
-            if (lineCommentStart == 0)
-                line.clear();
-            else if (lineCommentStart != std::wstring::npos) // keep leading up to start of comment
-                line.assign(trim(line.substr(0, lineCommentStart))); 
-
-            if (!inBlockComment) // don't start new block comment when in existing
-            {
-                size_t blockCommentStart = line.find(L"/*");
-                if (blockCommentStart == 0)
-                {
-                    line.clear();
-                    inBlockComment = true;
-                    continue;
-                }
-            }
-
-            if (inBlockComment)
-            {
-                size_t blockCommentEnd = line.find(L"*/");
-                if (blockCommentEnd == 0)
-                    inBlockComment = false;
-                line.clear();
-                continue;
-            }
-
-            if (line[0] == '/') // traditional single-line comment
-                line.clear();
-        }
-        if (inBlockComment)
-            raiseError("Incomplete block comment");
+        preprocess(lines);
 
         m_linesDb.emplace(newFilename, lines);
 
         preprocessFunctions(currentFilename, newFilename); // scan for functions first
 
         process_outcome outcome;
-        return process(currentFilename, newFilename, 0, int(m_linesDb[newFilename].size()) - 1, outcome, 0U);
+        object ret_val =
+            process
+            (
+                currentFilename, 
+                newFilename, 
+                0, 
+                int(m_linesDb[newFilename].size()) - 1, 
+                outcome, 
+                0U
+            );
+        return ret_val;
     }
 
     void script_processor::preprocessFunctions(const std::wstring& previousFilename, const std::wstring& filename)

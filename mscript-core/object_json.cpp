@@ -158,7 +158,7 @@ namespace mscript
 		case object::STRING:
 		{
 			std::wstring out_str;
-			out_str.reserve(std::max(2U, obj.stringVal().capacity() * 2U));
+			out_str.reserve(std::max(size_t(2), obj.stringVal().capacity() * 2));
 			out_str += L"\"";
 			for (wchar_t c : obj.stringVal())
 			{

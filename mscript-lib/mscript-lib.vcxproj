@@ -177,6 +177,7 @@
     <ClInclude Include="lib.h" />
     <ClInclude Include="names.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="preprocess.h" />
     <ClInclude Include="script_exception.h" />
     <ClInclude Include="script_processor.h" />
     <ClInclude Include="symbols.h" />
@@ -192,6 +193,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="preprocess.cpp" />
     <ClCompile Include="script_processor.cpp" />
     <ClCompile Include="symbols.cpp" />
   </ItemGroup>
