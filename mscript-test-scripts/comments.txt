@@ -1,5 +1,6 @@
 > "top"
 > "line 3" // after
+// > "nothing"
 > "after"
 
 /*
@@ -25,8 +26,8 @@
 /* should not matter
 here either */
 
-> "foobar" /* should not matter
-here either */ > "blet monkey"
+> "foobar" /* definitely not
+in here */ > "blet monkey"
 
 ===
 

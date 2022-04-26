@@ -27,7 +27,8 @@ void mscript::preprocess(std::vector<std::wstring>& lines)
             else // keep leading up to start of comment
                 line.assign(trim(line.substr(0, lineCommentStart)));
         }
-        else if (!inBlockComment) // don't start new block comment when in existing
+        
+        if (!inBlockComment) // don't start new block comment when in existing
         {
             static std::wstring block_comment_starter = L"/*";
             size_t blockCommentStart = line.find(block_comment_starter);
@@ -52,7 +53,8 @@ void mscript::preprocess(std::vector<std::wstring>& lines)
             else
                 line.clear();
         }
-        else if (!line.empty() && line[0] == '/') // traditional single-line comment
+        
+        if (!line.empty() && line[0] == '/') // traditional single-line comment
             line.clear();
     }
     if (inBlockComment)
