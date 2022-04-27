@@ -51,6 +51,12 @@
     <ClInclude Include="preprocess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="syncheck.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="script_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -75,6 +81,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="preprocess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="syncheck.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="script_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

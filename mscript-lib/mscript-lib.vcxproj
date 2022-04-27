@@ -180,7 +180,9 @@
     <ClInclude Include="preprocess.h" />
     <ClInclude Include="script_exception.h" />
     <ClInclude Include="script_processor.h" />
+    <ClInclude Include="script_utils.h" />
     <ClInclude Include="symbols.h" />
+    <ClInclude Include="syncheck.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bin_crypt.cpp" />
@@ -195,7 +197,9 @@
     </ClCompile>
     <ClCompile Include="preprocess.cpp" />
     <ClCompile Include="script_processor.cpp" />
+    <ClCompile Include="script_utils.cpp" />
     <ClCompile Include="symbols.cpp" />
+    <ClCompile Include="syncheck.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

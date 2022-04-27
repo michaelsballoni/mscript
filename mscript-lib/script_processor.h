@@ -89,10 +89,6 @@ namespace mscript
         void handleException(const std::exception& exp, const std::wstring& filename, const std::wstring& line, int l);
         object evaluate(const std::wstring& valueStr, unsigned callDepth);
 
-        static int findMatchingEnd(const std::vector<std::wstring>& lines, int startIndex, int endIndex);
-        static std::vector<int> findElses(const std::vector<std::wstring>& lines, int startIndex, int endIndex);
-        static bool isLineBlockBegin(const std::wstring& line);
-
     private:
         std::function<std::vector<std::wstring>(const std::wstring& current, const std::wstring& filename)> m_scriptLoader;
         std::function<std::wstring(const std::wstring& filename)> m_moduleLoader;

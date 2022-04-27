@@ -29,6 +29,13 @@ here either */
 > "foobar" /* definitely not
 in here */ > "blet monkey"
 
+>>
+
+> "one line" \
+	+ " another" \
+	+ " and another"
+> "but not this"
+
 ===
 
 top
@@ -41,3 +48,6 @@ after
 
 foobar
 blet monkey
+
+one line another and another
+but not this
