@@ -5,5 +5,12 @@
 
 namespace mscript
 {
-	void syncheck(const std::vector<std::wstring>& lines, int startLine, int endLine);
+	void 
+		syncheck
+		(
+			const std::wstring& filename, 
+			const std::vector<std::wstring>& lines, 
+			int startLine, 
+			int endLine
+		);
 }

@@ -23,7 +23,7 @@ namespace mscript
         std::vector<std::wstring> lines = m_scriptLoader(currentFilename, newFilename);
         
         preprocess(lines);
-        syncheck(lines, 0, int(lines.size()) - 1);
+        syncheck(newFilename, lines, 0, int(lines.size()) - 1);
 
         m_linesDb.emplace(newFilename, lines);
 
@@ -95,7 +95,7 @@ namespace mscript
                 int loopStart = l;
                 l = loopEnd;
 
-                syncheck(lines, loopStart + 1, loopEnd - 1);
+                syncheck(filename, lines, loopStart + 1, loopEnd - 1);
 
                 script_function function;
                 function.previousFilename = previousFilename;
@@ -638,6 +638,9 @@ namespace mscript
 #ifdef CATCH_SCRIPT_EXCEPTIONS
             catch (const user_exception& userExp)
             {
+                if (userExp.isSyntaxError)
+                    throw userExp;
+
                 if (curException.obj.type() != object::NOTHING)
                     throw curException;
 

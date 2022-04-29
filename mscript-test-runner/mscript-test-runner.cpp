@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 			if (it.first.filename().extension() != ".txt")
 				continue;
 
-			printf("ERROR: Test lacks == divider\n");
+			printf("ERROR: Test lacks === divider\n");
 			return 1;
 		}
 

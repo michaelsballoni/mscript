@@ -9,7 +9,6 @@ namespace mscript
     /// </summary>
     struct user_exception
     {
-    public:
         user_exception(const object& obj = object()) : obj(obj) {}
 
         object obj;
@@ -17,5 +16,7 @@ namespace mscript
         std::wstring filename;
         int lineNumber = -1;
         std::wstring line;
+
+        bool isSyntaxError = false;
     };
 }
