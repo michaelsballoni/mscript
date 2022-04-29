@@ -24,11 +24,11 @@ namespace mscript
     std::wstring toLower(const std::wstring& str);
     std::wstring toUpper(const std::wstring& str);
 
-    std::wstring join(const std::vector<std::wstring>& strs, const wchar_t* seperator);
+    std::wstring join(const std::vector<std::wstring>& strs, const std::wstring& seperator);
 
     std::wstring trim(const std::wstring& str);
 
-    std::vector<std::wstring> split(const std::wstring& str, const wchar_t seperator);
+    std::vector<std::wstring> split(const std::wstring& str, const std::wstring& seperator);
 
     std::wstring replace(const std::wstring& str, const std::wstring& from, const std::wstring& to);
 

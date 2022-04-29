@@ -78,7 +78,7 @@ namespace mscript
                 std::wstring paramListStr = line.substr(openParen);
                 paramListStr = replace(paramListStr, L"(", L"");
                 paramListStr = replace(paramListStr, L")", L"");
-                auto paramList = split(paramListStr, ',');
+                auto paramList = split(paramListStr, L",");
                 for (auto& param : paramList)
                     param = trim(param);
                 if (paramList.size() == 1 && paramList[0].empty())

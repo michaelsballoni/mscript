@@ -58,7 +58,7 @@ std::vector<std::wstring> loadScript(const std::wstring& current, const std::wst
 	if (fileFullPath.empty())
 		fileFullPath = fs::absolute(filename);
 
-	std::vector<std::wstring> contents = split(replace(readFileIntoString(fileFullPath), L"\r\n", L"\n"), '\n');;
+	std::vector<std::wstring> contents = split(replace(readFileIntoString(fileFullPath), L"\r\n", L"\n"), L"\n");
 
 	ScriptInfo scriptInfo;
 	scriptInfo.FullPath = fileFullPath;

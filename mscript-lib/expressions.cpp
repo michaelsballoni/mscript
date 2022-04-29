@@ -864,15 +864,12 @@ namespace mscript
                     first.type() != object::STRING
                     ||
                     paramList[1].type() != object::STRING
-                    ||
-                    paramList[1].stringVal().length() != 1
                 )
                 {
-                    raiseError("split() works with an item and a one character separator");
+                    raiseError("split() works with an item and a separator string");
                 }
 
-                wchar_t separator = paramList[1].stringVal()[0];
-                auto splitted = split(first.stringVal(), separator);
+                auto splitted = split(first.stringVal(), paramList[1].stringVal());
                 object::list splittedObjs;
                 splittedObjs.reserve(splitted.size());
                 for (const auto& str : splitted)

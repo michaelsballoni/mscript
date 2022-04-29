@@ -25,7 +25,7 @@ It also takes the version of the mscript EXE that is processing the arguments
 ~ parseArgsScript(arguments, argumentSpecs, exeVersion)
 	$ ret_val = index()
 	
-	ret_val.add("", list())
+	* ret_val.add("", list())
 	
 	? getType(arguments) != "list
 		* error("arguments must be a list")
@@ -50,7 +50,7 @@ It also takes the version of the mscript EXE that is processing the arguments
 		  || trim(cur_spec.get("long-flag")) = ""
 			* error('All argumentSpecs must have "long-flag" string setting')
 		}
-		? !cur_spec.has("description") 
+		? !cur_spec.has("description") \
 		  || getType(cur_spec.get("description")) != "string" \
 		  || trim(cur_spec.get("description")) = ""
 			* error('All argumentSpecs must have "description" string setting')
@@ -64,7 +64,7 @@ It also takes the version of the mscript EXE that is processing the arguments
 	$ already_had_help = false
 	@ cur_spec : argumentSpecs
 		? cur_spec.get("flag") == "-?" || cur_spec.get("long-flag") == "--help"
-			already_had_help = true
+			& already_had_help = true
 			V
 		}
 	}
@@ -78,7 +78,7 @@ It also takes the version of the mscript EXE that is processing the arguments
 	$ already_had_version = false
 	@ cur_spec : argumentSpecs
 		? cur_spec.get("flag") == "-v" || cur_spec.get("long-flag") == "--version"
-			already_had_version = true
+			& already_had_version = true
 			V
 		}
 	}
@@ -98,7 +98,7 @@ It also takes the version of the mscript EXE that is processing the arguments
 		
 		$ next_arg = null
 		? a < arguments.length() - 1
-			next_arg = arguments.get(a + 1)
+			& next_arg = arguments.get(a + 1)
 		}
 		
 		? cur_arg.get(0) = '-'

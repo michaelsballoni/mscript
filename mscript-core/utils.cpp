@@ -21,6 +21,9 @@ namespace mscript
 
     std::wstring mscript::toWideStr(const std::string& str)
     {
+        if (str.empty())
+            return std::wstring();
+
         bool allNarrow = true;
         {
             const unsigned char* bytes = reinterpret_cast<const unsigned char*>(str.data());
@@ -103,7 +106,7 @@ namespace mscript
         return retVal;
     }
 
-    std::wstring mscript::join(const std::vector<std::wstring>& strs, const wchar_t* seperator)
+    std::wstring mscript::join(const std::vector<std::wstring>& strs, const std::wstring& seperator)
     {
         std::wstring retVal;
         for (const auto& str : strs)
@@ -118,15 +121,10 @@ namespace mscript
     std::wstring mscript::trim(const std::wstring& str)
     {
         if (str.empty())
-            return L"";
+            return std::wstring();
 
         if (str.length() == 1)
-        {
-            if (iswspace(str[0]))
-                return L"";
-            else
-                return str;
-        }
+            return iswspace(str[0]) ? std::wstring() : str;
 
         if (!iswspace(str.front()) && !iswspace(str.back()))
             return str;
@@ -204,25 +202,49 @@ bool mscript::endsWith(const std::wstring& str, const std::wstring& finisher)
     return true;
 }
 
-std::vector<std::wstring> mscript::split(const std::wstring& str, const wchar_t seperator)
+std::vector<std::wstring> mscript::split(const std::wstring& str, const std::wstring& seperator)
 {
     std::vector<std::wstring> retVal;
-
-    std::wstring acc;
-    for (wchar_t c : str)
+    if (seperator.empty())
     {
-        if (c == seperator)
-        {
-            retVal.push_back(acc);
-            acc.clear();
-        }
-        else
-            acc.push_back(c);
+        retVal.push_back(str);
     }
-    
-    if (!acc.empty())
-        retVal.push_back(acc);
-
+    else if (seperator.size() == 1)
+    {
+        std::wstring acc;
+        const wchar_t sep = seperator[0];
+        for (wchar_t c : str)
+        {
+            if (c == sep)
+            {
+                retVal.push_back(acc);
+                acc.clear();
+            }
+            else
+                acc.push_back(c);
+        }
+        if (!acc.empty())
+            retVal.push_back(acc);
+    }
+    else
+    {
+        wchar_t* last_sep = const_cast<wchar_t*>(str.c_str());
+        size_t sep_len = seperator.length();
+        while (last_sep != nullptr && last_sep[0] != '\0')
+        {
+            wchar_t* next_sep = wcsstr(last_sep, seperator.c_str());
+            if (next_sep == nullptr)
+            {
+                retVal.push_back(last_sep);
+                break;
+            }
+            else
+            {
+                retVal.emplace_back(last_sep, next_sep);
+                last_sep = next_sep + sep_len;
+            }
+        }
+    }
     return retVal;
 }
 

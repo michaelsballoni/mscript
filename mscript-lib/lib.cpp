@@ -42,7 +42,7 @@ namespace mscript
 			exports = nullptr;
 		}
 
-		std::vector<std::wstring> exports_list = split(exports_str, ',');
+		std::vector<std::wstring> exports_list = split(exports_str, L",");
 		for (const auto& func_name : exports_list)
 		{
 			std::wstring func_name_trimmed = trim(func_name);
