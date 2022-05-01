@@ -25,9 +25,11 @@ This function also takes the version of the mscript EXE that is processing the a
 ~ parseArgsScript(arguments, argumentSpecs, exeVersion)
 	$ ret_val = index()
 	
+	/ Add the list for the raw, non-flag or flag-related arguments
 	$ raw_arg_list = list()
 	* ret_val.add("", raw_arg_list)
 	
+	/ Validate the arguments list
 	? getType(arguments) != "list"
 		* error("arguments must be a list")
 	}
@@ -37,31 +39,7 @@ This function also takes the version of the mscript EXE that is processing the a
 		}
 	}
 	
-	@ cur_spec : argumentSpecs
-		? getType(cur_spec) != "index"
-			* error("All argumentSpecs must be indexes")
-		}
-		? !cur_spec.has("flag") \
-		  || getType(cur_spec.get("flag")) != "string" \
-		  || trim(cur_spec.get("flag")) = ""
-			* error('All argumentSpecs must have "flag" string setting')
-		}
-		? !cur_spec.has("long-flag") \
-		  || getType(cur_spec.get("long-flag")) != "string" \
-		  || trim(cur_spec.get("long-flag")) = ""
-			* error('All argumentSpecs must have "long-flag" string setting')
-		}
-		? !cur_spec.has("description") \
-		  || getType(cur_spec.get("description")) != "string" \
-		  || trim(cur_spec.get("description")) = ""
-			* error('All argumentSpecs must have "description" string setting')
-		}
-		? !cur_spec.has("takes") \
-		  || getType(cur_spec.get("takes")) != "bool"
-			* error('argumentSpecs "take" setting value must be bool')
-		}
-	}
-	
+	/ Put the -? flag into the mix, if not already there
 	$ already_had_help = false
 	@ cur_spec : argumentSpecs
 		? cur_spec.get("flag") == "-?" || cur_spec.get("long-flag") == "--help"
@@ -72,10 +50,10 @@ This function also takes the version of the mscript EXE that is processing the a
 	? !already_had_help
 		* argumentSpecs.add(index("flag", "-?", \
 								  "long-flag", "--help", \
-								  "description", "Get the usage info about this script", \
-								  "takes", false))
+								  "description", "Get the usage info about this script"))
 	}
-							  
+			
+	/ Put the -v flag into the mix, if not already there
 	$ already_had_version = false
 	@ cur_spec : argumentSpecs
 		? cur_spec.get("flag") == "-v" || cur_spec.get("long-flag") == "--version"
@@ -86,74 +64,116 @@ This function also takes the version of the mscript EXE that is processing the a
 	? !already_had_version
 		* argumentSpecs.add(index("flag", "-v", \
 								  "long-flag", "--version", \
-								  "description", "Get the version of the mscript EXE running this script", \
-								  "takes", false))
+								  "description", "Get the version of mscript running this script"))
 	}
 	
-	@ arg_spec : argumentSpecs
-		* ret_val.set(arg_spec.get("flag"), false)
+	/ Validate the argument specifications
+	@ cur_spec : argumentSpecs
+		? getType(cur_spec) != "index"
+			* error("All argumentSpecs must be indexes")
+		}
+		? !cur_spec.has("flag") \
+		  || getType(cur_spec.get("flag")) != "string" \
+		  || trimmed(cur_spec.get("flag")) = ""
+			* error('All argumentSpecs must have "flag" string setting')
+		}
+		? !cur_spec.has("long-flag") \
+		  || getType(cur_spec.get("long-flag")) != "string" \
+		  || trimmed(cur_spec.get("long-flag")) = ""
+			* error('All argumentSpecs must have "long-flag" string setting')
+		}
+		? !cur_spec.has("description") \
+		  || getType(cur_spec.get("description")) != "string" \
+		  || trimmed(cur_spec.get("description")) = ""
+			* error('All argumentSpecs must have "description" string setting')
+		}
+		? cur_spec.has("takes") && getType(cur_spec.get("takes")) != "bool"
+			* error('argumentSpecs "takes" setting value must be bool')
+		}
 	}
 	
+	/ Add default values to the return value
+	@ cur_spec : argumentSpecs
+		* ret_val.add(cur_spec.get("flag"), null)
+	}
+	
+	/ Validate the EXE version
 	? getType(exeVersion) != "string" || exeVersion.length() = 0
 		* error("exeVersion must be a non-empty string")
 	}
-	
+
+	/ Bail if there are no arguments
+	/ This is necessary because if there are no arguments the loop below fails with 0 -> -1
 	? arguments.length() = 0
 		<- ret_val
 	}
 	
+	/ Loop over the arguments
 	# a : 0 -> arguments.length() - 1
 		$ cur_arg = arguments.get(a)
-		
+
+		/ Compute the next argument
 		$ next_arg = null
 		? a < arguments.length() - 1
 			& next_arg = arguments.get(a + 1)
 		}
 		
-		? cur_arg.get(0) = '-'
-			? !already_had_help && (cur_arg = "-?" || cur_arg = "--help")
-				> "-? or --help: output this command-line usage"
-				@ arg_key : spec_index
-					$ cur_spec = spec_index.get(arg_key)
-					> fmt("{0} - {1}: {2}", \
-						  cur_spec.get("flag"), \
-						  cur_spec.get("long-flag"), \
-						  cur_spec.get("description"))
-				}
+		/ If it's not a flag, it's raw output
+		? cur_arg.get(0) != '-'
+			* raw_arg_list.add(cur_arg)
+			^
+		}
+		
+		/ Handle -?
+		? !already_had_help && (cur_arg = "-?" || cur_arg = "--help")
+			@ cur_spec : argumentSpecs
+				> fmt("{0} {1}: {2}", \
+					  cur_spec.get("flag"), \
+					  cur_spec.get("long-flag"), \
+					  cur_spec.get("description"))
 			}
-			? !already_had_version && (cur_arg = "-v" || cur_arg = "--version")
-				> "mscript version: " + exeVersion
+			* ret_val.set(cur_arg, true)
+			^
+		}
+		
+		/ Handle -v
+		? !already_had_version && (cur_arg = "-v" || cur_arg = "--version")
+			> "mscript version: " + exeVersion
+			* ret_val.set(cur_arg, true)
+			^
+		}
+		
+		/ Loop over the argument specs to find this argument as a flag or long-flag
+		$ found_flag = false
+		@ cur_spec : argumentSpecs
+			? cur_arg != cur_spec.get("flag") && cur_arg != cur_spec.get("long-flag")
+				^
+			}
+			
+			$ cur_flag = cur_spec.get("flag")
+			
+			? cur_spec.has("takes") and cur_spec.get("takes")
+				? next_arg = null
+					* error("No value for flag that takes next argument: " + cur_arg)
+				}
+				<>
+					* ret_val.set(cur_flag, next_arg)
+					& a = a + 1 // skip the next arg we just processed
+				}
 			}
 			<>
-				$ found_spec = false
-				@ cur_spec : argumentSpecs
-					? cur_arg != cur_spec.get("flag") && cur_arg != cur_spec.get("long-flag")
-						^
-					}
-					$ cur_flag = cur_spec.get("flag")
-					? cur_spec.has("takes") and cur_spec.get("takes")
-						? next_arg = null
-							* error("No value for flag that takes next argument: " + cur_arg)
-						}
-						<>
-							* ret_val.set(cur_flag, next_arg)
-							& a = a + 1 // skip the next arg we just processed
-						}
-					}
-					<>
-						* ret_val.set(cur_flag, true)
-					}
-					& found_spec = true
-					V
-				}
+				* ret_val.set(cur_flag, true)
 			}
-			? !found_spec
-				* error(fmt("Unknown command-line flag: {0}", cur_arg))
-			}
+			
+			& found_flag = true
+			V
 		}
-		<>
-			* raw_arg_list.add(cur_arg)
+		
+		? !found_flag
+			* error("Unknown command line flag: " + cur_arg)
 		}
 	}
+	
+	/ All done
 	<- ret_val
 }

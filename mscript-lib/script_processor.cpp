@@ -564,6 +564,11 @@ namespace mscript
                                     ourOutcome,
                                     callDepth + 1
                                 );
+                                
+                                double end_loop_label_val = m_symbols.get(label).numberVal();
+                                if (end_loop_label_val != double(i))
+                                    i = int64_t(end_loop_label_val);
+
                                 if (ourOutcome.Return)
                                 {
                                     outcome = ourOutcome;
@@ -591,6 +596,11 @@ namespace mscript
                                     ourOutcome,
                                     callDepth + 1
                                 );
+
+                                double end_loop_label_val = m_symbols.get(label).numberVal();
+                                if (end_loop_label_val != double(i))
+                                    i = int64_t(end_loop_label_val);
+
                                 if (ourOutcome.Return)
                                 {
                                     outcome = ourOutcome;

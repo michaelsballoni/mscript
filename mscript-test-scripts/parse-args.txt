@@ -3,13 +3,99 @@
 $ exe_version = "3.0.0"
 
 {
+	$ arguments = list("-i", "foo")
+	$ argument_specs = list(index("flag", "-i", "long-flag", "--input", "description", "Input file", "takes", true))
+	$ parsed = parseArgsScript(arguments, argument_specs, exe_version)
+	> "5a. Should be: " + parsed.string()
+}
+{
+	$ arguments = list("-i")
+	$ argument_specs = list(index("flag", "-i", "long-flag", "--input", "description", "Input file", "takes", true))
+	$ parsed = parseArgsScript(arguments, argument_specs, exe_version)
+	* error("Missing argument should have been caught")
+	! err
+		> "5b. Error caught"
+	}
+}
+
+>>
+
+{
+	$ arguments = list("-q")
+	$ argument_specs = list(index("flag", "-q", "long-flag", "--quiet", "description", "Suppress program output"))
+	$ parsed = parseArgsScript(arguments, argument_specs, exe_version)
+	> "4a. Should be: " + parsed.string()
+}
+{
+	$ arguments = list("--quiet")
+	$ argument_specs = list(index("flag", "-q", "long-flag", "--quiet", "description", "Suppress program output"))
+	$ parsed = parseArgsScript(arguments, argument_specs, exe_version)
+	> "4b. Should be: " + parsed.string()
+}
+
+>>
+
+{
+	$ arguments = list("-?")
+	$ argument_specs = list()
+	$ parsed = parseArgsScript(arguments, argument_specs, exe_version)
+	> "3a. Should be: " + parsed.string()
+}
+{
+	$ arguments = list("-v")
+	$ argument_specs = list()
+	$ parsed = parseArgsScript(arguments, argument_specs, exe_version)
+	> "3b. Should be: " + parsed.string()
+}
+
+>>
+
+{
+	$ arguments = list("foo")
+	$ argument_specs = list()
+	$ parsed = parseArgsScript(arguments, argument_specs, exe_version)
+	> "2a. Should be: " + parsed.string()
+}
+{
+	$ arguments = list("foo", "bar")
+	$ argument_specs = list()
+	$ parsed = parseArgsScript(arguments, argument_specs, exe_version)
+	> "2b. Should be: " + parsed.string()
+}
+
+>>
+
+{
 	$ arguments = list()
 	$ argument_specs = list()
 	$ parsed = parseArgsScript(arguments, argument_specs, exe_version)
-	> "Should be: " + parsed.string()
+	> "1a. Should be: " + parsed.string()
 }
+{
+	$ arguments = list("foo", "bar")
+	$ argument_specs = list()
+	$ parsed = parseArgsScript(arguments, argument_specs, exe_version)
+	> "1b. Should be: " + parsed.string()
+}
+
 >>
 
 ===
 
-Should be: {: [], -?: false, -v: false}
+5a. Should be: {: [], -i: foo, -?: null, -v: null}
+5b. Error caught
+
+4a. Should be: {: [], -q: true, -?: null, -v: null}
+4b. Should be: {: [], -q: true, -?: null, -v: null}
+
+-? --help: Get the usage info about this script
+-v --version: Get the version of mscript running this script
+3a. Should be: {: [], -?: true, -v: null}
+mscript version: 3.0.0
+3b. Should be: {: [], -?: null, -v: true}
+
+2a. Should be: {: [foo], -?: null, -v: null}
+2b. Should be: {: [foo, bar], -?: null, -v: null}
+
+1a. Should be: {: [], -?: null, -v: null}
+1b. Should be: {: [foo, bar], -?: null, -v: null}

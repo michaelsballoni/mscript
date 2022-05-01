@@ -67,6 +67,7 @@ namespace mscript
 		case LIST:
 		{
 			std::vector<std::wstring> listStrs;
+			listStrs.reserve(m_list->size());
 			for (const auto& obj : *m_list)
 				listStrs.push_back(obj.toString());
 			return L"[" + join(listStrs, L", ") + L"]";
@@ -75,6 +76,7 @@ namespace mscript
 		case INDEX:
 		{
 			std::vector<std::wstring> indexStrs;
+			indexStrs.reserve(m_index->size());
 			for (const auto& kvp : m_index->vec())
 				indexStrs.push_back(kvp.first.toString() + L": " + kvp.second.toString());
 			return L"{" + join(indexStrs, L", ") + L"}";
