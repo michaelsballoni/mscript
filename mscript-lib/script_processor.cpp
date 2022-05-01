@@ -644,12 +644,11 @@ namespace mscript
                 if (curException.obj.type() != object::NOTHING)
                     throw curException;
 
-                curException.obj = userExp.obj;
-
+                curException = userExp;
                 if (curException.filename.empty())
                 {
                     curException.filename = filename;
-                    curException.lineNumber = l;
+                    curException.lineNumber = l + 1;
                     curException.line = line;
                 }
 
@@ -681,7 +680,7 @@ namespace mscript
 
     void script_processor::handleException(const std::exception& exp, const std::wstring& filename, const std::wstring& line, int l)
     {
-        throw script_exception(exp.what(), filename, l + 1, line);
+        throw script_exception(exp.what(), filename, l, line);
     }
 
     object script_processor::evaluate(const std::wstring& valueStr, unsigned callDepth)

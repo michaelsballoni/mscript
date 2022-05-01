@@ -1,0 +1,15 @@
++ "parse-args.ms"
+
+$ exe_version = "3.0.0"
+
+{
+	$ arguments = list()
+	$ argument_specs = list()
+	$ parsed = parseArgsScript(arguments, argument_specs, exe_version)
+	> "Should be: " + parsed.string()
+}
+>>
+
+===
+
+Should be: {: [], -?: false, -v: false}

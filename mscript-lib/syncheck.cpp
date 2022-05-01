@@ -236,7 +236,7 @@ mscript::syncheck
             if (userExp.filename.empty())
             {
                 userExp.filename = filename;
-                userExp.lineNumber = l;
+                userExp.lineNumber = l + 1;
                 userExp.line = line;
             }
             throw userExp;
