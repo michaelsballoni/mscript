@@ -171,11 +171,13 @@
   <ItemGroup>
     <ClInclude Include="bin_crypt.h" />
     <ClInclude Include="callable.h" />
+    <ClInclude Include="exe_version.h" />
     <ClInclude Include="expressions.h" />
     <ClInclude Include="functions.h" />
     <ClInclude Include="includes.h" />
     <ClInclude Include="lib.h" />
     <ClInclude Include="names.h" />
+    <ClInclude Include="parse_args.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="preprocess.h" />
     <ClInclude Include="script_exception.h" />
@@ -186,9 +188,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bin_crypt.cpp" />
+    <ClCompile Include="exe_version.cpp" />
     <ClCompile Include="expressions.cpp" />
     <ClCompile Include="lib.cpp" />
     <ClCompile Include="names.cpp" />
+    <ClCompile Include="parse_args.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

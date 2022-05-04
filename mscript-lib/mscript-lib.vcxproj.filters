@@ -57,6 +57,12 @@
     <ClInclude Include="script_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="parse_args.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="exe_version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -87,6 +93,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="script_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parse_args.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="exe_version.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -18,6 +18,8 @@
 #include <codecvt>
 #include <fstream>
 #include <functional>
+#include <iomanip>
+#include <iostream>
 #include <locale>
 #include <memory>
 #include <optional>

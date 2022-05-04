@@ -3,6 +3,8 @@
 #include "utils.h"
 #include "names.h"
 #include "user_exception.h"
+#include "exe_version.h"
+#include "parse_args.h"
 #include "object_json.h"
 #include "lib.h"
 
@@ -1235,6 +1237,36 @@ namespace mscript
                         envValStr = envVal;
                 }
                 return envValStr;
+            } },
+
+
+            { "getExeFilePath", [](object&, const object::list& paramList) -> object {
+                if (!paramList.empty())
+                    raiseError("getExeFilePath() takes parameters");
+                return getExeFilePath();
+            } },
+
+            { "getBinaryVersion", [](object& first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::STRING)
+                    raiseError("getBinaryVersion() takes one string parameter");
+                return toWideStr(getBinaryVersion(first.stringVal()));
+            } },
+
+            { "parseArgs", [](object& first, const object::list& paramList) -> object {
+                if
+                (
+                    paramList.size() != 2
+                    ||
+                    first.type() != object::LIST
+                    ||
+                    paramList[1].type() != object::LIST
+                )
+                {
+                    raiseError("parseArgs() works with a list of arguments and a list of argument specifications");
+                }
+
+                object ret_val = parseArgs(first.listVal(), paramList[1].listVal());
+                return ret_val;
             } },
 
             { "exit", [](object& first, const object::list& paramList) -> object {
