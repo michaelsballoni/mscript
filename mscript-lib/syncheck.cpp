@@ -81,6 +81,70 @@ mscript::syncheck
             else if (startsWith(line, L"<- "))
             {
             }
+            else if (first == '#' || startsWith(line, L"++") || startsWith(line, L"--"))
+            {
+                std::string err_prefix =
+                    first == '#'
+                    ? "#"
+                    : startsWith(line, L"++")
+                    ? "++"
+                    : "--";
+                size_t firstSpace = line.find(' ');
+                if (firstSpace == std::wstring::npos)
+                    raiseError(err_prefix + " statement missing first space");
+
+                size_t nextSpace = line.find(' ', firstSpace + 1);
+                if (nextSpace == std::wstring::npos)
+                    raiseError(err_prefix + " statement lacks counter variable");
+
+                std::wstring label = trim(line.substr(firstSpace, nextSpace - firstSpace));
+                validateName(label);
+
+                size_t thirdSpace = line.find(' ', nextSpace + 1);
+                if (thirdSpace == std::wstring::npos)
+                    raiseError(err_prefix + " statement lacks from part");
+
+                std::wstring from = trim(line.substr(nextSpace, thirdSpace - nextSpace));
+                if (from != L":")
+                    raiseError(err_prefix + " statement invalid : part");
+
+                std::wstring theRest = line.substr(thirdSpace + 1);
+                std::wstring fromExpStr, toExpStr;
+                int parenCount = 0;
+                bool inString = false;
+                static int arrowLen = int(strlen(" -> "));
+                int theRestSize = int(theRest.size());
+                for (int f = 0; f < theRestSize - arrowLen; ++f)
+                {
+                    auto c = theRest[f];
+                    if (c == '\"')
+                        inString = !inString;
+
+                    if (!inString)
+                    {
+                        if (c == '(')
+                            ++parenCount;
+                        else if (c == ')')
+                            --parenCount;
+                    }
+
+                    if (!inString && parenCount == 0)
+                    {
+                        if (startsWith(theRest.substr(f), L" -> "))
+                        {
+                            fromExpStr = trim(theRest.substr(0, f));
+                            toExpStr = trim(theRest.substr(f + arrowLen));
+                            break;
+                        }
+                    }
+                }
+
+                int loopEnd = findMatchingEnd(lines, l, endLine);
+                int loopStart = l;
+                l = loopEnd;
+
+                syncheck(filename, lines, loopStart + 1, loopEnd - 1);
+            }
             else if (first == '+')
             {
             }
@@ -149,64 +213,6 @@ mscript::syncheck
 
                 std::wstring label = trim(line.substr(firstSpace, nextSpace - firstSpace));
                 validateName(label);
-
-                int loopEnd = findMatchingEnd(lines, l, endLine);
-                int loopStart = l;
-                l = loopEnd;
-
-                syncheck(filename, lines, loopStart + 1, loopEnd - 1);
-            }
-            else if (first == '#')
-            {
-                size_t firstSpace = line.find(' ');
-                if (firstSpace == std::wstring::npos)
-                    raiseError("# statement missing first space");
-
-                size_t nextSpace = line.find(' ', firstSpace + 1);
-                if (nextSpace == std::wstring::npos)
-                    raiseError("# statement lacks counter variable");
-
-                std::wstring label = trim(line.substr(firstSpace, nextSpace - firstSpace));
-                validateName(label);
-
-                size_t thirdSpace = line.find(' ', nextSpace + 1);
-                if (thirdSpace == std::wstring::npos)
-                    raiseError("# statement lacks from part");
-
-                std::wstring from = trim(line.substr(nextSpace, thirdSpace - nextSpace));
-                if (from != L":")
-                    raiseError("# statement invalid : part");
-
-                std::wstring theRest = line.substr(thirdSpace + 1);
-                std::wstring fromExpStr, toExpStr;
-                int parenCount = 0;
-                bool inString = false;
-                static int arrowLen = int(strlen(" -> "));
-                int theRestSize = int(theRest.size());
-                for (int f = 0; f < theRestSize - arrowLen; ++f)
-                {
-                    auto c = theRest[f];
-                    if (c == '\"')
-                        inString = !inString;
-
-                    if (!inString)
-                    {
-                        if (c == '(')
-                            ++parenCount;
-                        else if (c == ')')
-                            --parenCount;
-                    }
-
-                    if (!inString && parenCount == 0)
-                    {
-                        if (startsWith(theRest.substr(f), L" -> "))
-                        {
-                            fromExpStr = trim(theRest.substr(0, f));
-                            toExpStr = trim(theRest.substr(f + arrowLen));
-                            break;
-                        }
-                    }
-                }
 
                 int loopEnd = findMatchingEnd(lines, l, endLine);
                 int loopStart = l;

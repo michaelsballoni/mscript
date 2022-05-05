@@ -305,9 +305,214 @@ namespace mscript
                     std::wstring expStr = line.substr(space + 1);
 
                     object returnValue = evaluate(expStr, callDepth);
+
                     outcome.ReturnValue = returnValue;
                     outcome.Return = true;
                     return outcome.ReturnValue;
+                }
+                else if (startsWith(line, L"++")) // for x = a; x < b; ++x
+                {
+                    size_t firstSpace = line.find(' ');
+                    if (firstSpace == std::wstring::npos)
+                        raiseError("++ statement missing first space");
+
+                    size_t nextSpace = line.find(' ', firstSpace + 1);
+                    if (nextSpace == std::wstring::npos)
+                        raiseError("++ statement lacks counter variable");
+
+                    std::wstring label = trim(line.substr(firstSpace, nextSpace - firstSpace));
+                    validateName(label);
+
+                    size_t thirdSpace = line.find(' ', nextSpace + 1);
+                    if (thirdSpace == std::wstring::npos)
+                        raiseError("++ statement lacks from part");
+
+                    std::wstring from = trim(line.substr(nextSpace, thirdSpace - nextSpace));
+                    if (from != L":")
+                        raiseError("++ statement invalid : part");
+
+                    std::wstring theRest = line.substr(thirdSpace + 1);
+                    std::wstring fromExpStr, toExpStr;
+                    int parenCount = 0;
+                    bool inString = false;
+                    static int arrowLen = int(strlen(" -> "));
+                    int theRestSize = int(theRest.size());
+                    for (int f = 0; f < theRestSize - arrowLen; ++f)
+                    {
+                        auto c = theRest[f];
+                        if (c == '\"')
+                            inString = !inString;
+
+                        if (!inString)
+                        {
+                            if (c == '(')
+                                ++parenCount;
+                            else if (c == ')')
+                                --parenCount;
+                        }
+
+                        if (!inString && parenCount == 0)
+                        {
+                            if (startsWith(theRest.substr(f), L" -> "))
+                            {
+                                fromExpStr = trim(theRest.substr(0, f));
+                                toExpStr = trim(theRest.substr(f + arrowLen));
+                                break;
+                            }
+                        }
+                    }
+
+                    object fromValue = evaluate(fromExpStr, callDepth);
+                    if (fromValue.type() != object::NUMBER)
+                        raiseWError(L"Invalid from value: " + fromValue.toString());
+
+                    object toValue = evaluate(toExpStr, callDepth);
+                    if (toValue.type() != object::NUMBER)
+                        raiseWError(L"Invalid to value: " + toValue.toString());
+
+                    auto fromIdx = static_cast<int64_t>(fromValue.numberVal());
+                    auto toIdx = static_cast<int64_t>(toValue.numberVal());
+
+                    int loopEnd = findMatchingEnd(lines, l, endLine);
+                    int loopStart = l;
+                    l = loopEnd;
+
+                    {
+                        symbol_stacker outerStacker(m_symbols);
+                        m_symbols.set(label, object());
+
+                        for (auto i = fromIdx; i <= toIdx; ++i)
+                        {
+                            m_symbols.assign(label, double(i));
+                            symbol_stacker innerStacker(m_symbols);
+                            process_outcome ourOutcome;
+                            process
+                            (
+                                previousFilename,
+                                filename,
+                                loopStart + 1,
+                                loopEnd - 1,
+                                ourOutcome,
+                                callDepth + 1
+                            );
+
+                            double end_loop_label_val = m_symbols.get(label).numberVal();
+                            if (end_loop_label_val != double(i))
+                                i = int64_t(end_loop_label_val);
+
+                            if (ourOutcome.Return)
+                            {
+                                outcome = ourOutcome;
+                                return ourOutcome.ReturnValue;
+                            }
+                            else if (ourOutcome.Continue)
+                                continue;
+                            else if (ourOutcome.Leave)
+                                break;
+                        }
+                    }
+                }
+                else if (startsWith(line, L"--")) // for x = a; x >= b; --x
+                {
+                    size_t firstSpace = line.find(' ');
+                    if (firstSpace == std::wstring::npos)
+                        raiseError("-- statement missing first space");
+
+                    size_t nextSpace = line.find(' ', firstSpace + 1);
+                    if (nextSpace == std::wstring::npos)
+                        raiseError("-- statement lacks counter variable");
+
+                    std::wstring label = trim(line.substr(firstSpace, nextSpace - firstSpace));
+                    validateName(label);
+
+                    size_t thirdSpace = line.find(' ', nextSpace + 1);
+                    if (thirdSpace == std::wstring::npos)
+                        raiseError("-- statement lacks from part");
+
+                    std::wstring from = trim(line.substr(nextSpace, thirdSpace - nextSpace));
+                    if (from != L":")
+                        raiseError("-- statement invalid : part");
+
+                    std::wstring theRest = line.substr(thirdSpace + 1);
+                    std::wstring fromExpStr, toExpStr;
+                    int parenCount = 0;
+                    bool inString = false;
+                    static int arrowLen = int(strlen(" -> "));
+                    int theRestSize = int(theRest.size());
+                    for (int f = 0; f < theRestSize - arrowLen; ++f)
+                    {
+                        auto c = theRest[f];
+                        if (c == '\"')
+                            inString = !inString;
+
+                        if (!inString)
+                        {
+                            if (c == '(')
+                                ++parenCount;
+                            else if (c == ')')
+                                --parenCount;
+                        }
+
+                        if (!inString && parenCount == 0)
+                        {
+                            if (startsWith(theRest.substr(f), L" -> "))
+                            {
+                                fromExpStr = trim(theRest.substr(0, f));
+                                toExpStr = trim(theRest.substr(f + arrowLen));
+                                break;
+                            }
+                        }
+                    }
+
+                    object fromValue = evaluate(fromExpStr, callDepth);
+                    if (fromValue.type() != object::NUMBER)
+                        raiseWError(L"Invalid from value: " + fromValue.toString());
+
+                    object toValue = evaluate(toExpStr, callDepth);
+                    if (toValue.type() != object::NUMBER)
+                        raiseWError(L"Invalid to value: " + toValue.toString());
+
+                    auto fromIdx = static_cast<int64_t>(fromValue.numberVal());
+                    auto toIdx = static_cast<int64_t>(toValue.numberVal());
+
+                    int loopEnd = findMatchingEnd(lines, l, endLine);
+                    int loopStart = l;
+                    l = loopEnd;
+
+                    {
+                        symbol_stacker outerStacker(m_symbols);
+                        m_symbols.set(label, object());
+
+                        for (auto i = fromIdx; i >= toIdx; --i)
+                        {
+                            m_symbols.assign(label, double(i));
+                            symbol_stacker innerStacker(m_symbols);
+                            process_outcome ourOutcome;
+                            process
+                            (
+                                previousFilename,
+                                filename,
+                                loopStart + 1,
+                                loopEnd - 1,
+                                ourOutcome,
+                                callDepth + 1
+                            );
+
+                            double end_loop_label_val = m_symbols.get(label).numberVal();
+                            if (end_loop_label_val != double(i))
+                                i = int64_t(end_loop_label_val);
+
+                            if (ourOutcome.Return)
+                            {
+                                outcome = ourOutcome;
+                                return ourOutcome.ReturnValue;
+                            }
+                            else if (ourOutcome.Continue)
+                                continue;
+                            else if (ourOutcome.Leave)
+                                break;
+                        }
+                    }
                 }
                 else if (first == '+')
                 {

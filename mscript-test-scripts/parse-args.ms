@@ -103,14 +103,8 @@ This function also takes the version of the mscript EXE that is processing the a
 		* error("exeVersion must be a non-empty string")
 	}
 
-	/ Bail if there are no arguments
-	/ This is necessary because if there are no arguments the loop below fails with 0 -> -1
-	? arguments.length() = 0
-		<- ret_val
-	}
-	
 	/ Loop over the arguments
-	# a : 0 -> arguments.length() - 1
+	++ a : 0 -> arguments.length() - 1
 		$ cur_arg = arguments.get(a)
 
 		/ Compute the next argument

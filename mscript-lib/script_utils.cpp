@@ -113,5 +113,8 @@ bool mscript::isLineBlockBegin(const std::wstring& line)
     if (line == L"<>" || line == L"{" || line == L"O")
         return true;
 
+    if (startsWith(line, L"++") || startsWith(line, L"--"))
+        return true;
+
     return false;
 }
