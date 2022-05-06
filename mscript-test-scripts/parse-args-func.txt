@@ -13,6 +13,12 @@
 		> "7b. Error caught"
 	}
 }
+{
+	$ arguments = list("-n")
+	$ argument_specs = list(index("flag", "-n", "long-flag", "--number", "description", "A number", "takes", true, "numeric", true, "default", 5))
+	$ parsed = parseArgs(arguments, argument_specs)
+	> "7c. Should be: " + parsed.string()
+}
 
 >>
 
@@ -89,12 +95,11 @@
 	> "1b. Should be: " + parsed.string()
 }
 
->>
-
 ===
 
 7a. Should be: {: [], -n: 10, -?: null}
 7b. Error caught
+7c. Should be: {: [], -n: 5, -?: null}
 
 6. Should be: {: [bar], -i: foo, -?: true}
 

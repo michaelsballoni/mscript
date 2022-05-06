@@ -876,6 +876,13 @@ namespace mscript
                         foundHandler = true;
                         break;
                     }
+                    // skip starts of other blocks, no rabbit holes
+                    else if (isLineBlockBegin(lines[l])) 
+                    {
+                        int block_end = findMatchingEnd(lines, l, endLine);
+                        if (block_end >= 0)
+                            l = std::min(block_end, endLine - 1);
+                    }
                 }
                 if (foundHandler)
                     continue;

@@ -16,6 +16,8 @@ struct arg_spec
 	bool takes = false;
 	bool numeric = false;
 	bool required = false;
+
+	object default_value;
 };
 
 static std::wstring getStrFlagValue(const object::index& argumentSpec, const std::string& flagName)
@@ -76,6 +78,9 @@ mscript::parseArgs
 		cur_spec.takes = getBoolFlagValue(cur_input_index, "takes");
 		cur_spec.numeric = getBoolFlagValue(cur_input_index, "numeric");
 		cur_spec.required = getBoolFlagValue(cur_input_index, "required");
+		object default_value;
+		if (cur_input_index.tryGet(toWideStr("default"), default_value))
+			cur_spec.default_value = default_value;
 		local_specs.push_back(cur_spec);
 	}
 
@@ -118,11 +123,12 @@ mscript::parseArgs
 		const std::wstring& cur_arg = arguments[a].stringVal();
 
 		bool has_next_arg = false;
-		std::wstring next_arg;
+		object next_arg;
 		if (a < arguments.size() - 1)
 		{
-			next_arg = arguments[a + 1].stringVal();
-			has_next_arg = true;
+			next_arg = arguments[a + 1];
+			if (!startsWith(next_arg.toString(), L"-"))
+				has_next_arg = true;
 		}
 
 		if (cur_arg.empty() || cur_arg[0] != '-')
@@ -172,19 +178,24 @@ mscript::parseArgs
 			if (cur_spec.takes)
 			{
 				if (!has_next_arg)
-					raiseWError(L"No value for flag that takes next argument: " + cur_arg);
+				{
+					if (cur_spec.default_value != object())
+						next_arg = cur_spec.default_value;
+					else
+						raiseWError(L"No value for flag that takes next argument: " + cur_arg);
+				}
 				
 				// Convert the next argument into its final value
 				if (cur_spec.numeric)
 				{
 					try
 					{
-						ret_val_index.set(cur_flag, std::stod(next_arg.c_str()));
+						ret_val_index.set(cur_flag, std::stod(next_arg.toString()));
 					}
 					catch (...)
 					{
 						raiseWError(L"Converting argument to number failed: " +
-									cur_spec.flag + L" - " + next_arg);
+									cur_spec.flag + L" - " + next_arg.toString());
 					}
 				}
 				else
