@@ -186,7 +186,7 @@ mscript::parseArgs
 				}
 				
 				// Convert the next argument into its final value
-				if (cur_spec.numeric)
+				if (cur_spec.numeric && next_arg.type() != object::NUMBER)
 				{
 					try
 					{
