@@ -1238,8 +1238,18 @@ namespace mscript
                 }
                 return envValStr;
             } },
+#if defined(_WIN32) || defined(_WIN64)
+            { "expandEnvVars", [](object& first, const object::list& paramList) -> object {
+                (void)first;
+                if (paramList.size() != 1 || first.type() != object::STRING)
+                    raiseError("expandEnvVars() works with one string parameter");
 
-
+                const unsigned int output_str_len = 32 * 1024;
+                std::unique_ptr<wchar_t[]> output_str(new wchar_t[output_str_len]);
+                ExpandEnvironmentStrings(first.stringVal().c_str(), output_str.get(), output_str_len);
+                return std::wstring(output_str.get());
+            } },
+#endif
             { "getExeFilePath", [](object&, const object::list& paramList) -> object {
                 if (!paramList.empty())
                     raiseError("getExeFilePath() takes parameters");
@@ -1339,6 +1349,77 @@ namespace mscript
                 else
                     raiseError("curDir() works with no parameter, or the drive to get the current directory for");
             } },
+
+#if defined(_WIN32) || defined(_WIN64)
+            { "getIniString", [](object&, const object::list& paramList) -> object {
+                if
+                (
+                    paramList.size() != 4
+                    ||
+                    paramList[0].type() != object::STRING
+                    ||
+                    paramList[0].stringVal().empty()
+                    ||
+                    paramList[1].type() != object::STRING
+                    ||
+                    paramList[1].stringVal().empty()
+                    ||
+                    paramList[2].type() != object::STRING
+                    ||
+                    paramList[2].stringVal().empty()
+                    ||
+                    paramList[3].type() != object::STRING
+                )
+                {
+                    raiseError("getIniString() takes INI file path, section name, key name, and default value");
+                }
+                std::wstring file_path, section, key, default_value;
+                file_path = paramList[0].stringVal();
+                section = paramList[1].stringVal();
+                key = paramList[2].stringVal();
+                default_value = paramList[3].stringVal();
+
+                const unsigned int output_str_len = 64 * 1024;
+                std::unique_ptr<wchar_t[]> output_str(new wchar_t[output_str_len]);
+                
+                GetPrivateProfileString(section.c_str(), key.c_str(), default_value.c_str(), output_str.get(), output_str_len, file_path.c_str());
+                
+                return std::wstring(output_str.get());
+            } },
+
+            { "getIniNumber", [](object&, const object::list& paramList) -> object {
+                if
+                (
+                    paramList.size() != 4
+                    ||
+                    paramList[0].type() != object::STRING
+                    ||
+                    paramList[0].stringVal().empty()
+                    ||
+                    paramList[1].type() != object::STRING
+                    ||
+                    paramList[1].stringVal().empty()
+                    ||
+                    paramList[2].type() != object::STRING
+                    ||
+                    paramList[2].stringVal().empty()
+                    ||
+                    paramList[3].type() != object::NUMBER
+                )
+                {
+                    raiseError("getIniNumber() takes INI file path, section name, key name, and default value");
+                }
+                std::wstring file_path, section, key;
+                file_path = paramList[0].stringVal();
+                section = paramList[1].stringVal();
+                key = paramList[2].stringVal();
+
+                int default_value = int(paramList[3].numberVal());
+
+                UINT ret_val = GetPrivateProfileInt(section.c_str(), key.c_str(), default_value, file_path.c_str());
+                return double(ret_val);
+            } },
+#endif
 
             //
             // File I/O
