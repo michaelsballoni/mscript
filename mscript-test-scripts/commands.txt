@@ -13,6 +13,12 @@ $ result = exec("echo foobar")
 > "Should be 0: " + result.get("exit_code")
 > "Should be bar: " + trimmed(result.get("output"))
 
+>>
+
+$ expanded = expandEnvVars("%path%")
+$ gotten = getEnv("path")
+> "expandEnvVars: Should be true: " + (expanded == gotten)
+
 ===
 
 Should be true: true
@@ -22,3 +28,5 @@ Should be foobar: foobar
 Should be true: true
 Should be 0: 0
 Should be bar: bar
+
+expandEnvVars: Should be true: true

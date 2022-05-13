@@ -1,0 +1,19 @@
+$ ini_contents = readFile(".\test.ini", "ascii")
+> "Should be string: " + ini_contents.getType()
+> "Should be true: " + (ini_contents.length() > 0)
+
+>>
+
+$ setting_string = getIniString("test.ini", "app", "setting_str", "default")
+> "Should be str: " + setting_string
+
+$ setting_number = getIniNumber("test.ini", "app", "setting_num", 42)
+> "Should be 10: " + setting_number
+
+===
+
+Should be string: string
+Should be true: true
+
+Should be str: str
+Should be 10: 10

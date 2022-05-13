@@ -57,6 +57,8 @@ $ diff = msts_diff(dt1, dt2, "hour")
 > "Should be (1973-12-21 11:15:07): " + msts_format("1973-12-21 11:15:07", "%F %T")
 }
 
+* exec("del test.txt")
+
 ===
 
 Should be true (local): true

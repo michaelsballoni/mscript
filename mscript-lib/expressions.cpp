@@ -1379,10 +1379,16 @@ namespace mscript
                 key = paramList[2].stringVal();
                 default_value = paramList[3].stringVal();
 
+                const unsigned int full_file_path_str_len = 64 * 1024;
+                std::unique_ptr<wchar_t[]> full_file_path_str(new wchar_t[full_file_path_str_len]);
+                DWORD full_file_path_result = ::GetFullPathName(file_path.c_str(), full_file_path_str_len, full_file_path_str.get(), nullptr);
+                if (full_file_path_result == 0)
+                    raiseWError(L"Invalid INI file path: " + file_path);
+
                 const unsigned int output_str_len = 64 * 1024;
                 std::unique_ptr<wchar_t[]> output_str(new wchar_t[output_str_len]);
                 
-                GetPrivateProfileString(section.c_str(), key.c_str(), default_value.c_str(), output_str.get(), output_str_len, file_path.c_str());
+                ::GetPrivateProfileString(section.c_str(), key.c_str(), default_value.c_str(), output_str.get(), output_str_len, full_file_path_str.get());
                 
                 return std::wstring(output_str.get());
             } },
@@ -1414,9 +1420,15 @@ namespace mscript
                 section = paramList[1].stringVal();
                 key = paramList[2].stringVal();
 
+                const unsigned int full_file_path_str_len = 64 * 1024;
+                std::unique_ptr<wchar_t[]> full_file_path_str(new wchar_t[full_file_path_str_len]);
+                DWORD full_file_path_result = ::GetFullPathName(file_path.c_str(), full_file_path_str_len, full_file_path_str.get(), nullptr);
+                if (full_file_path_result == 0)
+                    raiseWError(L"Invalid INI file path: " + file_path);
+
                 int default_value = int(paramList[3].numberVal());
 
-                UINT ret_val = GetPrivateProfileInt(section.c_str(), key.c_str(), default_value, file_path.c_str());
+                UINT ret_val = ::GetPrivateProfileInt(section.c_str(), key.c_str(), default_value, full_file_path_str.get());
                 return double(ret_val);
             } },
 #endif
