@@ -1,4 +1,4 @@
-+ "mscript-dll-sample.dll"
++ "mscript-sample.dll"
 
 $ summed = ms_sample_sum(1, 2, 3)
 > "Should be 6: " + summed

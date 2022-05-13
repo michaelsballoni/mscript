@@ -37,7 +37,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 			return module_utils::jsonStr(retVal);
 		}
 		else
-			raiseWError(L"Unknown mscript-dll-sample function: " + funcName);
+			raiseWError(L"mscript-sample: unknown function: " + funcName);
 	}
 	catch (const user_exception& exp)
 	{
