@@ -23,13 +23,26 @@
 namespace fs = std::filesystem;
 using namespace mscript;
 
-std::wstring readFileIntoString(const std::wstring& filePath)
+std::vector<std::wstring> readFileIntoString(const std::wstring& filePath)
 {
+	std::vector<std::wstring> ret_val;
+
 	std::wifstream inputStream(filePath);
+	if (!inputStream)
+		raiseWError(L"File could not be opened: " + filePath);
+
 	inputStream.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
-	std::wstring fileContents((std::istreambuf_iterator<wchar_t>(inputStream)),
-		(std::istreambuf_iterator<wchar_t>()));
-	return fileContents;
+	
+	std::wstring line;
+	for (;;)
+	{
+		std::getline(inputStream, line);
+		if (!inputStream)
+			break;
+		else
+			ret_val.push_back(line);
+	}
+	return ret_val;
 }
 
 struct ScriptInfo
@@ -58,7 +71,7 @@ std::vector<std::wstring> loadScript(const std::wstring& current, const std::wst
 	if (fileFullPath.empty())
 		fileFullPath = fs::absolute(filename);
 
-	std::vector<std::wstring> contents = split(replace(readFileIntoString(fileFullPath), L"\r\n", L"\n"), L"\n");
+	std::vector<std::wstring> contents = readFileIntoString(fileFullPath);
 
 	ScriptInfo scriptInfo;
 	scriptInfo.FullPath = fileFullPath;

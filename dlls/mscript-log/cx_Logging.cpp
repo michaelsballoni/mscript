@@ -10,15 +10,12 @@
 #include <fcntl.h>
 #include <io.h>
 
+#include <mutex>
+
 #define THREAD_FORMAT           "%.5ld"
 #define DATE_FORMAT             "%.4d/%.2d/%.2d"
 #define TIME_FORMAT             "%.2d:%.2d:%.2d.%.3d"
 #define TICKS_FORMAT            "%.10d"
-
-// define platform specific methods for manipulating locks
-#define INITIALIZE_LOCK(lock)   InitializeCriticalSection(&lock)
-#define ACQUIRE_LOCK(lock)      EnterCriticalSection(&lock)
-#define RELEASE_LOCK(lock)      LeaveCriticalSection(&lock)
 
 // define macro to get the build version as a string
 #define xstr(s)                 str(s)
@@ -28,7 +25,7 @@
 
 // define global logging state
 LoggingState *gLoggingState;
-LOCK_TYPE gLoggingStateLock;
+std::mutex gLoggingStateLock;
 
 
 // define keywords for common Python methods
@@ -141,7 +138,7 @@ static int WriteLevel(
         case LOG_LEVEL_CRITICAL:
             return WriteString(state, "CRIT");
         case LOG_LEVEL_NONE:
-            return WriteString(state, "TRACE");
+            return WriteString(state, "NONE");
     }
 
     char temp[20];
@@ -590,10 +587,9 @@ CX_LOGGING_API(int) StartLoggingEx(
             exceptionInfo);
     if (!loggingState)
         return -1;
-    ACQUIRE_LOCK(gLoggingStateLock);
+    std::unique_lock<std::mutex> lock(gLoggingStateLock);
     origLoggingState = gLoggingState;
     gLoggingState = loggingState;
-    RELEASE_LOCK(gLoggingStateLock);
     if (origLoggingState)
         LoggingState_Free(origLoggingState);
     return 0;
@@ -608,10 +604,9 @@ CX_LOGGING_API(void) StopLogging(void)
 {
     LoggingState *loggingState;
 
-    ACQUIRE_LOCK(gLoggingStateLock);
+    std::unique_lock<std::mutex> lock(gLoggingStateLock);
     loggingState = gLoggingState;
     gLoggingState = NULL;
-    RELEASE_LOCK(gLoggingStateLock);
     if (loggingState)
         LoggingState_Free(loggingState);
 }
@@ -628,10 +623,9 @@ CX_LOGGING_API(int) LogMessage(
     int result = 0;
 
     if (gLoggingState) {
-        ACQUIRE_LOCK(gLoggingStateLock);
+        std::unique_lock<std::mutex> lock(gLoggingStateLock);
         if (gLoggingState && level >= gLoggingState->level)
             result = WriteMessage(gLoggingState, level, message);
-        RELEASE_LOCK(gLoggingStateLock);
     }
 
     return result;
@@ -646,10 +640,9 @@ CX_LOGGING_API(unsigned long) GetLoggingLevel(void)
 {
     unsigned long level = LOG_LEVEL_NONE;
 
-    ACQUIRE_LOCK(gLoggingStateLock);
+    std::unique_lock<std::mutex> lock(gLoggingStateLock);
     if (gLoggingState)
         level = gLoggingState->level;
-    RELEASE_LOCK(gLoggingStateLock);
     return level;
 }
 
@@ -663,10 +656,9 @@ CX_LOGGING_API(int) SetLoggingLevel(
 {
     int result = 0;
 
-    ACQUIRE_LOCK(gLoggingStateLock);
+    std::unique_lock<std::mutex> lock(gLoggingStateLock);
     if (gLoggingState)
         result = LoggingState_SetLevel(gLoggingState, newLevel);
-    RELEASE_LOCK(gLoggingStateLock);
 
     return result;
 }

@@ -95,21 +95,6 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				raiseError("mslog_start: filename value not passed in");
 			}
 
-			object level;
-			if
-			(
-				!index.tryGet(toWideStr("level"), level)
-				||
-				level.type() != object::NUMBER
-				||
-				level.numberVal() < 0
-				||
-				unsigned(level.numberVal()) != level.numberVal()
-			)
-			{
-				raiseError("mslog_start: Invalid level parameter");
-			}
-
 			object max_files;
 			if
 			(
@@ -165,7 +150,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				StartLogging
 				(
 					toNarrowStr(filename.stringVal()).c_str(),
-					int(level.numberVal()),
+					LOG_LEVEL_NONE,
 					unsigned(max_files.numberVal()),
 					unsigned(max_file_size_bytes.numberVal()),
 					toNarrowStr(prefix.stringVal()).c_str()
