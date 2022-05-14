@@ -48,7 +48,7 @@ O
 		> fmt("Running the dir command failed with exit code {0}", result_index.get("exit_code"))
 		<- list()
 	}
-	<- split(replaced(result_index.get("output"), crlf, lf), lf)
+	<- splitLines(result_index.get("output"))
 }
 
 / Walk dir output processing each line in turn

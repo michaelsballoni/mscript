@@ -5,7 +5,6 @@ $ log_level = ""
 & log_level = mslog_getlevel()
 > "Initial log level: " + log_level
 
->> Starting logging...
 * mslog_start(index("filename", "logger.log", "prefix", "%t - %l"))
 & log_level = mslog_getlevel()
 > "NONE log level: " + log_level
@@ -22,19 +21,17 @@ $ log_level = ""
 * mslog_info("Test info")
 * mslog_debug("Test debug")
 
->> Stopping logging...
 * mslog_stop()
 & log_level = mslog_getlevel()
 > "NONE log level: " + log_level
 
-$ log_file_lines = split(replaced(readFile("logger.log", "utf-8"), crlf, lf), lf)
+$ log_file_lines = readFileLines("logger.log", "utf-8")
 
 $ error_seen = false
 $ info_seen = false
 $ debug_seen = false
 
 @ log_line : log_file_lines
-	> log_line
 	? log_line.has("ERROR")
 		& error_seen = true
 	}
@@ -57,3 +54,12 @@ $ debug_seen = false
 }
 
 >> All done.
+
+===
+
+Initial log level: NONE
+NONE log level: NONE
+INFO log level: INFO
+DEBUG log level: DEBUG
+NONE log level: NONE
+All done.

@@ -879,6 +879,25 @@ namespace mscript
                 return splittedObjs;
             } },
 
+            { "splitLines", [](object& first, const object::list& paramList) -> object {
+                if
+                (
+                    paramList.size() != 1
+                    ||
+                    first.type() != object::STRING
+                )
+                {
+                    raiseError("splitLines() works with a string parameter");
+                }
+
+                auto splitted = split(replace(first.stringVal(), L"\r\n", L"\n"), L"\n");
+                object::list splittedObjs;
+                splittedObjs.reserve(splitted.size());
+                for (const auto& str : splitted)
+                    splittedObjs.push_back(str);
+                return splittedObjs;
+            } },
+
             { "trimmed", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("trimmed() works with one string");
@@ -1351,6 +1370,23 @@ namespace mscript
             } },
 
 #if defined(_WIN32) || defined(_WIN64)
+            { "getLastErrorMsg", [](object& first, const object::list& paramList) -> object {
+                if (paramList.size() == 0)
+                {
+                    return mscript::getLastErrorMsg();
+                }
+                else if (paramList.size() == 1)
+                {
+                    if (first.type() != object::NUMBER)
+                        raiseError("getLastErrorMsg() first parameter must be an error number");
+                    if (double(DWORD(first.numberVal())) != first.numberVal() || first.numberVal() < 0)
+                        raiseError("getLastErrorMsg() first parameter must be a valid error number");
+                    return mscript::getLastErrorMsg(DWORD(first.numberVal()));
+                }
+                else
+                    raiseError("getLastErrorMsg() takes at most one parameter, the error number");
+            } },
+
             { "getIniString", [](object&, const object::list& paramList) -> object {
                 if
                 (
@@ -1477,6 +1513,57 @@ namespace mscript
                 }
 
                 raiseError("Unsupported readFile() encoding: must be ascii, utf-8, or utf-16");
+            } },
+
+            { "readFileLines", [](object& first, const object::list& paramList) -> object {
+                (void)first;
+                if (paramList.size() != 2
+                    || first.type() != object::STRING
+                    || paramList[1].type() != object::STRING)
+                {
+                    raiseError("readFileLines() works with a file path string and an encoding string");
+                }
+
+                std::wstring filePath = first.stringVal();
+                std::wstring encoding = paramList[1].stringVal();
+
+                if (encoding == L"ascii")
+                {
+                    std::ifstream file(filePath);
+                    if (!file)
+                        return object();
+
+                    object::list ret_val;
+                    std::string line;
+                    for (;;)
+                    {
+                        if (!std::getline(file, line))
+                            break;
+                        ret_val.push_back(replace(toWideStr(line), L"\r", L""));
+                    }
+                    return ret_val;
+                }
+
+                if (encoding == L"utf-8" || encoding == L"utf-16")
+                {
+                    std::wifstream file(filePath);
+                    if (encoding == L"utf-8")
+                        file.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
+                    if (!file)
+                        return object();
+
+                    object::list ret_val;
+                    std::wstring line;
+                    for (;;)
+                    {
+                        if (!std::getline(file, line))
+                            break;
+                        ret_val.push_back(replace(line, L"\r", L""));
+                    }
+                    return ret_val;
+                }
+
+                raiseError("Unsupported readFileLines() encoding: must be ascii, utf-8, or utf-16");
             } },
 
             { "writeFile", [](object& first, const object::list& paramList) -> object {

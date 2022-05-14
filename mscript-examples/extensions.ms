@@ -22,9 +22,7 @@ $ exec_result = exec('dir /B /S "' + dir_path + '"')
 
 / Extract a list of paths from the raw dir output
 >> Processing file paths...
-$ dir_output = exec_result.get("output")
-& dir_output = dir_output.replaced(crlf, lf)
-$ paths = split(dir_output, lf)
+$ paths = splitLines(exec_result.get("output"))
 
 / Loop over the paths collecting extension stats
 / An index is like a Scripting.Dictionary
