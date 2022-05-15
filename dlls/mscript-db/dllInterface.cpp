@@ -82,7 +82,7 @@ static mscript::object::list processDbReader(fourdb::dbreader& reader)
 
 	while (reader.read())
 	{
-		ret_val.push_back(mscript::object::list());
+		ret_val.emplace_back(mscript::object::list());
 		mscript::object::list& row_list = ret_val.back().listVal();
 		row_list.reserve(col_count);
 		for (unsigned c = 0; c < col_count; ++c)
@@ -120,7 +120,7 @@ wchar_t* __cdecl mscript_GetExports()
 		L"msdb_4db_drop",
 		L"msdb_4db_reset",
 
-		L"msdb_4db_getschema",
+		L"msdb_4db_get_schema",
 	};
 	return mscript::module_utils::getExports(exports);
 }
@@ -176,9 +176,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				raiseError("Takes the name of the database");
 			}
 
-			std::wstring db_name = params[0].stringVal();
-
-			auto db_it = g_db_conns.find(db_name);
+			auto db_it = g_db_conns.find(params[0].stringVal());
 			if (db_it != g_db_conns.end())
 				g_db_conns.erase(db_it);
 
@@ -200,7 +198,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				raiseError("Takes the name of the database, the SQL query, and an optional index of query parameters");
 			}
 
-			std::wstring db_name = params[0].stringVal();
+			auto sql_db = getSqldb(params[0].stringVal());
 			std::wstring sql_query = params[1].stringVal();
 			auto params_idx = 
 				params.size() >= 3 
@@ -208,7 +206,6 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				: mscript::object::index();
 			fourdb::paramap query_params = convert(params_idx);
 			
-			auto sql_db = getSqldb(db_name);
 			auto reader = sql_db->execReader(sql_query, query_params);
 
 			auto results = processDbReader(*reader);
@@ -227,25 +224,23 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				raiseError("Takes the database name");
 			}
 
-			std::wstring db_name = params[0].stringVal();
-			auto sql_db = getSqldb(db_name);
+			auto sql_db = getSqldb(params[0].stringVal());
 			int64_t rows_affected = sql_db->execScalarInt64(L"SELECT changes()").value();
 			return mscript::module_utils::jsonStr(double(rows_affected));
 		}
 		else if (funcName == L"msdb_sql_last_inserted_id")
 		{
 			if
-				(
-					params.size() != 1
-					||
-					params[0].type() != mscript::object::STRING
-					)
+			(
+				params.size() != 1
+				||
+				params[0].type() != mscript::object::STRING
+			)
 			{
 				raiseError("Takes the database name");
 			}
 
-			std::wstring db_name = params[0].stringVal();
-			auto sql_db = getSqldb(db_name);
+			auto sql_db = getSqldb(params[0].stringVal());
 			int64_t last_inserted_id = sql_db->execScalarInt64(L"SELECT last_insert_rowid()").value();
 			return mscript::module_utils::jsonStr(double(last_inserted_id));
 		}
@@ -286,9 +281,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				raiseError("Takes the name of the context");
 			}
 
-			std::wstring db_name = params[0].stringVal();
-
-			auto ctxt_it = g_contexts.find(db_name);
+			auto ctxt_it = g_contexts.find(params[0].stringVal());
 			if (ctxt_it != g_contexts.end())
 				g_contexts.erase(ctxt_it);
 
@@ -312,12 +305,11 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				raiseError("Takes four parameters: the name of the context, the table name, the key value, and an index of name-value pairs");
 			}
 
-			const std::wstring& db_name = params[0].stringVal();
-			auto ctxt = get4db(db_name);
+			auto ctxt = get4db(params[0].stringVal());
 
 			const std::wstring& table_name = params[1].stringVal();
-			fourdb::strnum key_value = convert(params[2]);
-			const fourdb::paramap metadata = convert(params[2].indexVal());
+			const fourdb::strnum key_value = convert(params[2]);
+			const fourdb::paramap metadata = convert(params[3].indexVal());
 
 			ctxt->define(table_name, key_value, metadata);
 
@@ -327,7 +319,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 		{
 			if
 			(
-				params.size() != 3
+				params.size() != 4
 				||
 				params[0].type() != mscript::object::STRING
 				||
@@ -341,12 +333,11 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				raiseError("Takes four parameters: the name of the context, the table name, the key value, and the name of the metadata to remove");
 			}
 
-			const std::wstring& db_name = params[0].stringVal();
-			auto ctxt = get4db(db_name);
+			auto ctxt = get4db(params[0].stringVal());
 
 			const std::wstring& table_name = params[1].stringVal();
-			fourdb::strnum key_value = convert(params[2]);
-			const std::wstring& metadata_name = params[1].stringVal();
+			const fourdb::strnum key_value = convert(params[2]);
+			const std::wstring& metadata_name = params[3].stringVal();
 
 			ctxt->undefine(table_name, key_value, metadata_name);
 
@@ -368,39 +359,17 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				raiseError("Takes three parameters: the name of the context, the SQL query, and an index of name-value parameters");
 			}
 
-			const std::wstring& db_name = params[0].stringVal();
-			auto ctxt = get4db(db_name);
+			auto ctxt = get4db(params[0].stringVal());
 
-			const std::wstring& sql_query = params[1].stringVal();
+			fourdb::select sql_select = fourdb::sql::parse(params[1].stringVal());
 			const fourdb::paramap query_params = convert(params[2].indexVal());
-
-			fourdb::select sql_select = fourdb::sql::parse(sql_query);
 			for (const auto& param_it : query_params)
 				sql_select.addParam(param_it.first, param_it.second);
 
-			auto db_reader = ctxt->execQuery(sql_select);
+			auto reader = ctxt->execQuery(sql_select);
+			auto results = processDbReader(*reader);
 
-			mscript::object::list ret_val;
-			ret_val.push_back(mscript::object::list());
-
-			unsigned col_count = db_reader->getColCount();
-			ret_val[0].listVal().reserve(col_count);
-			for (unsigned c = 0; c < col_count; ++c)
-				ret_val[0].listVal().push_back(db_reader->getColName(c));
-
-			while (db_reader->read())
-			{
-				mscript::object::list row_idx;
-				row_idx.reserve(col_count);
-				for (unsigned c = 0; c < col_count; ++c)
-				{
-					bool is_null = false;
-					fourdb::strnum val = db_reader->getStrNum(c, is_null);
-					row_idx.push_back(is_null ? mscript::object() : convert(val));
-				}
-			}
-
-			return mscript::module_utils::jsonStr(ret_val);
+			return mscript::module_utils::jsonStr(results);
 		}
 		else if (funcName == L"msdb_4db_delete")
 		{
@@ -418,11 +387,10 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				raiseError("Takes three parameters: the name of the context, the table name, and the key value");
 			}
 
-			const std::wstring& db_name = params[0].stringVal();
-			auto ctxt = get4db(db_name);
+			auto ctxt = get4db(params[0].stringVal());
 
 			const std::wstring& table_name = params[1].stringVal();
-			fourdb::strnum key_value = convert(params[2]);
+			const fourdb::strnum key_value = convert(params[2]);
 
 			ctxt->deleteRow(table_name, key_value);
 
@@ -442,13 +410,9 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				raiseError("Takes two parameters: the name of the context, and the table name");
 			}
 
-			const std::wstring& db_name = params[0].stringVal();
-			auto ctxt = get4db(db_name);
-
+			auto ctxt = get4db(params[0].stringVal());
 			const std::wstring& table_name = params[1].stringVal();
-
 			ctxt->drop(table_name);
-
 			return mscript::module_utils::jsonStr(mscript::object());
 		}
 		else if (funcName == L"msdb_4db_reset")
@@ -463,14 +427,11 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				raiseError("Takes the name of the context to reset");
 			}
 
-			const std::wstring& db_name = params[0].stringVal();
-			auto ctxt = get4db(db_name);
-
+			auto ctxt = get4db(params[0].stringVal());
 			ctxt->reset();
-
 			return mscript::module_utils::jsonStr(mscript::object());
 		}
-		else if (funcName == L"msdb_4db_getschema")
+		else if (funcName == L"msdb_4db_get_schema")
 		{
 			if
 			(
@@ -482,22 +443,19 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				raiseError("Takes the name of the context to get the schema of");
 			}
 
-			const std::wstring& db_name = params[0].stringVal();
-			auto ctxt = get4db(db_name);
-			auto schema = ctxt->getSchema();
-			std::vector<std::wstring> lines;
+			auto ctxt = get4db(params[0].stringVal());
+			const auto schema = ctxt->getSchema();
+			mscript::object::index table_schema;
 			for (const auto& tables_it : schema.vec())
 			{
 				const std::wstring& table_name = tables_it.first;
-				const auto& column_names = *tables_it.second;
-				std::wstring line = 
-					table_name + 
-					L": " + 
-					mscript::join(column_names, L", ");
-				lines.push_back(line);
+				mscript::object::list table_columns;
+				table_columns.reserve(tables_it.second->size());
+				for (const std::wstring& col : *tables_it.second)
+					table_columns.push_back(col);
+				table_schema.set(table_name, table_columns);
 			}
-			std::wstring schema_str = mscript::join(lines, L"\n");
-			return mscript::module_utils::jsonStr(schema_str);
+			return mscript::module_utils::jsonStr(table_schema);
 		}
 		else
 			raiseWError(L"Unknown function");

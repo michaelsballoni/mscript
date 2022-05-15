@@ -1,6 +1,6 @@
 + "mscript-db.dll"
 
-> "Creating DB..."
+>> Creating DB...
 exec("del " + "bar.db") // start from scratch
 msdb_sql_init("foo", "bar.db")
 

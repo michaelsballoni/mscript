@@ -1,0 +1,117 @@
++ "mscript-db.dll"
+
+>> Creating 4db ctxt...
+exec("del " + "monkey.db") // start from scratch
+msdb_4db_init("blet", "monkey.db")
+
+>> Provoking duplicate init...
+{
+	msdb_4db_init("blet", "monkey.db")
+	! err
+		>> Duplicate msdb_4db_init handled
+	}
+}
+
+>>
+
+>> Define some data...
+msdb_4db_define \
+( \
+	"blet", \
+	"table_name", \
+	"key_value", \
+	index("foo", "bar", "blet", "monkey") \
+)
+> "Schema: " + msdb_4db_get_schema("blet")
+
+{
+	$ query_results = \
+		msdb_4db_query \
+		( \
+			"blet", \
+			"SELECT value, foo FROM table_name WHERE value = @val", \
+			index("@val", "key_value") \
+		)
+	> "query_results[0]: " + query_results.get(0)
+	> "query_results[1]: " + query_results.get(1)
+}
+
+>>
+
+>> Undefining...
+msdb_4db_undefine("blet", "table_name", "key_value", "foo")
+{
+	$ query_results = \
+		msdb_4db_query \
+		( \
+			"blet", \
+			"SELECT value, foo FROM table_name WHERE value = @val", \
+			index("@val", "key_value") \
+		)
+	> "query_results[0]: " + query_results.get(0)
+	> "query_results[1]: " + query_results.get(1)
+}
+
+>>
+
+>> Deleting...
+msdb_4db_delete("blet", "table_name", "key_value")
+{
+	$ query_results = \
+		msdb_4db_query \
+		( \
+			"blet", \
+			"SELECT value, foo FROM table_name WHERE value = @val", \
+			index("@val", "key_value") \
+		)
+	> "query_results: " + query_results
+}
+
+>>
+
+>> Dropping...
+msdb_4db_drop("blet", "table_name")
+> "Schema: " + msdb_4db_get_schema("blet")
+
+>>
+
+>> Resetting...
+msdb_4db_reset("blet")
+> "Schema: " + msdb_4db_get_schema("blet")
+
+>>
+
+>> Closing ctxt...
+msdb_4db_close("blet")
+
+>>
+
+>> All done.
+
+===
+
+Creating 4db ctxt...
+Provoking duplicate init...
+Duplicate msdb_4db_init handled
+
+Define some data...
+Schema: {table_name: [blet, foo]}
+query_results[0]: [value, foo]
+query_results[1]: [key_value, bar]
+
+Undefining...
+query_results[0]: [value, foo]
+query_results[1]: [key_value, null]
+
+Deleting...
+query_results: [[value, foo]]
+
+Dropping...
+Schema: {}
+
+Resetting...
+Schema: {}
+
+Closing ctxt...
+
+All done.
