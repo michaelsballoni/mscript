@@ -16,10 +16,10 @@
 @ encoding : list("ascii", "utf-8", "utf-16")
 	* writeFile("test.txt", "foo" + crlf + "bar" + crlf + "blet", encoding)
 	
-	> "TRACE: readFileLines: " + encoding
+	/ DEBUG > "TRACE: readFileLines: " + encoding
 	* validateLines(readFileLines("test.txt", encoding))
 
-	> "TRACE: splitLines(readFile): " + encoding
+	/ DEBUG > "TRACE: splitLines(readFile): " + encoding
 	* validateLines(splitLines(readFile("test.txt", encoding)))
 }
 	

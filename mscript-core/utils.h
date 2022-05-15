@@ -10,7 +10,7 @@
 #include <vector>
 
 // Use macros for exception raising helpers to not pollute the stack trace
-#define raiseError(msg) throw mscript::user_exception(toWideStr(msg))
+#define raiseError(msg) throw mscript::user_exception(mscript::toWideStr(msg))
 #define raiseWError(msg) throw mscript::user_exception(std::wstring(msg))
 
 namespace mscript

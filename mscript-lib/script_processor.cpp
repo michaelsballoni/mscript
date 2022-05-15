@@ -845,7 +845,22 @@ namespace mscript
                 }
                 else
                 {
-                    raiseWError(L"Invalid statement: " + line);
+                    size_t equals_idx = line.find('=');
+                    if (equals_idx != std::wstring::npos)
+                    {
+                        std::wstring name_str = trim(line.substr(0, equals_idx));
+                        if (isName(name_str))
+                        {
+                            std::wstring value_str = trim(line.substr(equals_idx + 1));
+
+                            object answer = evaluate(value_str, callDepth);
+
+                            m_symbols.assign(name_str, answer);
+                            return object();
+                        }
+                    }
+
+                    evaluate(line, callDepth);
                 }
 
                 curException.obj = object();

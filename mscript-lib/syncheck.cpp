@@ -233,8 +233,9 @@ mscript::syncheck
             else if (first == '*')
             {
             }
-            else
-                raiseWError(L"Invalid statement: " + line);
+            // assign or eval, anything goes
+            //else
+            //    raiseWError(L"Invalid statement: " + line);
         }
         catch (user_exception userExp)
         {

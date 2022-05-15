@@ -64,7 +64,6 @@ mscript::parseArgs
 
 	// Pre-process the argument specs
 	std::vector<arg_spec> local_specs;
-	local_specs.reserve(argumentSpecs.size() + 2U);
 	for (const auto& cur_input_spec : argumentSpecs)
 	{
 		if (cur_input_spec.type() != object::INDEX)
@@ -78,6 +77,7 @@ mscript::parseArgs
 		cur_spec.takes = getBoolFlagValue(cur_input_index, "takes");
 		cur_spec.numeric = getBoolFlagValue(cur_input_index, "numeric");
 		cur_spec.required = getBoolFlagValue(cur_input_index, "required");
+
 		object default_value;
 		if (cur_input_index.tryGet(toWideStr("default"), default_value))
 			cur_spec.default_value = default_value;
@@ -118,6 +118,7 @@ mscript::parseArgs
 	}
 
 	// Loop over the arguments
+	bool help_was_output = false;
 	for (size_t a = 0; a < arguments.size(); ++a)
 	{
 		const std::wstring& cur_arg = arguments[a].stringVal();
@@ -157,11 +158,24 @@ mscript::parseArgs
 					<< std::setw(max_flags_output_len)
 					<< (arg_spec.flag + flag_separator + arg_spec.long_flag)
 					<< L": "
-					<< arg_spec.description
-					<< L"\n";
+					<< arg_spec.description;
+
+				if (arg_spec.takes)
+				{
+					std::wcout << " - type=" << (arg_spec.numeric ? "num" : "str");
+					
+					if (arg_spec.default_value.type() != object::NOTHING)
+						std::wcout << " - default=" << arg_spec.default_value.toString();
+
+					if (arg_spec.required)
+						std::wcout << " - [REQUIRED]";
+				}
+
+				std::wcout << L"\n";
 			}
 			std::wcout << std::flush;
 			ret_val_index.set(toWideStr("-?"), true);
+			help_was_output = true;
 			continue;
 		}
 
@@ -215,10 +229,13 @@ mscript::parseArgs
 	}
 
 	// Enforce that all required flags were specified
-	for (const auto& cur_spec : local_specs)
+	if (!help_was_output)
 	{
-		if (cur_spec.required && ret_val_index.get(cur_spec.flag).type() == object::NOTHING)
-			raiseWError(L"Required argument not provided: " + cur_spec.flag);
+		for (const auto& cur_spec : local_specs)
+		{
+			if (cur_spec.required && ret_val_index.get(cur_spec.flag).type() == object::NOTHING)
+				raiseWError(L"Required argument not provided: " + cur_spec.flag);
+		}
 	}
 
 	// All done
