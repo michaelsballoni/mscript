@@ -82,7 +82,8 @@ static mscript::object::list processDbReader(fourdb::dbreader& reader)
 
 	while (reader.read())
 	{
-		mscript::object::list row_list;
+		ret_val.push_back(mscript::object::list());
+		mscript::object::list& row_list = ret_val.back().listVal();
 		row_list.reserve(col_count);
 		for (unsigned c = 0; c < col_count; ++c)
 		{
@@ -101,7 +102,10 @@ wchar_t* __cdecl mscript_GetExports()
 	{
 		L"msdb_sql_init",
 		L"msdb_sql_close",
-		L"msdb_sql_query",
+
+		L"msdb_sql_exec",
+		L"msdb_sql_rows_affected",
+		L"msdb_sql_last_inserted_id",
 
 		L"msdb_4db_init",
 		L"msdb_4db_close",
@@ -146,14 +150,14 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				params[1].type() != mscript::object::STRING
 			)
 			{
-				raiseError("msdb_sql_init takes two parameters: a name for the database, and the path to the DB file");
+				raiseError("Takes two parameters: a name for the database, and the path to the DB file");
 			}
 
 			std::wstring db_name = params[0].stringVal();
 			std::wstring db_file_path = params[1].stringVal();
 
-			if (g_db_conns.find(db_file_path) != g_db_conns.end())
-				raiseWError(L"msdb_sql_init: database already initialized: " + db_name);
+			if (g_db_conns.find(db_name) != g_db_conns.end())
+				raiseWError(L"Database already initialized: " + db_name);
 
 			auto new_db = std::make_shared<fourdb::db>(mscript::toNarrowStr(db_file_path));
 			g_db_conns.insert({ db_name, new_db });
@@ -169,38 +173,40 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				params[0].type() != mscript::object::STRING
 			)
 			{
-				raiseError("msdb_sql_close takes the name of the database");
+				raiseError("Takes the name of the database");
 			}
 
 			std::wstring db_name = params[0].stringVal();
 
 			auto db_it = g_db_conns.find(db_name);
-			if (db_it == g_db_conns.end())
-				raiseWError(L"msdb_sql_close: database not open: " + db_name);
-
-			g_db_conns.erase(db_it);
+			if (db_it != g_db_conns.end())
+				g_db_conns.erase(db_it);
 
 			return mscript::module_utils::jsonStr(mscript::object());
 		}
-		else if (funcName == L"msdb_sql_query")
+		else if (funcName == L"msdb_sql_exec")
 		{
 			if
 			(
-				params.size() != 3
+				(params.size() != 2 && params.size() != 3)
 				||
 				params[0].type() != mscript::object::STRING
 				||
 				params[1].type() != mscript::object::STRING
 				||
-				params[2].type() != mscript::object::INDEX
+				(params.size() == 3 && params[2].type() != mscript::object::INDEX)
 			)
 			{
-				raiseError("msdb_sql_query takes three parameters: the name of the database, the SQL query, and an index of query parameters");
+				raiseError("Takes the name of the database, the SQL query, and an optional index of query parameters");
 			}
 
 			std::wstring db_name = params[0].stringVal();
 			std::wstring sql_query = params[1].stringVal();
-			fourdb::paramap query_params = convert(params[2].indexVal());
+			auto params_idx = 
+				params.size() >= 3 
+				? params[2].indexVal() 
+				: mscript::object::index();
+			fourdb::paramap query_params = convert(params_idx);
 			
 			auto sql_db = getSqldb(db_name);
 			auto reader = sql_db->execReader(sql_query, query_params);
@@ -208,6 +214,40 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 			auto results = processDbReader(*reader);
 
 			return mscript::module_utils::jsonStr(results);
+		}
+		else if (funcName == L"msdb_sql_rows_affected")
+		{
+			if
+			(
+				params.size() != 1
+				||
+				params[0].type() != mscript::object::STRING
+			)
+			{
+				raiseError("Takes the database name");
+			}
+
+			std::wstring db_name = params[0].stringVal();
+			auto sql_db = getSqldb(db_name);
+			int64_t rows_affected = sql_db->execScalarInt64(L"SELECT changes()").value();
+			return mscript::module_utils::jsonStr(double(rows_affected));
+		}
+		else if (funcName == L"msdb_sql_last_inserted_id")
+		{
+			if
+				(
+					params.size() != 1
+					||
+					params[0].type() != mscript::object::STRING
+					)
+			{
+				raiseError("Takes the database name");
+			}
+
+			std::wstring db_name = params[0].stringVal();
+			auto sql_db = getSqldb(db_name);
+			int64_t last_inserted_id = sql_db->execScalarInt64(L"SELECT last_insert_rowid()").value();
+			return mscript::module_utils::jsonStr(double(last_inserted_id));
 		}
 		else if (funcName == L"msdb_4db_init")
 		{
@@ -220,14 +260,14 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				params[1].type() != mscript::object::STRING
 			)
 			{
-				raiseError("msdb_4db_init takes two parameters: a name for the context, and the path to the DB file");
+				raiseError("Takes two parameters: a name for the context, and the path to the DB file");
 			}
 
 			std::wstring db_name = params[0].stringVal();
 			std::wstring db_file_path = params[1].stringVal();
 
 			if (g_contexts.find(db_name) != g_contexts.end())
-				raiseWError(L"msdb_4db_init: context already initialized: " + db_name);
+				raiseWError(L"Context already initialized: " + db_name);
 
 			auto ctxt_ptr = std::make_shared<fourdb::ctxt>(mscript::toNarrowStr(db_file_path));
 			g_contexts.insert({ db_name, ctxt_ptr });
@@ -243,16 +283,14 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				params[0].type() != mscript::object::STRING
 			)
 			{
-				raiseError("msdb_4db_close takes the name of the context");
+				raiseError("Takes the name of the context");
 			}
 
 			std::wstring db_name = params[0].stringVal();
 
 			auto ctxt_it = g_contexts.find(db_name);
-			if (ctxt_it == g_contexts.end())
-				raiseWError(L"msdb_4db_close: context not open: " + db_name);
-
-			g_contexts.erase(ctxt_it);
+			if (ctxt_it != g_contexts.end())
+				g_contexts.erase(ctxt_it);
 
 			return mscript::module_utils::jsonStr(mscript::object());
 		}
@@ -271,7 +309,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				params[3].type() != mscript::object::INDEX
 			)
 			{
-				raiseError("msdb_4db_define takes four parameters: the name of the context, the table name, the key value, and an index of name-value pairs");
+				raiseError("Takes four parameters: the name of the context, the table name, the key value, and an index of name-value pairs");
 			}
 
 			const std::wstring& db_name = params[0].stringVal();
@@ -300,7 +338,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				params[3].type() != mscript::object::STRING
 			)
 			{
-				raiseError("msdb_4db_undefine takes four parameters: the name of the context, the table name, the key value, and the name of the metadata to remove");
+				raiseError("Takes four parameters: the name of the context, the table name, the key value, and the name of the metadata to remove");
 			}
 
 			const std::wstring& db_name = params[0].stringVal();
@@ -327,7 +365,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				params[2].type() != mscript::object::INDEX
 			)
 			{
-				raiseError("msdb_4db_query takes three parameters: the name of the context, the SQL query, and an index of name-value parameters");
+				raiseError("Takes three parameters: the name of the context, the SQL query, and an index of name-value parameters");
 			}
 
 			const std::wstring& db_name = params[0].stringVal();
@@ -377,7 +415,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				//params[2].type() != mscript::object::STRING
 			)
 			{
-				raiseError("msdb_4db_delete takes three parameters: the name of the context, the table name, and the key value");
+				raiseError("Takes three parameters: the name of the context, the table name, and the key value");
 			}
 
 			const std::wstring& db_name = params[0].stringVal();
@@ -401,7 +439,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				params[1].type() != mscript::object::STRING
 			)
 			{
-				raiseError("msdb_4db_drop takes two parameters: the name of the context, and the table name");
+				raiseError("Takes two parameters: the name of the context, and the table name");
 			}
 
 			const std::wstring& db_name = params[0].stringVal();
@@ -422,7 +460,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				params[0].type() != mscript::object::STRING
 			)
 			{
-				raiseError("msdb_4db_reset takes the name of the context to reset");
+				raiseError("Takes the name of the context to reset");
 			}
 
 			const std::wstring& db_name = params[0].stringVal();
@@ -441,7 +479,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				params[0].type() != mscript::object::STRING
 			)
 			{
-				raiseError("msdb_4db_getschema takes the name of the context to get the schema of");
+				raiseError("Takes the name of the context to get the schema of");
 			}
 
 			const std::wstring& db_name = params[0].stringVal();
@@ -462,7 +500,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 			return mscript::module_utils::jsonStr(schema_str);
 		}
 		else
-			raiseWError(L"msdb: unknown function: " + funcName);
+			raiseWError(L"Unknown function");
 	}
 	catch (const mscript::user_exception& exp)
 	{

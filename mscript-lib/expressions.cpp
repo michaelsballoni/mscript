@@ -376,10 +376,11 @@ namespace mscript
         }
 
         // Deal with parens, including function calls
-        size_t leftParen = expStr.find('(');
-        if (expStr.size() > 2 && leftParen != std::wstring::npos && expStr.back() == ')')
+        auto trimmed_exp_str = trim(expStr);
+        size_t leftParen = trimmed_exp_str.find('(');
+        if (trimmed_exp_str.size() > 2 && leftParen != std::wstring::npos && trimmed_exp_str.back() == ')')
         {
-            std::wstring functionName = expStr.substr(0, leftParen);
+            std::wstring functionName = trim(expStr.substr(0, leftParen));
 
             int subStrLen = (int(expStr.size()) - 1) - int(leftParen) - 1;
 
@@ -1115,35 +1116,57 @@ namespace mscript
             //
             { "isMatch", [](object& first, const object::list& paramList) -> object {
                 (void)first;
-                if (paramList.size() != 2)
-                    raiseError("isMatch() works string to match and pattern");
-                if (paramList[0].type() != object::STRING)
+                bool full_match = false;
+                if (paramList.size() < 2 || paramList.size() > 3)
+                    raiseError("isMatch() works string to match and pattern and optional allow substring match");
+                else if (paramList[0].type() != object::STRING)
                     raiseError("isMatch() only works with string input");
-                if (paramList[1].type() != object::STRING)
+                else if (paramList[1].type() != object::STRING)
                     raiseError("isMatch() only works with string input");
+                else if (paramList.size() == 3)
+                {
+                    if (paramList[2].type() != object::BOOL)
+                        raiseError("isMatch() optional parameter to require full string match must be bool");
+                    else
+                        full_match = paramList[2].boolVal();
+                }
 
                 std::wregex re(paramList[1].stringVal());
-                return std::regex_match(first.stringVal(), re);
+                return 
+                    full_match
+                    ? std::regex_match(first.stringVal(), re)
+                    : std::regex_search(first.stringVal(), re);
             } },
 
             { "getMatches", [](object& first, const object::list& paramList) -> object {
                 (void)first;
-                if (paramList.size() != 2)
+                bool full_match = false;
+                if (paramList.size() < 2 || paramList.size() > 3)
                     raiseError("getMatches() works string to match and pattern");
                 if (paramList[0].type() != object::STRING)
                     raiseError("getMatches() only works with string input");
                 if (paramList[1].type() != object::STRING)
                     raiseError("getMatches() only works with string input");
+                else if (paramList.size() == 3)
+                {
+                    if (paramList[2].type() != object::BOOL)
+                        raiseError("getMatches() optional parameter to require full string match must be bool");
+                    else
+                        full_match = paramList[2].boolVal();
+                }
 
                 std::wregex re(paramList[1].stringVal());
 
-                object::list output;
                 std::wsmatch sm;
-                std::regex_match(first.stringVal(), sm, re);
+                if (full_match)
+                    std::regex_match(first.stringVal(), sm, re);
+                else
+                    std::regex_search(first.stringVal(), sm, re);
+
+                object::list output;
                 for (const auto& m : sm)
                     output.push_back(m.str());
                 return output;
-
             } },
 
             //
