@@ -22,9 +22,8 @@ namespace mscript
 	For flags with no value, the value is null
 	The special non-flag "" gives a list of all un-tagged arguments
 
-	-? / --help outputs the contents of argumentSpecs
-
-	-v / --version outputs the mscript EXE version
+	Special flag -? / --help outputs the contents of argumentSpecs
+	If you pass your own -? / --help function, this suppresses the special behavior
 	*/
 	object
 		parseArgs

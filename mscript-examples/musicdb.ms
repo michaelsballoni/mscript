@@ -4,11 +4,11 @@
 	$ lines = loadLines()
 	
 	$ db = index()
-	* processLines(db, lines, false)
+	processLines(db, lines, false)
 
 	$ matching_artists = getMatchingArtistNames(db, arguments)
 	@ matching_artist : matching_artists
-		* summarizeArtist(db, matching_artist)
+		summarizeArtist(db, matching_artist)
 		>>
 	}
 	/ Exit the script with a good exit code
@@ -20,9 +20,9 @@ $ lines = loadLines()
 > "Music Files: " + lines.length()
 
 $ db = index()
-* processLines(db, lines, true)
+processLines(db, lines, true)
 >> All done
-* outputStats(db)
+outputStats(db)
 
 O
 	>>
@@ -35,7 +35,7 @@ O
 	}
 
 	@ matching_artist : matching_artists
-		* summarizeArtist(db, matching_artist)
+		summarizeArtist(db, matching_artist)
 		>>
 	}
 }
@@ -56,15 +56,15 @@ O
 	? should_pacify
 		$ line_count = 0
 		@ line : lines
-			* processLine(db, line)
-			& line_count = line_count + 1
+			processLine(db, line)
+			line_count = line_count + 1
 			? (line_count % 5000) = 0
 				> line_count
 			}
 		}
 	<>
 		@ line : lines
-			* processLine(db, line)
+			processLine(db, line)
 		}
 	}
 }
@@ -73,7 +73,7 @@ O
 / ...if it's a somewhat valid line
 ~ processLine(db, line)
 	/ Split up path, bail if not at least artist\album\track
-	& line = line.trimmed()
+	line = line.trimmed()
 	$ parts = line.split('\')
 	? parts.length() < 3
 		/ not deep enough
@@ -93,18 +93,18 @@ O
 
 	/ Ensure the artist is in the DB
 	? !db.has(artist)
-		* db.add(artist, index())
+		db.add(artist, index())
 	}
 	$ artist_index = db.get(artist)
 
 	/ Ensure the artist has the album
 	? !artist_index.has(album)
-		* artist_index.add(album, list())
+		artist_index.add(album, list())
 	}
 	$ album_list = artist_index.get(album)
 
 	/ Add the track to the album
-	* album_list.add(track)
+	album_list.add(track)
 
 	/ All done
 	<- true
@@ -118,9 +118,9 @@ O
 	@ artist : artists
 		$ artist_index = db.get(artist)
 		@ album_name : artist_index.keys()
-			& album_count = album_count + 1
+			album_count = album_count + 1
 			$ album_tracks = artist_index.get(album_name)
-			& track_count = track_count + album_tracks.length()
+			track_count = track_count + album_tracks.length()
 		}
 	}
 	>>
@@ -138,7 +138,7 @@ O
 	@ part : parts
 		$ normalized_part = trimmed(toLower(part))
 		? normalized_part.length() > 0
-			* normalized_parts.add(normalized_part)
+			normalized_parts.add(normalized_part)
 		}
 	}
 
@@ -152,12 +152,12 @@ O
 		$ match = true
 		@ part : normalized_parts
 			? !artist_lower.has(part)
-				& match = false
+				match = false
 				V
 			}
 		}
 		? match
-			* matching_artists.add(artist)
+			matching_artists.add(artist)
 		}
 	}
 	<- matching_artists

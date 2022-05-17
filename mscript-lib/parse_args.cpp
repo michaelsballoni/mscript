@@ -140,6 +140,12 @@ mscript::parseArgs
 
 		if (!already_had_help && (cur_arg == L"-?" || cur_arg == L"--help"))
 		{
+			std::wstring mscript_exe_path = getExeFilePath();
+			std::wcout
+				<< mscript_exe_path
+				<< L" - v" << toWideStr(getBinaryVersion(mscript_exe_path))
+				<< L"\n";
+
 			size_t max_flags_len = 0;
 			for (const auto& arg_spec : local_specs)
 			{
@@ -173,7 +179,9 @@ mscript::parseArgs
 
 				std::wcout << L"\n";
 			}
+
 			std::wcout << std::flush;
+
 			ret_val_index.set(toWideStr("-?"), true);
 			help_was_output = true;
 			continue;
@@ -228,7 +236,7 @@ mscript::parseArgs
 			raiseWError(L"Unknown command line flag: " + cur_arg);
 	}
 
-	// Enforce that all required flags were specified
+	// Enforce that all required flags were specified...unless -? / --help
 	if (!help_was_output)
 	{
 		for (const auto& cur_spec : local_specs)

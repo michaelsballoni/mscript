@@ -6,12 +6,12 @@
 / Otherwise, error out
 $ dir_path = ""
 ? arguments.length() = 0
-	& dir_path = "."
+	dir_path = "."
 ? arguments.length() = 1
-	& dir_path = arguments.get(0)
+	dir_path = arguments.get(0)
 <>
 	>> Either specify no parameters, or pass one directory path parameter
-	* exit(0)
+	exit(0)
 }
 
 / Run the dir command to enumerate all paths
@@ -43,9 +43,9 @@ $ ext_stats = index()
 	
 	/ Add to our stats
 	? ext_stats.has(ext)
-		* ext_stats.set(ext, ext_stats.get(ext) + 1)
+		ext_stats.set(ext, ext_stats.get(ext) + 1)
 	<>
-		* ext_stats.set(ext, 1)
+		ext_stats.set(ext, 1)
 	}
 }
 
@@ -58,7 +58,7 @@ $ ext_stats = index()
 / making for a unique set of count values with the counts as keys
 $ unique_counts = index()
 @ count : reversed(sorted(ext_stats.values()))
-	* unique_counts.set(count, 0)
+	unique_counts.set(count, 0)
 }
 
 / Output what we've found
