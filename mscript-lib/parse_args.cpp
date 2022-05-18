@@ -100,7 +100,7 @@ mscript::parseArgs
 		new_spec.flag = L"-?";
 		new_spec.long_flag = L"--help";
 		new_spec.description = L"Get usage of this script";
-		local_specs.push_back(new_spec);
+		local_specs.insert(local_specs.begin(), new_spec);
 	}
 
 	// Add default values (nulls) to the return value index

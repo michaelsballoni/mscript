@@ -845,6 +845,7 @@ namespace mscript
                 }
                 else
                 {
+                    bool assign_worked = false;
                     size_t equals_idx = line.find('=');
                     if (equals_idx != std::wstring::npos)
                     {
@@ -856,11 +857,12 @@ namespace mscript
                             object answer = evaluate(value_str, callDepth);
 
                             m_symbols.assign(name_str, answer);
-                            return object();
+                            assign_worked = true;
                         }
                     }
 
-                    evaluate(line, callDepth);
+                    if (!assign_worked)
+                        evaluate(line, callDepth);
                 }
 
                 curException.obj = object();

@@ -15,9 +15,9 @@ $ result = exec("echo foobar")
 
 >>
 
-$ expanded = expandEnvVars("%path%")
+$ expanded = expandedEnvVars("%path%")
 $ gotten = getEnv("path")
-> "expandEnvVars: Should be true: " + (expanded == gotten)
+> "expandedEnvVars: Should be true: " + (expanded == gotten)
 
 ===
 
@@ -29,4 +29,4 @@ Should be true: true
 Should be 0: 0
 Should be bar: bar
 
-expandEnvVars: Should be true: true
+expandedEnvVars: Should be true: true

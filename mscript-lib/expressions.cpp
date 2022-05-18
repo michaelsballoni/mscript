@@ -1281,10 +1281,10 @@ namespace mscript
                 return envValStr;
             } },
 #if defined(_WIN32) || defined(_WIN64)
-            { "expandEnvVars", [](object& first, const object::list& paramList) -> object {
+            { "expandedEnvVars", [](object& first, const object::list& paramList) -> object {
                 (void)first;
                 if (paramList.size() != 1 || first.type() != object::STRING)
-                    raiseError("expandEnvVars() works with one string parameter");
+                    raiseError("expandedEnvVars() works with one string parameter");
 
                 const unsigned int output_str_len = 32 * 1024;
                 std::unique_ptr<wchar_t[]> output_str(new wchar_t[output_str_len]);
