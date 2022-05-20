@@ -7,8 +7,10 @@
 $ dir_path = ""
 ? arguments.length() = 0
 	dir_path = "."
+}
 ? arguments.length() = 1
 	dir_path = arguments.get(0)
+}
 <>
 	>> Either specify no parameters, or pass one directory path parameter
 	exit(0)
@@ -44,6 +46,7 @@ $ ext_stats = index()
 	/ Add to our stats
 	? ext_stats.has(ext)
 		ext_stats.set(ext, ext_stats.get(ext) + 1)
+	}
 	<>
 		ext_stats.set(ext, 1)
 	}

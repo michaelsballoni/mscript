@@ -75,6 +75,8 @@ std::vector<int> mscript::findElses(const std::vector<std::wstring>& lines, int 
                 last_when_start = false;
                 last_when_end = true;
             }
+            else if (is_block_begin)
+                break;
         }
         else if (block_depth == 0)
         {
@@ -100,6 +102,9 @@ std::vector<int> mscript::findElses(const std::vector<std::wstring>& lines, int 
 bool mscript::isLineBlockBegin(const std::wstring& line)
 {
     if (line.empty())
+        return false;
+
+    if (iswalpha(line[0]) && line[0] != 'O')
         return false;
 
     wchar_t startC = line[0];

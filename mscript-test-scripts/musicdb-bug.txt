@@ -1,0 +1,25 @@
+/ Borrowed from musicdb.ms sample
+$ db = index("Balloni", null)
+$ normalized_parts = list("ball")
+$ matching_artists = list()
+? normalized_parts.length() = 0
+	<- matching_artists
+}
+@ artist : db.keys()
+	$ artist_lower = toLower(artist)
+	$ match = true
+	@ part : normalized_parts
+		? !artist_lower.has(part)
+			match = false
+			V
+		}
+	}
+	? match
+		matching_artists.add(artist)
+	}
+}
+> "Should be " + matching_artists
+
+===
+
+Should be [Balloni]

@@ -62,6 +62,7 @@ O
 				> line_count
 			}
 		}
+	}
 	<>
 		@ line : lines
 			processLine(db, line)

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "object.h"
-#include "vectormap.h"
 
 namespace mscript
 {

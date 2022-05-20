@@ -8,6 +8,7 @@
 #include "bin_crypt.h"
 #include "includes.h"
 #include "script_processor.h"
+#include "exe_version.h"
 #include "utils.h"
 #pragma comment(lib, "mscript-core")
 #pragma comment(lib, "mscript-lib")
@@ -23,7 +24,7 @@
 namespace fs = std::filesystem;
 using namespace mscript;
 
-std::vector<std::wstring> readFileIntoString(const std::wstring& filePath)
+static std::vector<std::wstring> readFileIntoString(const std::wstring& filePath)
 {
 	std::vector<std::wstring> ret_val;
 
@@ -53,7 +54,7 @@ struct ScriptInfo
 
 std::unordered_map<std::wstring, ScriptInfo> FilenameToScriptInfo;
 
-std::vector<std::wstring> loadScript(const std::wstring& current, const std::wstring& filename)
+static std::vector<std::wstring> loadScript(const std::wstring& current, const std::wstring& filename)
 {
 	{
 		const auto& scriptIt = FilenameToScriptInfo.find(filename);
@@ -132,7 +133,14 @@ int wmain(int argc, wchar_t* argv[])
 {
 	if (argc < 2)
 	{
-		printf("Usage: mscript2 <script path> ...\n");
+		std::cout << "Usage: mscript3 <script path> ..." << std::endl;
+		
+		std::cout << std::endl;
+
+		std::wstring mscript_exe_path = mscript::getExeFilePath();
+		std::wcout << L"EXE path: " << mscript_exe_path << std::endl;
+		std::wcout << L"Version:  " << toWideStr(getBinaryVersion(mscript_exe_path)) << std::endl;
+
 		return 0;
 	}
 	try

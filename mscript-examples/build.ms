@@ -10,6 +10,11 @@ setEnv("ms_version", version)
 
 $ ignore_errors = index("ignore_errors", true)
 
+>> Licenses...
+exec("rmdir /S /Q licenses", ignore_errors)
+exec("mkdir licenses")
+exec("xcopy /Y ..\mscript\mscript-licenses\*.* licenses\.")
+
 >> Binaries...
 exec("rmdir /S /Q binaries", ignore_errors)
 exec("mkdir binaries")
@@ -18,13 +23,14 @@ exec("xcopy /Y ..\mscript\Win32\Release\*.* binaries\.")
 >> Resource hacking and signing...
 exec("del resources.res", ignore_errors)
 exec("ResourceHacker.exe -open resources.rc -save resources.res -action compile")
-$ filename = list("mscript2.exe")
-filename.add("mscript-sample.dll")
-filename.add("mscript-timestamp.dll")
-filename.add("mscript-registry.dll")
-filename.add("mscript-log.dll")
-filename.add("mscript-db.dll")
-@ filename : filename
+$ filenames = list()
+filenames.add("mscript3.exe")
+filenames.add("mscript-sample.dll")
+filenames.add("mscript-timestamp.dll")
+filenames.add("mscript-registry.dll")
+filenames.add("mscript-log.dll")
+filenames.add("mscript-db.dll")
+@ filename : filenames
 	> "..." + filename
 	setEnv("ms_filepath", "binaries\" + filename)
 	exec("ResourceHacker.exe -open %ms_filepath% -save %ms_filepath% -action addoverwrite -resource resources.res")
@@ -42,7 +48,7 @@ exec("rmdir /S /Q ..\mscript.io\samples", ignore_errors)
 exec("mkdir ..\mscript.io\samples")
 exec("xcopy /Y ..\mscript\mscript-examples\*.* ..\mscript.io\samples\.")
 
-@ filename : filename
+@ filename : filenames
 	> "..." + filename
 	setEnv("ms_filepath", "binaries\" + filename)
 	exec("xcopy /Y %ms_filepath% ..\mscript.io\releases\%ms_version%\.")

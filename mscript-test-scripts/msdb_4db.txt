@@ -40,6 +40,7 @@ msdb_4db_define \
 
 >> Undefining...
 msdb_4db_undefine("blet", "table_name", "key_value", "foo")
+
 {
 	$ query_results = \
 		msdb_4db_query \
@@ -56,6 +57,7 @@ msdb_4db_undefine("blet", "table_name", "key_value", "foo")
 
 >> Deleting...
 msdb_4db_delete("blet", "table_name", "key_value")
+
 {
 	$ query_results = \
 		msdb_4db_query \

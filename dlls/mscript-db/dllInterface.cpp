@@ -42,7 +42,7 @@ static mscript::object convert(const fourdb::strnum& obj)
 		return obj.num();
 }
 
-static fourdb::paramap convert(const mscript::object::index idx)
+static fourdb::paramap convert(const mscript::object::index& idx)
 {
 	fourdb::paramap ret_val;
 	for (const auto& it : idx.vec())
