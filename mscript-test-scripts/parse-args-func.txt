@@ -21,7 +21,7 @@
 }
 
 {
-	$ arguments = list("-?")
+	$ arguments = list("-?", "--suppress-help-quit")
 	$ argument_specs = list(index("flag", "-n", "long-flag", "--number", "description", "A number", "takes", true, "numeric", true, "default", 5, "required", true))
 	$ parsed = parseArgs(arguments, argument_specs)
 	> "7d. Should be: " + parsed.string()
@@ -30,7 +30,7 @@
 >>
 
 {
-	$ arguments = list("-i", "foo", "bar", "--help")
+	$ arguments = list("-i", "foo", "bar", "--help", "--suppress-help-quit")
 	$ argument_specs = list(index("flag", "-i", "long-flag", "--input", "description", "Input file", "takes", true))
 	$ parsed = parseArgs(arguments, argument_specs)
 	> "6. Should be: " + parsed.string()
@@ -72,7 +72,7 @@
 >>
 
 {
-	$ arguments = list("-?")
+	$ arguments = list("-?", "--suppress-help-quit")
 	$ argument_specs = list()
 	$ parsed = parseArgs(arguments, argument_specs)
 	> "3. Should be: " + parsed.string()
@@ -102,7 +102,7 @@
 	> "1b. Should be: " + parsed.string()
 }
 {
-	$ arguments = list("-?")
+	$ arguments = list("-?", "--suppress-help-quit")
 	$ argument_specs = list()
 	$ parsed = parseArgs(arguments, argument_specs)
 	> "1c. Should be: " + parsed.string()

@@ -108,6 +108,7 @@ mscript::parseArgs
 		ret_val_index.set(arg_spec.flag, object());
 
 	// Validate the arguments
+    bool help_exit_suppressed = false;
 	for (size_t a = 0; a < arguments.size(); ++a)
 	{
 		if (arguments[a].type() != object::STRING)
@@ -115,6 +116,8 @@ mscript::parseArgs
 			raiseWError(L"Invalid command-line argument, not a string: #" + num2wstr(double(a)) +
 						L" - " + arguments[a].toString());
 		}
+		if (arguments[a].stringVal() == L"--suppress-help-quit")
+			help_exit_suppressed = true;
 	}
 
 	// Loop over the arguments
@@ -122,6 +125,8 @@ mscript::parseArgs
 	for (size_t a = 0; a < arguments.size(); ++a)
 	{
 		const std::wstring& cur_arg = arguments[a].stringVal();
+		if (cur_arg == L"--suppress-help-quit")
+			continue;
 
 		bool has_next_arg = false;
 		object next_arg;
@@ -181,6 +186,9 @@ mscript::parseArgs
 			}
 
 			std::wcout << std::flush;
+
+			if (!help_exit_suppressed)
+				exit(0);
 
 			ret_val_index.set(toWideStr("-?"), true);
 			help_was_output = true;

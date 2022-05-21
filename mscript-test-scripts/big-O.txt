@@ -1,0 +1,13 @@
+$ vals = list(1, 2, 3)
+O
+	# iter : 0 -> vals.length() - 1
+		> vals.get(iter)
+	}
+	V
+}
+
+===
+
+1
+2
+3

@@ -131,8 +131,10 @@ static std::wstring getModuleFilePath(const std::wstring& filename)
 
 int wmain(int argc, wchar_t* argv[])
 {
-	if (argc < 2)
+	if (argc < 2 || _wcsicmp(argv[1], L"-?") == 0)
 	{
+		std::cout << std::endl;
+
 		std::cout << "Usage: mscript3 <script path> ..." << std::endl;
 		
 		std::cout << std::endl;
