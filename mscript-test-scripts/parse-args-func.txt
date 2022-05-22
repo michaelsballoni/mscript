@@ -113,7 +113,7 @@
 7a. Should be: {: [], -?: null, -n: 10}
 7b. Error caught
 7c. Should be: {: [], -?: null, -n: 5}
-7d. Should be: {: [], -?: true, -n: null}
+7d. Should be: {: [], -?: true, -n: 5}
 
 6. Should be: {: [bar], -?: true, -i: foo}
 

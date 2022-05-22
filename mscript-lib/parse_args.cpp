@@ -105,7 +105,7 @@ mscript::parseArgs
 
 	// Add default values (nulls) to the return value index
 	for (const auto& arg_spec : local_specs)
-		ret_val_index.set(arg_spec.flag, object());
+		ret_val_index.set(arg_spec.flag, arg_spec.default_value);
 
 	// Validate the arguments
     bool help_exit_suppressed = false;

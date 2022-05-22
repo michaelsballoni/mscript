@@ -228,11 +228,11 @@ namespace mscript
                         object leftVal = evaluate(leftStr);
 
                         // Short circuitry
-                        if ((op == "and" || op == "&&") && !leftVal.boolVal())
+                        if ((op == "and" || op == "AND" || op == "&&") && !leftVal.boolVal())
                         {
                             value = false;
                         }
-                        else if ((op == "or" || op == "||") && leftVal.boolVal())
+                        else if ((op == "or" || op == "OR" || op == "||") && leftVal.boolVal())
                         {
                             value = true;
                         }
@@ -328,13 +328,9 @@ namespace mscript
                                 bool leftBool = leftVal.boolVal();
                                 bool rightBool = rightVal.boolVal();
 
-                                if (op == "and")
+                                if (op == "and" || op == "AND" || op == "&&")
                                     value = leftBool && rightBool;
-                                else if (op == "&&")
-                                    value = leftBool && rightBool;
-                                else if (op == "or")
-                                    value = leftBool || rightBool;
-                                else if (op == "||")
+                                else if (op == "or" || op == "OR" || op == "||")
                                     value = leftBool || rightBool;
                                 else if (op == "==" || op == "=")
                                     value = leftBool == rightBool;
