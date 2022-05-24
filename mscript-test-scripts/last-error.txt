@@ -1,0 +1,14 @@
+$ last_error = getLastError()
+> "Should be 0: " + last_error
+
+$ last_error_msg = getLastErrorMsg(last_error)
+> 'Should be "The operation completed successfully. (0)": ' + last_error_msg
+
+last_error_msg = getLastErrorMsg(5)
+> 'Should be "Access is denied. (5)": ' + last_error_msg
+
+===
+
+Should be 0: 0
+Should be "The operation completed successfully. (0)": The operation completed successfully. (0)
+Should be "Access is denied. (5)": Access is denied. (5)

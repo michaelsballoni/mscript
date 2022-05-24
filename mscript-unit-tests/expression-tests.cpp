@@ -115,7 +115,9 @@ namespace mscript
             ValidateExpression("3<>3", false, symbols);
             ValidateExpression("3<=4", true, symbols);
             ValidateExpression("3<=4 and 3<4", true, symbols);
+            ValidateExpression("3<=4 AND 3<4", true, symbols);
             ValidateExpression("3<4 and 5 <= 4 or 12<=50 and 6 <= 13", true, symbols);
+            ValidateExpression("3<4 AND 5 <= 4 OR 12<=50 AND 6 <= 13", true, symbols);
 
             ValidateExpression("2 + 3", 5.0, symbols);
             ValidateExpression("2 - 3", -1.0, symbols);
@@ -162,6 +164,7 @@ namespace mscript
             ValidateExpression("r", false, symbols);
             ValidateExpression("!r", true, symbols);
             ValidateExpression("not r", true, symbols);
+            ValidateExpression("NOT r", true, symbols);
             ValidateExpression("!q or !r", true, symbols);
             ValidateExpression("not q or not r", true, symbols);
 

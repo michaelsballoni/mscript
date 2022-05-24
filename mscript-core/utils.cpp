@@ -270,7 +270,7 @@ std::wstring mscript::getLastErrorMsg(DWORD dwErrorCode)
     }
 
     std::wstring output = 
-        std::wstring(error_str) + L" (" + std::to_wstring(dwErrorCode) + L")";
+        trim(std::wstring(error_str)) + L" (" + std::to_wstring(dwErrorCode) + L")";
 
     LocalFree(error_str);
     error_str = nullptr;

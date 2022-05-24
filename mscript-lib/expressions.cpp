@@ -20,8 +20,11 @@ namespace mscript
     std::vector<std::string> sm_ops
     {
         "or",
+        "OR",
         "||",
+
         "and",
+        "AND",
         "&&",
 
         "<>",
@@ -216,7 +219,7 @@ namespace mscript
                 if (opMatches)
                 {
                     // Make sure our operator isn't some 5E+5 nonsense
-                    if (isOperator(expStr, op, idx))
+                    if (isOperator(trim(expStr), op, idx))
                     {
                         object value;
 
@@ -364,7 +367,7 @@ namespace mscript
             object answer = evaluate(expStr.substr(1));
             return !answer.boolVal();
         }
-        else if (startsWith(expStr, L"not "))
+        else if (startsWith(expStr, L"not ") || startsWith(expStr, L"NOT "))
         {
             static size_t notLen = strlen("not ");
             object answer = evaluate(expStr.substr(notLen));
@@ -398,16 +401,19 @@ namespace mscript
         raiseWError(L"Expression not evaluated: " + expStr);
     }
 
-    bool expression::isOperator(std::wstring expr, const std::string& op, int n)
+    bool expression::isOperator(const std::wstring& expr, const std::string& op, int n)
     {
-        expr = trim(expr);
         if (expr.empty())
             return true;
 
         if (n < 0 || n >= int(expr.length()))
             return true;
 
-        if (op == "and" || op == "&&" || op == "or" || op == "||")
+        if
+        (
+            op == "and" || op == "AND" || op == "&&"
+            || 
+            op == "or" || op == "OR" || op == "||")
         {
             wchar_t before = n - 1 >= 0 ? expr[n - 1] : 0;
             if (iswalpha(before))
@@ -1389,6 +1395,12 @@ namespace mscript
             } },
 
 #if defined(_WIN32) || defined(_WIN64)
+            { "getLastError", [](object&, const object::list& paramList) -> object {
+                if (paramList.size() != 0)
+                    raiseError("getLastError() takes no parameters");
+                return double(::GetLastError());
+            } },
+
             { "getLastErrorMsg", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() == 0)
                 {
@@ -1398,7 +1410,7 @@ namespace mscript
                 {
                     if (first.type() != object::NUMBER)
                         raiseError("getLastErrorMsg() first parameter must be an error number");
-                    if (double(DWORD(first.numberVal())) != first.numberVal() || first.numberVal() < 0)
+                    if (first.numberVal() < 0 || double(DWORD(first.numberVal())) != first.numberVal())
                         raiseError("getLastErrorMsg() first parameter must be a valid error number");
                     return mscript::getLastErrorMsg(DWORD(first.numberVal()));
                 }

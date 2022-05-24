@@ -43,25 +43,27 @@ list \
 	), \
 	index \
 	( \
-		"flag", "-rc", \
-		"long-flag", "--recompute", \
-		"description", "Should the file size data be recomputed?", \
+		"flag", "-rebuild", \
+		"long-flag", "--rebuild-index", \
+		"description", "Should the program start over and rebuild the index?", \
 		"default", false \
 	) \
 )
 $ args = parseArgs(arguments, arg_specs)
+
 $ starting_dir_path = args.get("-dir")
 $ db_file_path = args.get("-db")
 $ log_file_path = args.get("-log")
 $ log_level = args.get("-ll")
-$ recompute = string(args.get("-rc")) == "true"
+$ rebuild = args.get("-rebuild")
+
 >>
 >> Configuration:
 > "Dir Path:      " + starting_dir_path
 > "DB File Path:  " + db_file_path
 > "Log File Path: " + log_file_path
 > "Log Level:     " + log_level
-> "Recompute:     " + recompute
+> "Rebuild:         " + rebuild
 >>
 ! err
 	> "Error processing command line arguments: " + err
@@ -70,32 +72,64 @@ $ recompute = string(args.get("-rc")) == "true"
 
 / Start logging to a fresh file
 exec('del "' + log_file_path + '"', index("method", "system")) // system doesn't print
-mslog_start(index("filename", log_file_path))
-mslog_setlevel(log_level)
+mslog_start(log_file_path, log_level)
 
 $ did_db_file_exist = false
 {
 	$ exec_result = exec('dir "' + db_file_path + '"')
-	did_db_file_exist = firstLocation(trimmed(exec_result.get("output")), "File Not Found") = -1
+	did_db_file_exist = firstLocation(trimmed(exec_result.get("output")), "File Not Found") < 0
 }
 
-? recompute
+? !did_db_file_exist
+	rebuild = true
+}
+
+? rebuild
 	exec('del "' + db_file_path + '"', index("method", "system")) // system doesn't print anything
 }
 
 $ db = msdb_sql_init("db", db_file_path)
-
-? recompute
-	msdb_sql_exec("db", "CREATE TABLE file_sizes (FilePath STRING NOT NULL, SizeBytes NUMBER NOT NULL)")
-	processDir(starting_dir_path)
+? rebuild
+	msdb_sql_exec \
+	( \
+		"db", \
+		"CREATE TABLE file_sizes (FilePath STRING NOT NULL, SizeBytes NUMBER NOT NULL)" \
+	)
 }
 
-/ Do the deed
+>> Processing files and folders...
+processDir(starting_dir_path)
 
-/ Close up shop
+O
+	>>
+	>> Enter the path pattern to compute stats.  Like *.mp3
+	>>
+	$ pattern = trimmed(input())
+	? pattern.length() = 0
+		^
+	}
+	$ sql_pattern = "&" + pattern.replaced("*", "%")
+	$ results = \
+		msdb_exec("SELECT COUNT(*), SUM(SizeBytes) FROM file_sizes WHERE FilePath LIKE @like", \
+				  index("@like", sql_pattern))
+	? results.length() <= 1
+		>> No results
+		^
+	}
+	++ idx : 1 -> results.length() - 1
+		$ result = results.get(idx)
+		> "Count:   " + result.get(0)
+		> "Size MB: " + round(result.get(1) / 1024 / 1024)
+	}
+}
+
 msdb_sql_close("db")
+mslog_stop()
 
 >> All done.
+
+$ insert_statement = \
+	"INSERT INTO file_sizes (FilePath, SizeBytes) VALUES (@filePath, @sizeBytes)
 
 ~ processDir(dirPath)
 	mslog_debug("DIR Path: " + dirPath)
@@ -124,8 +158,9 @@ msdb_sql_close("db")
 			"\s*" + \
 			"((\<DIR\>\s*)|([0-9\,]+))" + \
 			"\s*" + \
-			"([\S]*)"
+			"(\S.*)"
 		$ matches = line.getMatches(pattern, true)
+		> "FORNOW: matches: " + matches
 		? matches.length() < 2 // file size and path stem
 			^
 		}
@@ -153,7 +188,16 @@ msdb_sql_close("db")
 		exit(1)
 	}
 	
-	/ load file size data into the DB
+	/ load the file size data we found into the DB
+	$ insert_params = index()
+	@ file_path : found_file_sizes
+		insert_params.add("@filePath", file_path)
+		insert_params.add("@sizeBytes", found_file_sizes.get(file_path))
+		msdb_exec(insert_statement, insert_params)
+	}
 
-	/ recurse on the dirs
+	/ recurse on the dirs we found
+	@ dir_path : found_dirs
+		processDir(dir_path)
+	}
 }
