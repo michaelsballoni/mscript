@@ -17,7 +17,7 @@ struct arg_spec
 	bool numeric = false;
 	bool required = false;
 
-	object default_value;
+	object default_value = object(false);
 };
 
 static std::wstring getStrFlagValue(const object::index& argumentSpec, const std::string& flagName)

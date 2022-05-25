@@ -110,23 +110,23 @@
 
 ===
 
-7a. Should be: {: [], -?: null, -n: 10}
+7a. Should be: {: [], -?: false, -n: 10}
 7b. Error caught
-7c. Should be: {: [], -?: null, -n: 5}
+7c. Should be: {: [], -?: false, -n: 5}
 7d. Should be: {: [], -?: true, -n: 5}
 
 6. Should be: {: [bar], -?: true, -i: foo}
 
-5a. Should be: {: [], -?: null, -i: foo}
+5a. Should be: {: [], -?: false, -i: foo}
 5b. Error caught
 
-4a. Should be: {: [], -?: null, -q: true}
-4b. Should be: {: [], -?: null, -q: true}
+4a. Should be: {: [], -?: false, -q: true}
+4b. Should be: {: [], -?: false, -q: true}
 
 3. Should be: {: [], -?: true}
 
-2. Should be: {: [foo, bar], -?: null}
+2. Should be: {: [foo, bar], -?: false}
 
-1a. Should be: {: [], -?: null}
-1b. Should be: {: [foo, bar], -?: null}
+1a. Should be: {: [], -?: false}
+1b. Should be: {: [foo, bar], -?: false}
 1c. Should be: {: [], -?: true}

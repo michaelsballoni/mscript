@@ -63,20 +63,32 @@ $ rebuild = args.get("-rebuild")
 > "DB File Path:  " + db_file_path
 > "Log File Path: " + log_file_path
 > "Log Level:     " + log_level
-> "Rebuild:         " + rebuild
+> "Rebuild:       " + rebuild
 >>
 ! err
-	> "Error processing command line arguments: " + err
+	> "Processing command line arguments failed: " + err
 	exit(1)
 }
 
-/ Start logging to a fresh file
-exec('del "' + log_file_path + '"', index("method", "system")) // system doesn't print
+/ Start logging to a fresh file every time
+$ exec_options =  index("ignore_errors", true)
+exec(fmt('del "{0}"', log_file_path), exec_options)
 mslog_start(log_file_path, log_level)
+~ logError(msg)
+	mslog_error(msg)
+	> "ERROR: " + msg
+}
+~ logMsg(msg)
+	mslog_info(msg)
+	> msg
+}
+~ logDebug(msg)
+	mslog_debug(msg)
+}
 
 $ did_db_file_exist = false
 {
-	$ exec_result = exec('dir "' + db_file_path + '"')
+	$ exec_result = exec(fmt('dir "{0}"', db_file_path), exec_options)
 	did_db_file_exist = firstLocation(trimmed(exec_result.get("output")), "File Not Found") < 0
 }
 
@@ -85,65 +97,103 @@ $ did_db_file_exist = false
 }
 
 ? rebuild
-	exec('del "' + db_file_path + '"', index("method", "system")) // system doesn't print anything
+	exec(fmt('del "{0}"', db_file_path), exec_options)
 }
 
-$ db = msdb_sql_init("db", db_file_path)
+$ db = null
 ? rebuild
+	logMsg("Processing files and folders...")
+	db = msdb_sql_init("db", db_file_path)
 	msdb_sql_exec \
 	( \
 		"db", \
 		"CREATE TABLE file_sizes (FilePath STRING NOT NULL, SizeBytes NUMBER NOT NULL)" \
 	)
+	processDir(starting_dir_path)
+	msdb_sql_close("db")
+}
+db = msdb_sql_init("db", db_file_path)
+! err
+	logError("Setting up index failed: " + err)
+	exit(1)
 }
 
->> Processing files and folders...
-processDir(starting_dir_path)
-
-O
+O // UI loop
 	>>
 	>> Enter the path pattern to compute stats.  Like *.mp3
 	>>
 	$ pattern = trimmed(input())
-	? pattern.length() = 0
-		^
-	}
-	$ sql_pattern = "&" + pattern.replaced("*", "%")
-	$ results = \
-		msdb_exec("SELECT COUNT(*), SUM(SizeBytes) FROM file_sizes WHERE FilePath LIKE @like", \
-				  index("@like", sql_pattern))
+	$ sql_pattern = "%" + pattern.replaced("*", "%")
+	$ sql_query = \
+		"SELECT COUNT(*), SUM(SizeBytes) FROM file_sizes WHERE FilePath LIKE @like"
+	$ results = msdb_sql_exec("db", sql_query, index("@like", sql_pattern))
 	? results.length() <= 1
 		>> No results
 		^
 	}
-	++ idx : 1 -> results.length() - 1
-		$ result = results.get(idx)
-		> "Count:   " + result.get(0)
-		> "Size MB: " + round(result.get(1) / 1024 / 1024)
+	$ result = results.get(1)
+
+	>>
+	$ file_count = result.get(0)
+	? file_count = null
+		file_count = 0
+	}
+	logMsg("Count:     " + file_count)
+	/       Size (GB): 
+	
+	$ size_bytes = result.get(1)
+	? size_bytes = null
+		size_bytes = 0
+	}
+	$ size_str = ""
+	? size_bytes > 1024 * 1024 * 1024
+		size_str = "Size (GB): " + round(size_bytes / 1024 / 1024 / 1024, 2)
+	}
+	? size_bytes > 1024 * 1024
+		size_str = "Size (MB): " + round(size_bytes / 1024 / 1024, 2)
+	}
+	<>
+		size_str = "Size (KB): " + round(size_bytes / 1024, 2)
+	}
+	logMsg(size_str)
+	
+	! err
+		> "Querying interface failed: " + err
+		^
 	}
 }
 
+/ Unreachable...
 msdb_sql_close("db")
 mslog_stop()
-
 >> All done.
 
-$ insert_statement = \
-	"INSERT INTO file_sizes (FilePath, SizeBytes) VALUES (@filePath, @sizeBytes)
-
+/*
+Implementation of search index population
+Recursive function that runs DIR at each level and parses out files to add to index
+and directories to recurse on
+*/
 ~ processDir(dirPath)
-	mslog_debug("DIR Path: " + dirPath)
+	logDebug("DIR Path: " + dirPath)
 	> dirPath
-
-	$ dir_result = exec('dir "' + dirPath + '"')
-	$ dir_output = dir_result.get("output")
-	$ dir_output_lines = splitLines(dir_output)
-	? log_level = "DEBUG"
-		mslog_debug("DIR Output:" + crlf + dir_output)
+	
+	$ dir_output_lines = null
+	{
+		$ dir_result = exec(fmt('dir "{0}"', dirPath))
+		$ dir_output = dir_result.get("output")
+		dir_output_lines = splitLines(dir_output)
 	}
 	
 	$ found_dirs = list()
 	$ found_file_sizes = index()
+	$ line_pattern = \
+		"[0-9\/]+" + \
+		"\s*" + \
+		"[0-9\:]+\s*(AM|PM)" + \
+		"\s*" + \
+		"((\<DIR\>\s*)|([0-9\,]+))" + \
+		"\s*" + \
+		"(\S.*)"
 	@ line : dir_output_lines
 		/ Skip header lines
 		? line.firstLocation(" ") == 0
@@ -151,17 +201,9 @@ $ insert_statement = \
 		}
 		
 		/ Match up the DIR parts
-		$ pattern = \
-			"[0-9\/]+" + \
-			"\s*" + \
-			"[0-9\:]+\s*(AM|PM)" + \
-			"\s*" + \
-			"((\<DIR\>\s*)|([0-9\,]+))" + \
-			"\s*" + \
-			"(\S.*)"
-		$ matches = line.getMatches(pattern, true)
-		> "FORNOW: matches: " + matches
-		? matches.length() < 2 // file size and path stem
+		$ matches = line.getMatches(line_pattern, true)
+		// > "DEBUG: matches: " + matches
+		? matches.length() < 2 // get at least the file size and path stem
 			^
 		}
 
@@ -170,7 +212,10 @@ $ insert_statement = \
 			^
 		}
 		
-		$ full_path = dirPath + "\" + path_stem
+		$ full_path = path_stem
+		? dirPath <> "."
+			full_path = dirPath + "\" + full_path
+		}
 		
 		$ len_str = replaced(trimmed(matches.get(matches.length() - 2)), ",", "")
 		? len_str.length() == 0
@@ -180,20 +225,19 @@ $ insert_statement = \
 			found_file_sizes.add(full_path, number(len_str))
 		}
 	}
-	/ FORNOW DEBUG
-	> "Dirs:  " + found_dirs
-	> "Files: " + found_file_sizes
 	! err
-		> "Error processing directory: " + err
+		> fmt('Error processing directory "{0}": {1}', dirPath, err
 		exit(1)
 	}
 	
 	/ load the file size data we found into the DB
+	$ insert_statement = \
+		"INSERT INTO file_sizes (FilePath, SizeBytes) VALUES (@filePath, @sizeBytes)"
 	$ insert_params = index()
 	@ file_path : found_file_sizes
-		insert_params.add("@filePath", file_path)
-		insert_params.add("@sizeBytes", found_file_sizes.get(file_path))
-		msdb_exec(insert_statement, insert_params)
+		insert_params.set("@filePath", file_path)
+		insert_params.set("@sizeBytes", found_file_sizes.get(file_path))
+		msdb_sql_exec("db", insert_statement, insert_params)
 	}
 
 	/ recurse on the dirs we found

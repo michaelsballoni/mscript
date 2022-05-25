@@ -61,39 +61,37 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 		if (funcName == L"mslog_getlevel")
 		{
 			if (params.size() != 0)
-				raiseError("mslog_getlevel: No parameters can be given");
+				raiseError("Takes no parameters");
 			return module_utils::jsonStr(getLogLevel(GetLoggingLevel()));
 		}
 
 		if (funcName == L"mslog_setlevel")
 		{
 			if (params.size() != 1 || params[0].type() != object::STRING)
-				raiseError("mslog_setlevel: Pass in the log level as one string");
-			unsigned result =
-				SetLoggingLevel(getLogLevel(toUpper(params[0].stringVal())));
+				raiseError("Pass in the log level: DEBUG, INFO, ERROR, or NONE");
+			unsigned result = SetLoggingLevel(getLogLevel(toUpper(params[0].stringVal())));
 			return module_utils::jsonStr(bool(result == 0));
 		}
 
 		if (funcName == L"mslog_start")
 		{
-			if (params.size() != 1)
-				raiseError("mslog_start: Index parameter not passed in");;
+			if (params.size() < 2 || params.size() > 3)
+				raiseError("Takes three parameters: filename, log level, and optional settings index");;
 
-			if (params[0].type() != object::INDEX)
-				raiseError("mslog_start: Parameter passed in is not an index");
+			if (params[0].type() != object::STRING)
+				raiseError("First parameter must be filename string");
+			if (params[1].type() != object::STRING)
+				raiseError("Second parameter must be log level string: DEBUG, INFO, ERROR, or NONE");
+			if (params.size() == 3 && params[2].type() != object::INDEX)
+				raiseError("Third parameter must be a settings index");
 
-			const object::index& index = params[0].indexVal();
+			std::wstring filename = params[0].stringVal();
+			unsigned log_level = getLogLevel(toUpper(params[1].stringVal()));
 
-			object filename;
-			if
-			(
-				!index.tryGet(toWideStr("filename"), filename) 
-				|| 
-				filename.type() != object::STRING
-			)
-			{
-				raiseError("mslog_start: filename value not passed in");
-			}
+			object::index index = 
+				params.size() == 3 
+				? params[2].indexVal() 
+				: object::index();
 
 			object max_files;
 			if
@@ -109,7 +107,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				)
 			)
 			{
-				raiseError("mslog_start: Invalid maxFiles parameter");
+				raiseError("Invalid maxFiles parameter");
 			}
 			if (max_files.type() == object::NOTHING)
 				max_files = double(1);
@@ -128,7 +126,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				)
 			)
 			{
-				raiseError("mslog_start: Invalid maxFileSizeBytes parameter");
+				raiseError("Invalid maxFileSizeBytes parameter");
 			}
 			if (max_file_size_bytes.type() == object::NOTHING)
 				max_file_size_bytes = double(DEFAULT_MAX_FILE_SIZE);
@@ -141,7 +139,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 				prefix.type() != object::STRING
 			)
 			{
-				raiseError("mslog_start: Invalid prefix parameter");
+				raiseError("Invalid prefix parameter");
 			}
 			if (prefix.type() == object::NOTHING)
 				prefix = toWideStr(DEFAULT_PREFIX);
@@ -149,8 +147,8 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 			unsigned result = 
 				StartLogging
 				(
-					toNarrowStr(filename.stringVal()).c_str(),
-					LOG_LEVEL_NONE,
+					toNarrowStr(filename).c_str(),
+					log_level,
 					unsigned(max_files.numberVal()),
 					unsigned(max_file_size_bytes.numberVal()),
 					toNarrowStr(prefix.stringVal()).c_str()
@@ -167,7 +165,7 @@ wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* par
 		{
 			auto under_parts = split(funcName, L"_");
 			if (under_parts.size() != 2)
-				raiseWError(L"mslog: Invalid function name: " + funcName);
+				raiseWError(L"Invalid function name: " + funcName);
 
 			unsigned int log_level = getLogLevel(toUpper(under_parts[1]));
 

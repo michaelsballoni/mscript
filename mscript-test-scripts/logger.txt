@@ -5,9 +5,14 @@ $ log_level = ""
 log_level = mslog_getlevel()
 > "Initial log level: " + log_level
 
-mslog_start(index("filename", "logger.log", "prefix", "%d %t - %l"))
+mslog_start("logger.log", "NONE") // no index
 log_level = mslog_getlevel()
 > "NONE log level: " + log_level
+mslog_stop()
+
+mslog_start("logger.log", "ERROR", index("prefix", "%d %t - %l"))
+log_level = mslog_getlevel()
+> "ERROR log level: " + log_level
 
 mslog_setlevel("INFO")
 log_level = mslog_getlevel()
@@ -60,6 +65,7 @@ $ debug_seen = false
 
 Initial log level: NONE
 NONE log level: NONE
+ERROR log level: ERROR
 INFO log level: INFO
 DEBUG log level: DEBUG
 NONE log level: NONE
