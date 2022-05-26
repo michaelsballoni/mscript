@@ -36,7 +36,7 @@ list \
 		"description", "The encoding of the input text file", \
 		"takes", true, \
 		"required", true, \
-		"default", "utf8" \
+		"default", "utf-8" \
 	) \
 )
 $ args = parseArgs(arguments, arg_specs)

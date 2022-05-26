@@ -100,10 +100,9 @@ $ did_db_file_exist = false
 	exec(fmt('del "{0}"', db_file_path), exec_options)
 }
 
-$ db = null
 ? rebuild
 	logMsg("Processing files and folders...")
-	db = msdb_sql_init("db", db_file_path)
+	msdb_sql_init("db", db_file_path)
 	msdb_sql_exec \
 	( \
 		"db", \
@@ -112,7 +111,7 @@ $ db = null
 	processDir(starting_dir_path)
 	msdb_sql_close("db")
 }
-db = msdb_sql_init("db", db_file_path)
+msdb_sql_init("db", db_file_path)
 ! err
 	logError("Setting up index failed: " + err)
 	exit(1)
