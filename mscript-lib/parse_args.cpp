@@ -17,7 +17,7 @@ struct arg_spec
 	bool numeric = false;
 	bool required = false;
 
-	object default_value = object(false);
+	object default_value;
 };
 
 static std::wstring getStrFlagValue(const object::index& argumentSpec, const std::string& flagName)
@@ -81,6 +81,8 @@ mscript::parseArgs
 		object default_value;
 		if (cur_input_index.tryGet(toWideStr("default"), default_value))
 			cur_spec.default_value = default_value;
+		else if (!cur_spec.takes) // normal flag
+			cur_spec.default_value = false;
 		local_specs.push_back(cur_spec);
 	}
 
@@ -100,10 +102,11 @@ mscript::parseArgs
 		new_spec.flag = L"-?";
 		new_spec.long_flag = L"--help";
 		new_spec.description = L"Get usage of this script";
+		new_spec.default_value = false;
 		local_specs.insert(local_specs.begin(), new_spec);
 	}
 
-	// Add default values (nulls) to the return value index
+	// Add default values to seed the return value index
 	for (const auto& arg_spec : local_specs)
 		ret_val_index.set(arg_spec.flag, arg_spec.default_value);
 

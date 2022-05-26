@@ -71,7 +71,7 @@ $ rebuild = args.get("-rebuild")
 }
 
 / Start logging to a fresh file every time
-$ exec_options =  index("ignore_errors", true)
+$ exec_options = index("ignore_errors", true)
 exec(fmt('del "{0}"', log_file_path), exec_options)
 mslog_start(log_file_path, log_level)
 ~ logError(msg)
@@ -88,8 +88,9 @@ mslog_start(log_file_path, log_level)
 
 $ did_db_file_exist = false
 {
-	$ exec_result = exec(fmt('dir "{0}"', db_file_path), exec_options)
-	did_db_file_exist = firstLocation(trimmed(exec_result.get("output")), "File Not Found") < 0
+	$ exec_result = exec(fmt('IF EXIST "{0}" ECHO exists', db_file_path), exec_options)
+	$ exec_output = trimmed(exec_result.get("output"))
+	did_db_file_exist = exec_output == "exists"
 }
 
 ? !did_db_file_exist
