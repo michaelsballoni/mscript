@@ -1,4 +1,32 @@
 {
+	$ argument_specs = \
+	list \
+	( \
+		index \
+		( \
+			"flag", "-i", \
+			"long-flag", "--input", \
+			"description", "An input", \
+			"takes", true, \
+			"required", true \
+		) \
+	)
+	$ parsed1 = parseArgs(list(), argument_specs)	
+	> "8a. ERROR: Missing required flag not caught!"
+	! err
+		> "8a. Caught error"
+	}
+	
+	$ parsed2 = parseArgs(list("-i", "foo"), argument_specs)
+	? not parsed2.has("-i")
+		> "8b. ERROR: Specified required flag not found!"
+	}
+	> "8b. Should be foo: " + parsed2.get("-i")
+}
+
+>>
+
+{
 	$ arguments = list("-n", "10")
 	$ argument_specs = list(index("flag", "-n", "long-flag", "--number", "description", "A number", "takes", true, "numeric", true))
 	$ parsed = parseArgs(arguments, argument_specs)
@@ -109,6 +137,9 @@
 }
 
 ===
+
+8a. Caught error
+8b. Should be foo: foo
 
 7a. Should be: {: [], -?: false, -n: 10}
 7b. Error caught
