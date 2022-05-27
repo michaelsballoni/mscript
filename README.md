@@ -7,8 +7,6 @@ The thinking is, here's a simple scripting language, if it can solve your proble
 
 To see the language reference, visit [mscript.io](https://mscript.io)
 
-To read about the development of mscript, go to CodeProject for [version 1.0](https://www.codeproject.com/Articles/5324522/mscript-A-Programming-Language-for-Scripting-Comma) and [version 2.0](https://www.codeproject.com/Articles/5328249/mscript-Version-2-0-Adds-Error-Handling-New-Functi)
-
 ## a little taste
 ```
 / Import the timestamp DLL for working with file timestamps
@@ -17,7 +15,7 @@ To read about the development of mscript, go to CodeProject for [version 1.0](ht
 / Make sure we got a file path argument
 ? arguments.length() != 1
 	>> Provide the path to the file to touch
-	* exit(0)
+	exit(0)
 }
 
 / Report on the file path and its timestamp
@@ -26,7 +24,7 @@ $ file_path = arguments.get(0)
 > "Last Modified Be4: " + msts_last_modified(file_path)
 
 / Do the deed
-* msts_touch(file_path)
+msts_touch(file_path)
 
 / Report on the new timestamp
 > "Last Modified Now: " + msts_last_modified(file_path)
@@ -34,7 +32,7 @@ $ file_path = arguments.get(0)
 ```
 It is a line-based, pseudo-object-oriented scripting language that uses symbols instead of keywords
 
-To jump in and see more mscript, check out the  [extensions](mscript-examples/extensions.ms) and [musicdb](mscript-examples/musicdb.ms) samples
+To jump in and see more mscript, check out some [sample scripts](mscript-examples)
 
 ## project layout
 The mscript project is a Visual Studio solution.  mscript has no external dependencies; it statically links the runtime
