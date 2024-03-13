@@ -13,6 +13,7 @@
 #endif
 
 #include <algorithm>
+#include <cctype>
 #include <charconv>
 #include <cmath>
 #include <codecvt>

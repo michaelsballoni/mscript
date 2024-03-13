@@ -1,0 +1,77 @@
++ "mscript-http.dll"
+
+{
+>> No params
+$ out_idx = mshttp_process_request()
+! err
+	> err.has("one param")
+}
+}
+>>
+
+{
+>> Two params
+$ in_idx = index()
+$ out_idx = mshttp_process_request(in_idx, "foo")
+! err
+	> err.has("one param")
+}
+}
+>>
+
+{
+>> Bad input
+$ out_idx = mshttp_process_request("foo")
+! err
+	> err.has("index")
+}
+}
+>>
+
+{
+>> Empty input
+$ in_idx = index()
+$ out_idx = mshttp_process_request(in_idx)
+! err
+	> "got err"
+}
+}
+>>
+
+{
+>> Basic input
+$ in_idx = index("server", "mscript.io", \
+				 "path", "/", \
+				 "outputfile", "mscript.html")
+$ out_idx = mshttp_process_request(in_idx)
+> "TRACE: headers: " + out_idx.get("headers")
+$ html = readFile("mscript.html", "utf-8")
+> "TRACE: HTML len: " + html.length()
+> out_idx.get("statuscode")
+}
+>>
+
+>> All done.
+
+! err
+	> "TRACE: err: " + err
+}
+
+===
+
+No params
+true
+
+Two params
+true
+
+Bad input
+true
+
+Empty input
+got err
+
+Basic input
+200
+
+All done.

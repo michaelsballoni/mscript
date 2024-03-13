@@ -32,48 +32,61 @@ public:
             ::WinHttpCloseHandle(m_session);
     }
 
-    // Inputs: server (string), usetls (bool), port (number), verb (string), path (string), headers (index), inputfile (string), outputfile (string)
-    // Returns: statuscode (number), headers (index)
+    // Inputs: 
+    // server: string
+    // usetls: bool = true, set to true if port is set to 443
+    // port: number = usetls ? 443 : 80
+    // verb: string = GET
+    // path: string
+    // headers: index, optional
+    // inputfile: string, optional
+    // outputfile: string, optional
+    // 
+    // Returns:
+    // statuscode: number
+    // headers: index
     object::index ProcessRequest(const object::index& param)
     {
         //
         // Unpack input parameters
         //
         object server;
-        if (!param.tryGet(object("server"), server))
+        if (!param.tryGet(std::wstring(L"server"), server))
             throw std::exception("server missing from input");
         if (server.typeStr() != "string")
-            throw std::exception("server field not string");
+            throw std::exception("server not string");
 
-        object use_tls = false;
-        param.tryGet(object("usetls"), use_tls);
+        object use_tls = true;
+        param.tryGet(std::wstring(L"usetls"), use_tls);
         if (use_tls.typeStr() != "bool")
-            throw std::exception("usetls field not bool");
+            throw std::exception("usetls not bool");
 
         object port = double(use_tls.boolVal() ? INTERNET_DEFAULT_HTTPS_PORT : INTERNET_DEFAULT_HTTP_PORT);
-        param.tryGet(object("port"), port);
+        param.tryGet(std::wstring(L"port"), port);
         if (port.typeStr() != "number")
-            throw std::exception("port field not number");
+            throw std::exception("port not number");
+        if (port.numberVal() == INTERNET_DEFAULT_HTTPS_PORT)
+            use_tls = true;
 
-        object verb = "GET";
-        param.tryGet(object("verb"), verb);
+        object verb = std::wstring(L"GET");
+        param.tryGet(std::wstring(L"verb"), verb);
         if (verb.typeStr() != "string")
-            throw std::exception("verb field not string");
+            throw std::exception("verb not string");
 
         object path;
-        if (!param.tryGet(object("path"), path))
+        if (!param.tryGet(std::wstring(L"path"), path))
             throw std::exception("path missing from inputs");
         if (path.typeStr() != "string")
-            throw std::exception("path field not string");
+            throw std::exception("path not string");
 
         object input_headers = object::index();
-        param.tryGet(object("headers"), input_headers);
+        param.tryGet(std::wstring(L"headers"), input_headers);
         if (input_headers.typeStr() != "index")
-            throw std::exception("headers field not index");
-        object::index headers = input_headers.indexVal();
+            throw std::exception("headers not index");
+        object::index input_headers_idx = input_headers.indexVal();
 
         object accept_header;
-        headers.tryGet(L"Accept", accept_header);
+        input_headers_idx.tryGet(L"Accept", accept_header);
         std::wstring accept_header_str;
         if (accept_header.type() == object::object_type::STRING)
             accept_header_str = accept_header.stringVal();
@@ -84,13 +97,13 @@ public:
         //
         std::wstring headers_combined;
         {
-            object::list header_keys = headers.keys();
-            for (size_t h = 0; h < headers.size(); ++h)
+            object::list header_keys = input_headers_idx.keys();
+            for (size_t h = 0; h < input_headers_idx.size(); ++h)
             {
                 std::wstring header_name = header_keys[h].stringVal();
                 std::wstring header_name_lower = toLower(header_name);
 
-                std::wstring header_value = headers.getAt(h).stringVal();
+                std::wstring header_value = input_headers_idx.getAt(h).stringVal();
 
                 if (header_name_lower != L"accept" && header_name_lower != L"content-length")
                     headers_combined += header_name + L": " + header_value + L"\r\n";
@@ -103,9 +116,9 @@ public:
         std::vector<uint8_t> input_data;
         {
             object input_path = std::wstring();
-            param.tryGet(object("inputfile"), input_path);
+            param.tryGet(std::wstring(L"inputfile"), input_path);
             if (input_path.typeStr() != "string")
-                throw std::exception("inputfile field not string");
+                throw std::exception("inputfile not string");
             if (!input_path.stringVal().empty())
             {
                 FILE* file = _wfopen(input_path.stringVal().c_str(), L"rb");
@@ -129,9 +142,9 @@ public:
         }
 
         object output_path = std::wstring();
-        param.tryGet(object("outputfile"), output_path);
+        param.tryGet(std::wstring(L"outputfile"), output_path);
         if (output_path.typeStr() != "string")
-            throw std::exception("outputfile field not string");
+            throw std::exception("outputfile not string");
 
         //
         // Connect to the server
@@ -220,7 +233,7 @@ public:
             WinHttpQueryHeaders
             (
                 m_request,
-                WINHTTP_QUERY_RAW_HEADERS_CRLF | WINHTTP_QUERY_FLAG_REQUEST_HEADERS,
+                WINHTTP_QUERY_RAW_HEADERS_CRLF,
                 WINHTTP_HEADER_NAME_BY_INDEX,
                 NULL,
                 &dwHeadersSize,
@@ -236,7 +249,7 @@ public:
                 !WinHttpQueryHeaders
                 (
                     m_request,
-                    WINHTTP_QUERY_RAW_HEADERS_CRLF | WINHTTP_QUERY_FLAG_REQUEST_HEADERS,
+                    WINHTTP_QUERY_RAW_HEADERS_CRLF,
                     WINHTTP_HEADER_NAME_BY_INDEX,
                     buffer.data(),
                     &dwHeadersSize,
@@ -249,9 +262,8 @@ public:
             for (const auto& header_str : split(buffer.data(), L"\r\n"))
             {
                 auto f = header_str.find(':');
-                if (f == std::wstring::npos)
-                    continue;
-                output_headers.set(header_str.substr(0, f), header_str.substr(f + 1));
+                if (f != std::wstring::npos)
+                    output_headers.set(trim(header_str.substr(0, f)), trim(header_str.substr(f + 1)));
             }
         }
 
@@ -283,7 +295,7 @@ public:
                 if (!::WinHttpReadData(m_request, buffer.data(), dwSize, &dwDownloaded))
                     break;
 
-                if (fwrite(buffer.data(), dwDownloaded, 0, output) != 1)
+                if (fwrite(buffer.data(), dwDownloaded, 1, output) != 1)
                     break;
             }
 
@@ -296,8 +308,8 @@ public:
         // Set the outputs
         //
         object::index output_index;
-        output_index.set(L"statuscode", double(dwStatusCode));
-        output_index.set(L"headers", output_headers);
+        output_index.set(std::wstring(L"statuscode"), double(dwStatusCode));
+        output_index.set(std::wstring(L"headers"), output_headers);
 
         // All done.
         return output_index;

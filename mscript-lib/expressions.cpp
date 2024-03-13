@@ -1653,7 +1653,75 @@ namespace mscript
                 else
                     return objectFromJson(first.stringVal());
             } },
-        };
+
+            //
+            // HTML & URL encodings
+            //
+            { "htmlEncoded", [](object& first, const object::list& paramList) -> object {
+                if (paramList.size() != 1)
+                    raiseError("htmlEncoded() takes one object to HTML encode");
+
+                std::wstring input_str = first.toString();
+
+                std::wstring output_str;
+                output_str.reserve(input_str.size()); // most strings need no encoding
+                for (wchar_t c : input_str)
+                {
+                    switch (c)
+                    {
+                    case '&': output_str += L"&amp;"; break;
+                    case '\"': output_str += L"&quot;"; break;
+                    case '\'': output_str += L"&apos;"; break;
+                    case '<': output_str += L"&lt;"; break;
+                    case '>': output_str += L"&gt;"; break;
+                    default: output_str += c; break;
+                    }
+                }
+                return output_str;
+            } },
+
+            { "urlEncoded", [](object& first, const object::list& paramList) -> object {
+                if (paramList.size() != 1)
+                    raiseError("urlEncoded() takes one object to URL encode");
+
+                std::wstring input_str = first.toString();
+
+                std::wstringstream escaped;
+                escaped.fill('0');
+                escaped << std::hex;
+
+                for (std::wstring::const_iterator i = input_str.begin(), n = input_str.end(); i != n; ++i)
+                {
+                    std::wstring::value_type c = (*i);
+                    if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+                        escaped << c;
+                        continue;
+                    }
+
+                    // Any other characters are percent-encoded
+                    escaped << std::uppercase;
+                    escaped << '%' << std::setw(2) << int((unsigned char)c);
+                    escaped << std::nouppercase;
+                }
+
+                return escaped.str();
+
+                std::wstring output_str;
+                output_str.reserve(input_str.size()); // most strings need no encoding
+                for (wchar_t c : input_str)
+                {
+                    switch (c)
+                    {
+                    case '&': output_str += L"&amp;"; break;
+                    case '\"': output_str += L"&quot;"; break;
+                    case '\'': output_str += L"&apos;"; break;
+                    case '<': output_str += L"&lt;"; break;
+                    case '>': output_str += L"&gt;"; break;
+                    default: output_str += c; break;
+                    }
+                }
+                return output_str;
+            } }, };
 
         //
         // Function calls
