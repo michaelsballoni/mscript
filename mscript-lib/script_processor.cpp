@@ -72,7 +72,7 @@ namespace mscript
 
                 std::wstring name = trim(line.substr(firstSpace, openParen - firstSpace));
                 validateName(name);
-                if (m_functions.find(name) != m_functions.end())
+                if (m_functions.find(toLower(name)) != m_functions.end())
                     raiseWError(L"function already defined: " + name);
 
                 std::wstring paramListStr = line.substr(openParen);
@@ -105,7 +105,7 @@ namespace mscript
                 function.startIndex = loopStart + 1;
                 function.endIndex = loopEnd - 1;
 
-                m_functions.insert({ name, std::make_shared<script_function>(function) });
+                m_functions.insert({ toLower(name), std::make_shared<script_function>(function) });
             }
 #ifndef _DEBUG
             catch (const std::exception& exp)
@@ -933,7 +933,7 @@ namespace mscript
 
     bool script_processor::hasFunction(const std::wstring& name) const
     {
-        return name == L"input" ||m_functions.find(name) != m_functions.end();
+        return name == L"input" || m_functions.find(toLower(name)) != m_functions.end();
     }
 
     object script_processor::callFunction(const std::wstring& name, const object::list& parameters)
@@ -947,7 +947,7 @@ namespace mscript
                 return object();
         }
 
-        auto funcIt = m_functions.find(name);
+        auto funcIt = m_functions.find(toLower(name));
         if (funcIt == m_functions.end())
             raiseWError(L"Unknown function: " + name);
 

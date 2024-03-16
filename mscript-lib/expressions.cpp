@@ -564,8 +564,9 @@ namespace mscript
             return paramList[0].numberVal();
     }
 
-    object expression::executeFunction(const std::wstring& functionW, const object::list& paramList)
+    object expression::executeFunction(std::wstring functionW, const object::list& paramList)
     {
+        functionW = toLower(functionW);
         const std::string function = toNarrowStr(functionW);
 
         object first = paramList.size() == 0 ? object::NOTHING : paramList[0];
@@ -612,7 +613,7 @@ namespace mscript
             //
             // Type Operations
             //
-            { "getType", [](object& first, const object::list& paramList) -> object {
+            { "gettype", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1)
                     raiseError("getType() takes one parameter");
                 return toWideStr(first.typeStr());
@@ -882,7 +883,7 @@ namespace mscript
                 return splittedObjs;
             } },
 
-            { "splitLines", [](object& first, const object::list& paramList) -> object {
+            { "splitlines", [](object& first, const object::list& paramList) -> object {
                 if
                 (
                     paramList.size() != 1
@@ -907,7 +908,7 @@ namespace mscript
                 return trim(first.stringVal());
             }},
 
-            { "toUpper", [](object& first, const object::list& paramList) -> object {
+            { "toupper", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("toUpper() works with one string");
                 auto str = first.stringVal();
@@ -916,7 +917,7 @@ namespace mscript
                 return str;
             } },
 
-            { "toLower", [](object& first, const object::list& paramList) -> object {
+            { "tolower", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("toLower() works with one string");
                 auto str = first.stringVal();
@@ -984,7 +985,7 @@ namespace mscript
             //
             // Searching and Slicing
             //
-            { "firstLocation", [](object& first, const object::list& paramList) -> object {
+            { "firstlocation", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 2)
                     raiseError("firstLocation() works with an item to look in and a key to look for");
 
@@ -1012,7 +1013,7 @@ namespace mscript
                     raiseError("firstLocation() only works with string and list");
             } },
 
-            { "lastLocation", [](object& first, const object::list& paramList) -> object {
+            { "lastlocation", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 2)
                     raiseError("lastLocation() works with an item to look in and a key to look for");
 
@@ -1116,7 +1117,7 @@ namespace mscript
             //
             // Regular Expressions
             //
-            { "isMatch", [](object& first, const object::list& paramList) -> object {
+            { "ismatch", [](object& first, const object::list& paramList) -> object {
                 (void)first;
                 bool full_match = false;
                 if (paramList.size() < 2 || paramList.size() > 3)
@@ -1140,7 +1141,7 @@ namespace mscript
                     : std::regex_search(first.stringVal(), re);
             } },
 
-            { "getMatches", [](object& first, const object::list& paramList) -> object {
+            { "getmatches", [](object& first, const object::list& paramList) -> object {
                 (void)first;
                 bool full_match = false;
                 if (paramList.size() < 2 || paramList.size() > 3)
@@ -1258,7 +1259,7 @@ namespace mscript
                 return retVal;
             } },
 
-            { "setEnv", [](object& first, const object::list& paramList) -> object {
+            { "setenv", [](object& first, const object::list& paramList) -> object {
                 (void)first;
                 if (paramList.size() != 2 || first.type() != object::STRING || paramList[1].type() != object::STRING)
                     raiseError("setEnv() works with name and value string parameters");
@@ -1269,7 +1270,7 @@ namespace mscript
                 return object();
             } },
 
-            { "getEnv", [](object& first, const object::list& paramList) -> object {
+            { "getenv", [](object& first, const object::list& paramList) -> object {
                 (void)first;
                 if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("getEnv() works with one name string parameter");
@@ -1283,7 +1284,7 @@ namespace mscript
                 return envValStr;
             } },
 #if defined(_WIN32) || defined(_WIN64)
-            { "expandedEnvVars", [](object& first, const object::list& paramList) -> object {
+            { "expandedenvvars", [](object& first, const object::list& paramList) -> object {
                 (void)first;
                 if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("expandedEnvVars() works with one string parameter");
@@ -1294,19 +1295,19 @@ namespace mscript
                 return std::wstring(output_str.get());
             } },
 #endif
-            { "getExeFilePath", [](object&, const object::list& paramList) -> object {
+            { "getexefilepath", [](object&, const object::list& paramList) -> object {
                 if (!paramList.empty())
                     raiseError("getExeFilePath() takes parameters");
                 return getExeFilePath();
             } },
 
-            { "getBinaryVersion", [](object& first, const object::list& paramList) -> object {
+            { "getbinaryversion", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("getBinaryVersion() takes one string parameter");
                 return toWideStr(getBinaryVersion(first.stringVal()));
             } },
 
-            { "parseArgs", [](object& first, const object::list& paramList) -> object {
+            { "parseargs", [](object& first, const object::list& paramList) -> object {
                 if
                 (
                     paramList.size() != 2
@@ -1349,7 +1350,7 @@ namespace mscript
                 return true;
             } },
 
-            { "curDir", [](object& first, const object::list& paramList) -> object {
+            { "curdir", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() == 0)
                 {
                     wchar_t* buffer = _wgetcwd(nullptr, 0);
@@ -1395,13 +1396,13 @@ namespace mscript
             } },
 
 #if defined(_WIN32) || defined(_WIN64)
-            { "getLastError", [](object&, const object::list& paramList) -> object {
+            { "getlasterror", [](object&, const object::list& paramList) -> object {
                 if (paramList.size() != 0)
                     raiseError("getLastError() takes no parameters");
                 return double(::GetLastError());
             } },
 
-            { "getLastErrorMsg", [](object& first, const object::list& paramList) -> object {
+            { "getlasterrormsg", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() == 0)
                 {
                     return mscript::getLastErrorMsg();
@@ -1418,7 +1419,7 @@ namespace mscript
                     raiseError("getLastErrorMsg() takes at most one parameter, the error number");
             } },
 
-            { "getIniString", [](object&, const object::list& paramList) -> object {
+            { "getinistring", [](object&, const object::list& paramList) -> object {
                 if
                 (
                     paramList.size() != 4
@@ -1460,7 +1461,7 @@ namespace mscript
                 return std::wstring(output_str.get());
             } },
 
-            { "getIniNumber", [](object&, const object::list& paramList) -> object {
+            { "getininumber", [](object&, const object::list& paramList) -> object {
                 if
                 (
                     paramList.size() != 4
@@ -1503,7 +1504,7 @@ namespace mscript
             //
             // File I/O
             //
-            { "readFile", [](object& first, const object::list& paramList) -> object {
+            { "readfile", [](object& first, const object::list& paramList) -> object {
                 (void)first;
                 if (paramList.size() != 2
                     || first.type() != object::STRING
@@ -1528,10 +1529,10 @@ namespace mscript
                     return toWideStr(output);
                 }
 
-                if (encoding == L"utf-8" || encoding == L"utf-16")
+                if (encoding == L"utf-8" || encoding == L"utf-16" || encoding == L"utf8" || encoding == L"utf16")
                 {
                     std::wifstream file(filePath);
-                    if (encoding == L"utf-8")
+                    if (encoding == L"utf-8" || encoding == L"utf8")
                         file.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
                     if (!file)
                         return object();
@@ -1546,7 +1547,7 @@ namespace mscript
                 raiseError("Unsupported readFile() encoding: must be ascii, utf-8, or utf-16");
             } },
 
-            { "readFileLines", [](object& first, const object::list& paramList) -> object {
+            { "readfilelines", [](object& first, const object::list& paramList) -> object {
                 (void)first;
                 if (paramList.size() != 2
                     || first.type() != object::STRING
@@ -1575,10 +1576,10 @@ namespace mscript
                     return ret_val;
                 }
 
-                if (encoding == L"utf-8" || encoding == L"utf-16")
+                if (encoding == L"utf-8" || encoding == L"utf-16" || encoding == L"utf8" || encoding == L"utf16")
                 {
                     std::wifstream file(filePath);
-                    if (encoding == L"utf-8")
+                    if (encoding == L"utf-8" || encoding == L"utf8")
                         file.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
                     if (!file)
                         return object();
@@ -1597,7 +1598,7 @@ namespace mscript
                 raiseError("Unsupported readFileLines() encoding: must be ascii, utf-8, or utf-16");
             } },
 
-            { "writeFile", [](object& first, const object::list& paramList) -> object {
+            { "writefile", [](object& first, const object::list& paramList) -> object {
                 (void)first;
                 if (paramList.size() != 3
                     || first.type() != object::STRING
@@ -1622,10 +1623,10 @@ namespace mscript
                     return true;
                 }
 
-                if (encoding == L"utf-8" || encoding == L"utf-16")
+                if (encoding == L"utf-8" || encoding == L"utf-16" || encoding == L"utf8" || encoding == L"utf16")
                 {
                     std::wofstream file(filePath, std::wofstream::trunc);
-                    if (encoding == L"utf-8")
+                    if (encoding == L"utf-8" || encoding == L"utf8")
                         file.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
                     if (!file)
                         return false;
@@ -1640,14 +1641,14 @@ namespace mscript
             //
             // JSON
             //
-            { "toJson", [](object& first, const object::list& paramList) -> object {
+            { "tojson", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1)
                     raiseError("toJson() takes one object to turn into JSON");
                 else
                     return objectToJson(first);
             } },
 
-            { "fromJson", [](object& first, const object::list& paramList) -> object {
+            { "fromjson", [](object& first, const object::list& paramList) -> object {
                 if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("fromJson() takes one JSON string to turn into an object");
                 else
@@ -1657,15 +1658,15 @@ namespace mscript
             //
             // HTML & URL encodings
             //
-            { "htmlEncoded", [](object& first, const object::list& paramList) -> object {
-                if (paramList.size() != 1)
-                    raiseError("htmlEncoded() takes one object to HTML encode");
+            { "htmlencoded", [](object& first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::object_type::STRING)
+                    raiseError("htmlEncoded() takes one string to HTML encode");
 
-                std::wstring input_str = first.toString();
+                std::wstring input_str = first.stringVal();
 
                 std::wstring output_str;
                 output_str.reserve(input_str.size()); // most strings need no encoding
-                for (wchar_t c : input_str)
+                for (std::wstring::value_type c : input_str)
                 {
                     switch (c)
                     {
@@ -1680,19 +1681,30 @@ namespace mscript
                 return output_str;
             } },
 
-            { "urlEncoded", [](object& first, const object::list& paramList) -> object {
-                if (paramList.size() != 1)
-                    raiseError("urlEncoded() takes one object to URL encode");
+            { "htmldecoded", [](object& first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::object_type::STRING)
+                    raiseError("htmlDecoded() takes one string to HTML encode");
+
+                std::wstring output_str = first.stringVal();
+                output_str = replace(output_str, L"&gt;", L">");
+                output_str = replace(output_str, L"&lt;", L"<");
+                output_str = replace(output_str, L"&apos;", L"\'");
+                output_str = replace(output_str, L"&quot;", L"\"");
+                output_str = replace(output_str, L"&amp;", L"&");
+                return output_str;
+            } },
+
+            { "urlencoded", [](object& first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::object_type::STRING)
+                    raiseError("urlEncoded() takes one string to URL encode");
 
                 std::wstring input_str = first.toString();
 
                 std::wstringstream escaped;
                 escaped.fill('0');
                 escaped << std::hex;
-
-                for (std::wstring::const_iterator i = input_str.begin(), n = input_str.end(); i != n; ++i)
+                for (std::wstring::value_type c : input_str)
                 {
-                    std::wstring::value_type c = (*i);
                     if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
                         escaped << c;
                         continue;
@@ -1703,25 +1715,32 @@ namespace mscript
                     escaped << '%' << std::setw(2) << int((unsigned char)c);
                     escaped << std::nouppercase;
                 }
-
                 return escaped.str();
+            } }, 
+
+            { "urldecoded", [](object& first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::object_type::STRING)
+                    raiseError("urlDecoded() takes one string to URL decode");
+
+                std::wstring input_str = first.toString();
 
                 std::wstring output_str;
-                output_str.reserve(input_str.size()); // most strings need no encoding
-                for (wchar_t c : input_str)
+                for (size_t i = 0; i < input_str.length(); ++i)
                 {
-                    switch (c)
+                    if (input_str[i] == '%')
                     {
-                    case '&': output_str += L"&amp;"; break;
-                    case '\"': output_str += L"&quot;"; break;
-                    case '\'': output_str += L"&apos;"; break;
-                    case '<': output_str += L"&lt;"; break;
-                    case '>': output_str += L"&gt;"; break;
-                    default: output_str += c; break;
+                        int ii = 0;
+                        if (swscanf(input_str.substr(i + 1, 2).c_str(), L"%x", &ii) <= 0)
+                            raiseError("urlDecoded() fails to convert character code");
+                        output_str += static_cast<std::wstring::value_type>(ii);
+                        i = i + 2;
                     }
+                    else
+                        output_str += input_str[i];
                 }
                 return output_str;
-            } }, };
+            } },
+        };
 
         //
         // Function calls

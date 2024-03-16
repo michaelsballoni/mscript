@@ -47,25 +47,57 @@ namespace mscript
             catch (const user_exception&) {}
             catch (const std::exception&) {}
 
-            table.set(L"startsNull", object(object::NOTHING));
-            Assert::IsTrue(table.get(L"startsNull").isNull());
-
-            table.assign(L"startsNull", object(object::NOTHING));
-            Assert::IsTrue(table.get(L"startsNull").isNull());
-
-            table.assign(L"startsNull", 13.0);
-            Assert::AreEqual(13.0, table.get(L"startsNull").numberVal());
-
-            try
             {
-                table.assign(L"startsNull", toWideStr("foobar"));
-                Assert::Fail();
-            }
-            catch (const user_exception&) {}
-            catch (const std::exception&) {}
+                table.set(L"startsNull", object(object::NOTHING));
+                Assert::IsTrue(table.get(L"startsNull").isNull());
 
-            table.assign(L"startsNull", 11.0);
-            Assert::AreEqual(11.0, table.get(L"startsNull").numberVal());
+                table.assign(L"startsNull", object(object::NOTHING));
+                Assert::IsTrue(table.get(L"startsNull").isNull());
+
+                table.assign(L"startsNull", 13.0);
+                Assert::AreEqual(13.0, table.get(L"startsNull").numberVal());
+
+                try
+                {
+                    table.assign(L"startsNull", toWideStr("foobar"));
+                    Assert::Fail();
+                }
+                catch (const user_exception&) {}
+                catch (const std::exception&) {}
+
+                table.assign(L"startsNull", 11.0);
+                Assert::AreEqual(11.0, table.get(L"startsNull").numberVal());
+            }
+
+            {
+                table.set(L"startsNull2", object(object::NOTHING));
+                Assert::IsTrue(table.get(L"startsNull2").isNull());
+                Assert::IsTrue(table.get(L"startsnull2").isNull()); // lower
+
+                table.assign(L"startsNull2", object(object::NOTHING));
+                Assert::IsTrue(table.get(L"startsNull2").isNull());
+
+                table.assign(L"startsNull2", 13.0);
+                Assert::AreEqual(13.0, table.get(L"startsNull2").numberVal());
+                Assert::AreEqual(13.0, table.get(L"startsnull2").numberVal());
+
+                table.assign(L"startsnull2", 14.0);
+                Assert::AreEqual(14.0, table.get(L"startsNull2").numberVal());
+
+                try
+                {
+                    table.assign(L"startsNull2", toWideStr("foobar"));
+                    Assert::Fail();
+                }
+                catch (const user_exception&) {}
+                catch (const std::exception&) {}
+
+                table.assign(L"startsNull2", 11.0);
+                Assert::AreEqual(11.0, table.get(L"startsnull2").numberVal());
+
+                table.assign(L"startsnull2", 12.0);
+                Assert::AreEqual(12.0, table.get(L"startsNull2").numberVal());
+            }
         }
 
         TEST_METHOD(SymbolStackerTests)

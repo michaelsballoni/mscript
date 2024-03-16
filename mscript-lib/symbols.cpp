@@ -24,10 +24,11 @@ namespace mscript
 
     bool symbol_table::contains(const std::wstring& name)
     {
+        std::wstring name_lower = toLower(name);
         for (int s = int(m_symbols.size()) - 1; s >= 0; --s)
         {
             const auto& curMap = m_symbols[s];
-            if (curMap.find(name) != curMap.end())
+            if (curMap.find(name_lower) != curMap.end())
                 return true;
         }
         return false;
@@ -39,20 +40,22 @@ namespace mscript
 
         auto& dict = m_symbols.back();
 
-        if (dict.find(name) != dict.end())
+        std::wstring name_lower = toLower(name);
+        if (dict.find(name_lower) != dict.end())
             raiseWError(L"Name already set, you have to use a different name: " + name);
 
-        dict.insert({ name, value });
+        dict.insert({ name_lower, value });
     }
 
     void symbol_table::assign(const std::wstring& name, object value)
     {
+        std::wstring name_lower = toLower(name);
         for (int s = int(m_symbols.size()) - 1; s >= 0; --s)
         {
             auto& curMap = m_symbols[s];
-            if (curMap.find(name) != curMap.end())
+            if (curMap.find(name_lower) != curMap.end())
             {
-                stack_entry& entry = curMap[name];
+                stack_entry& entry = curMap[name_lower];
                 // Implement type-safe assignment
                 // If it ever had a non-null value, subsequent assignments
                 // have to be to values of the same type
@@ -77,11 +80,12 @@ namespace mscript
 
     bool symbol_table::tryGet(const std::wstring& name, object& answer)
     {
+        std::wstring name_lower = toLower(name);
         answer = object();
         for (int s = int(m_symbols.size()) - 1; s >= 0; --s)
         {
             const auto& curMap = m_symbols[s];
-            const auto& it = curMap.find(name);
+            const auto& it = curMap.find(name_lower);
             if (it != curMap.end())
             {
                 answer = it->second.value;

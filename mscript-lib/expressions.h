@@ -44,7 +44,7 @@ namespace mscript
         // Implement expressions that have function calls
         // This is the core runtime of mscript
         object::list processParameters(const std::vector<std::wstring>& expStrs);
-        object executeFunction(const std::wstring& functionW, const object::list& paramList);
+        object executeFunction(std::wstring functionW, const object::list& paramList);
 
     private:
         symbol_table& m_symbols;

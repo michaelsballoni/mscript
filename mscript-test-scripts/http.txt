@@ -1,6 +1,26 @@
 + "mscript-http.dll"
 
 {
+>> TRACE: HTML ENCODING
+>> htmlEncode
+$ encoded = htmlencoded("foo&bar") // lower
+> "foo&amp;bar : " + encoded
+$ decoded = htmlDecoded(encoded)
+> "foo&bar : " + decoded
+}
+>>
+
+{
+>> TRACE: URL ENCODING
+>> urlEncode
+$ encoded = urlEncoded("foo bar")
+> "foo%20bar : " + encoded
+$ decoded = urlDecoded(encoded)
+> "foo bar : " + decoded
+}
+>>
+
+{
 >> No params
 $ out_idx = mshttp_process_request()
 ! err
@@ -58,6 +78,14 @@ $ html = readFile("mscript.html", "utf-8")
 }
 
 ===
+
+htmlEncode
+foo&amp;bar : foo&amp;bar
+foo&bar : foo&bar
+
+urlEncode
+foo%20bar : foo%20bar
+foo bar : foo bar
 
 No params
 true
