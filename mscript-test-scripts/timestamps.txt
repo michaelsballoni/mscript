@@ -59,6 +59,13 @@ $ diff = msts_diff(dt1, dt2, "hour")
 
 * exec("del test.txt")
 
+>>
+
+msts_last_modified("foobar.bletmonkey")
+! err
+	>> msts_last_modified(bogus_file) error caught
+}
+
 ===
 
 Should be true (local): true
@@ -74,3 +81,5 @@ Should be (1973-12-21 11:15:07): 1973-12-21 11:15:07
 Should be 2: 2
 
 Should be (1973-12-21 11:15:07): 1973-12-21 11:15:07
+
+msts_last_modified(bogus_file) error caught

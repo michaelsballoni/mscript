@@ -19,22 +19,31 @@ namespace mscript
     /// </summary>
     std::vector<std::string> sm_ops
     {
-        "or",
-        "OR",
         "||",
+        "OR",
 
-        "and",
-        "AND",
         "&&",
+        "AND",
 
         "<>",
         "!=",
+        "NEQ",
+
         "<=",
+        "LEQ",
+
         ">=",
+        "GEQ",
+
         "<",
+        "LSS",
+
         ">",
+        "GTR",
+
         "==",
         "=",
+        "EQU",
 
         "%",
         "-",
@@ -47,19 +56,20 @@ namespace mscript
     object expression::evaluate(std::wstring expStr)
     {
         expStr = trim(expStr);
+        std::string upper = toNarrowStr(toUpper(expStr));
         std::string narrow = toNarrowStr(expStr);
 
         // Check for easy stuff
         if (narrow.empty())
             raiseError("Empty expression");
 
-        if (narrow == "null")
+        if (upper == "NULL")
             return object::NOTHING;
 
-        if (narrow == "true")
+        if (upper == "TRUE")
             return true;
 
-        if (narrow == "false")
+        if (upper == "FALSE")
             return false;
 
         // Do an exact parsing of a number from the full expression string
@@ -124,28 +134,28 @@ namespace mscript
             // It will get handled by the recursive evaluate of the two sides of the op
         }
 
-        if (narrow == "dquote")
+        if (upper == "DQUOTE")
             return toWideStr("\"");
 
-        if (narrow == "squote")
+        if (upper == "SQUOTE")
             return toWideStr("\'");
 
-        if (narrow == "tab")
+        if (upper == "TAB")
             return toWideStr("\t");
 
-        if (narrow == "cr")
+        if (upper == "CR")
             return toWideStr("\f");
 
-        if (narrow == "lf")
+        if (upper == "LF")
             return toWideStr("\n");
 
-        if (narrow == "crlf")
+        if (upper == "CRLF")
             return toWideStr("\r\n");
 
-        if (narrow == "pi")
+        if (upper == "PI")
             return M_PI;
 
-        if (narrow == "e")
+        if (upper == "E")
             return M_E;
 
         {
@@ -161,14 +171,14 @@ namespace mscript
         for (size_t opdx = 0; opdx < sm_ops.size(); ++opdx)
         {
             const std::string& op = sm_ops[opdx];
-            size_t opLen = op.size();
+            size_t opLen = op.length();
 
             size_t parenCount = 0;
 
             bool inSingleString = false;
             bool inDoubleString = false;
 
-            // Walk the exception from the end, so that we bind to
+            // Walk the expression from the end, so that we bind to
             // the right-side of the expression
             int expStrSize = int(expStr.size());
             for (int idx = expStrSize - 1; idx >= 0; --idx)
@@ -192,7 +202,7 @@ namespace mscript
                     continue;
 
                 bool opMatches = false;
-                if (c == op[0]) // quick filter
+                if (toupper(c) == op[0]) // quick filter
                 {
                     if (opLen == 1)
                     {
@@ -200,21 +210,41 @@ namespace mscript
                     }
                     else if (opLen == 2)
                     {
-                        if (idx < expStrSize - 1)
-                            opMatches = expStr[idx + 1] == op[1];
+                        opMatches = idx < expStrSize - 1 && toupper(expStr[idx + 1]) == op[1];
                     }
                     else if (opLen == 3)
                     {
-                        if (idx < expStrSize - 2)
-                        {
-                            opMatches = 
-                                expStr[idx + 1] == op[1]
-                                && 
-                                expStr[idx + 2] == op[2];
-                        }
+                        opMatches = 
+                            idx < expStrSize - 2
+                            &&
+                            toupper(expStr[idx + 1]) == op[1]
+                            && 
+                            toupper(expStr[idx + 2]) == op[2];
                     }
                     else
                         raiseWError(L"Invalid operator length: " + expStr);
+                }
+                if (opMatches)
+                {
+                    // don't honor alpha ops inside other alpha stuff
+                    // like some_request has an equ in it
+                    // in fact, let's require that alpha operators have spaces around them
+                    bool is_op_alpha = true;
+                    for (auto a : op)
+                    {
+                        if (!isalpha(a))
+                        {
+                            is_op_alpha = false;
+                            break;
+                        }
+                    }
+                    if (is_op_alpha)
+                    {
+                        wchar_t before = idx > 0 ? expStr[idx - 1] : 0;
+                        wchar_t after = idx < expStrSize - int(opLen) ? expStr[idx + opLen] : 0;
+
+                        opMatches = before == ' ' && after == ' ';
+                    }
                 }
                 if (opMatches)
                 {
@@ -231,11 +261,11 @@ namespace mscript
                         object leftVal = evaluate(leftStr);
 
                         // Short circuitry
-                        if ((op == "and" || op == "AND" || op == "&&") && !leftVal.boolVal())
+                        if ((op == "&&" || _stricmp(op.c_str(), "AND") == 0) && !leftVal.boolVal())
                         {
                             value = false;
                         }
-                        else if ((op == "or" || op == "OR" || op == "||") && leftVal.boolVal())
+                        else if ((op == "||" || _stricmp(op.c_str(), "OR") == 0) && leftVal.boolVal())
                         {
                             value = true;
                         }
@@ -247,9 +277,9 @@ namespace mscript
                             // Handle nulls with equivalent checks
                             if (leftVal.isNull() || rightVal.isNull())
                             {
-                                if (op == "=" || op == "==")
+                                if (op == "=" || op == "==" || _stricmp(op.c_str(), "EQU") == 0)
                                     value = leftVal == rightVal;
-                                else if (op == "!=" || op == "<>")
+                                else if (op == "!=" || op == "<>" || _stricmp(op.c_str(), "NEQ") == 0)
                                     value = leftVal != rightVal;
                                 else
                                     raiseWError(L"Invalid operator for null values: " + expStr);
@@ -260,7 +290,7 @@ namespace mscript
                                 std::wstring leftValStr = leftVal.toString();
                                 std::wstring rightValStr = rightVal.toString();
 
-                                if (op.length() == 1)
+                                if (opLen == 1)
                                 {
                                     switch (op[0])
                                     {
@@ -272,15 +302,38 @@ namespace mscript
                                         raiseWError(L"Unrecognized string operator: " + expStr);
                                     }
                                 }
-                                else
+                                else if (opLen == 2)
                                 {
                                     if (op == "==")
                                         value = leftValStr == rightValStr;
                                     else if (op == "!=" || op == "<>")
                                         value = leftValStr != rightValStr;
+                                    else if (op == "<=")
+                                        value = leftValStr <= rightValStr;
+                                    else if (op == ">=")
+                                        value = leftValStr >= rightValStr;
                                     else
                                         raiseWError(L"Unrecognized string operator: " + expStr);
                                 }
+                                else if (opLen == 3)
+                                {
+                                    if (_stricmp(op.c_str(), "EQU") == 0)
+                                        value = leftValStr == rightValStr;
+                                    else if (_stricmp(op.c_str(), "NEQ") == 0)
+                                        value = leftValStr != rightValStr;
+                                    else if (_stricmp(op.c_str(), "LSS") == 0)
+                                        value = leftValStr < rightValStr;
+                                    else if (_stricmp(op.c_str(), "LEQ") == 0)
+                                        value = leftValStr <= rightValStr;
+                                    else if (_stricmp(op.c_str(), "GTR") == 0)
+                                        value = leftValStr > rightValStr;
+                                    else if (_stricmp(op.c_str(), "GEQ") == 0)
+                                        value = leftValStr >= rightValStr;
+                                    else
+                                        raiseWError(L"Unrecognized string operator: " + expStr);
+                                }
+                                else
+                                    raiseWError(L"Unrecognized string operator: " + expStr);
                             }
                             // Numbers are easy
                             else if (leftVal.type() == object::NUMBER && rightVal.type() == object::NUMBER)
@@ -294,7 +347,7 @@ namespace mscript
                                 }
                                 else
                                 {
-                                    if (op.length() == 1)
+                                    if (opLen == 1)
                                     {
                                         switch (op[0])
                                         {
@@ -310,7 +363,7 @@ namespace mscript
                                         default: raiseWError(L"Unrecognized numeric operator: " + expStr);
                                         }
                                     }
-                                    else
+                                    else if (opLen == 2)
                                     {
                                         if (op == "==")
                                             value = leftNum == rightNum;
@@ -323,6 +376,25 @@ namespace mscript
                                         else
                                             raiseWError(L"Unrecognized numeric operator: " + expStr);
                                     }
+                                    else if (opLen == 3)
+                                    {
+                                        if (_stricmp(op.c_str(), "EQU") == 0)
+                                            value = leftNum == rightNum;
+                                        else if (_stricmp(op.c_str(), "NEQ") == 0)
+                                            value = leftNum != rightNum;
+                                        if (_stricmp(op.c_str(), "LSS") == 0)
+                                            value = leftNum < rightNum;
+                                        else if (_stricmp(op.c_str(), "LEQ") == 0)
+                                            value = leftNum <= rightNum;
+                                        else if (_stricmp(op.c_str(), "GTR") == 0)
+                                            value = leftNum > rightNum;
+                                        else if (_stricmp(op.c_str(), "GEQ") == 0)
+                                            value = leftNum >= rightNum;
+                                        else
+                                            raiseWError(L"Unrecognized numeric operator: " + expStr);
+                                    }
+                                    else
+                                        raiseWError(L"Unrecognized numeric operator: " + expStr);
                                 }
                             }
                             // Bools are easy
@@ -331,13 +403,13 @@ namespace mscript
                                 bool leftBool = leftVal.boolVal();
                                 bool rightBool = rightVal.boolVal();
 
-                                if (op == "and" || op == "AND" || op == "&&")
+                                if (op == "&&" || _stricmp(op.c_str(), "AND") == 0)
                                     value = leftBool && rightBool;
-                                else if (op == "or" || op == "OR" || op == "||")
+                                else if (op == "||" || _stricmp(op.c_str(), "OR") == 0)
                                     value = leftBool || rightBool;
-                                else if (op == "==" || op == "=")
+                                else if (op == "=" || op == "==" || _stricmp(op.c_str(), "EQU") == 0)
                                     value = leftBool == rightBool;
-                                else if (op == "!=" || op == "<>")
+                                else if (op == "!=" || op == "<>" || _stricmp(op.c_str(), "NEQ") == 0)
                                     value = leftBool != rightBool;
                                 else
                                     raiseWError(L"Unrecognized boolean operator: " + expStr);
@@ -367,9 +439,9 @@ namespace mscript
             object answer = evaluate(expStr.substr(1));
             return !answer.boolVal();
         }
-        else if (startsWith(expStr, L"not ") || startsWith(expStr, L"NOT "))
+        else if (startsWith(toUpper(expStr), L"NOT "))
         {
-            static size_t notLen = strlen("not ");
+            static size_t notLen = strlen("NOT ");
             object answer = evaluate(expStr.substr(notLen));
             return !answer.boolVal();
         }
@@ -411,9 +483,14 @@ namespace mscript
 
         if
         (
-            op == "and" || op == "AND" || op == "&&"
+            op == "&&" 
             || 
-            op == "or" || op == "OR" || op == "||")
+            op == "||"
+            || 
+            _stricmp(op.c_str(), "AND") == 0
+            || 
+            _stricmp(op.c_str(), "OR") == 0
+        )
         {
             wchar_t before = n - 1 >= 0 ? expr[n - 1] : 0;
             if (iswalpha(before))
