@@ -8,7 +8,7 @@ int mscript::findMatchingEnd(const std::vector<std::wstring>& lines, int startIn
     {
         auto markers = findElses(lines, startIndex, endIndex, L"? ", L"<>");
         if (markers.empty())
-            raiseError("No } found in ? statement");
+            raiseError("No } found for ? statement");
         else
             return markers.back();
     }
@@ -17,9 +17,9 @@ int mscript::findMatchingEnd(const std::vector<std::wstring>& lines, int startIn
     {
         auto markers = findElses(lines, startIndex + 1, endIndex, L"= ", L"*");
         if (markers.empty())
-            raiseError("No } found in % statement");
+            raiseError("No } found for % statement");
         else
-            return markers.back();
+            return markers.back() + 1;
     }
 
     int block_depth = 0;
@@ -62,12 +62,12 @@ mscript::findElses
     {
         const std::wstring& line = lines[i];
 
-        bool isEnd = line == L"}";
+        bool is_block_end = line == L"}";
         bool is_block_begin = isLineBlockBegin(line);
 
         if (is_block_begin)
             ++block_depth;
-        else if (isEnd)
+        else if (is_block_end)
             --block_depth;
 
         if (block_depth == 1)
@@ -97,7 +97,7 @@ mscript::findElses
         }
         else if (block_depth == 0)
         {
-            if (isEnd)
+            if (is_block_end)
             {
                 if (last_when_start || last_when_end)
                     retVal.push_back(i);
@@ -115,24 +115,23 @@ mscript::findElses
         return retVal;
 }
 
-
 bool mscript::isLineBlockBegin(const std::wstring& line)
 {
     if (line.empty())
         return false;
 
-    if (iswalpha(line[0]) && line[0] != 'O')
+    if (iswalpha(line[0]) && line[0] != 'O') // variable name or function call, bail early
         return false;
 
-    wchar_t startC = line[0];
-    static std::vector<char> blockBeginnings{ '?', '@', '#', '~', '!' };
-    for (char blockC : blockBeginnings)
+    wchar_t start_c = line[0];
+    static std::vector<char> block_beginnings{ '?', '@', '#', '~', '!', '%', '=' };
+    for (char block_c : block_beginnings)
     {
-        if (startC == blockC)
+        if (start_c == block_c)
             return true;
     }
 
-    if (line == L"<>" || line == L"{" || line == L"O")
+    if (line == L"<>" || line == L"{" || line == L"O" || line == L"*")
         return true;
 
     if (startsWith(line, L"++") || startsWith(line, L"--"))

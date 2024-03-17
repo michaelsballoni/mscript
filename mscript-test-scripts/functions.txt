@@ -69,7 +69,7 @@ $ global = 14
 	$ var = 10
 	>> "outer: " + inc1 + " - " + var
 	& global = global + inc1
-	* inner(inc1 * 2)
+	inner(inc1 * 2)
 	>> "outer global: " + global + " - " + var
 }
 

@@ -631,7 +631,7 @@ namespace mscript
                             answer = true;
                         }
                         else
-                            raiseWError(L"Invalid line, not ? or <>: " + marker_line);
+                            raiseWError(L"Invalid line, not ? or <>");
 
                         if (!answer.boolVal())
                             continue;
@@ -665,13 +665,14 @@ namespace mscript
 
                     object switch_val = evaluate(line.substr(space + 1), callDepth);
 
+                    int loopEnd = findMatchingEnd(lines, l, endLine);
+                    int loopStart = l;
+                    l = loopEnd;
+
                     bool seenQuestion = false;
                     bool seenEndingElse = false;
 
-                    auto markers = findElses(lines, l, endLine, L"= ", L"*");
-
-                    int endMarker = markers.back();
-                    l = endMarker;
+                    auto markers = findElses(lines, loopStart + 1, loopEnd - 1, L"= ", L"*");
 
                     const int max_markers_idx = int(markers.size()) - 1;
                     for (int m = 0; m <= max_markers_idx; ++m)
@@ -712,30 +713,30 @@ namespace mscript
                             seenEndingElse = true;
                         }
                         else
-                            raiseWError(L"Invalid line, not ? or <>: " + marker_line);
+                            raiseWError(L"Invalid line, not ? or <>");
 
-                        if (case_val != switch_val || seenEndingElse)
-                            continue;
-
-                        symbol_stacker stacker(m_symbols);
-                        process_outcome ourOutcome;
-                        process
-                        (
-                            previousFilename,
-                            filename,
-                            marker_line_idx + 1,
-                            next_marker_line_idx - 1,
-                            ourOutcome,
-                            callDepth + 1
-                        );
-                        outcome = ourOutcome;
-                        if (ourOutcome.Return)
-                            return ourOutcome.ReturnValue;
-                        else if (ourOutcome.Continue)
-                            return object();
-                        else if (ourOutcome.Leave)
+                        if (case_val == switch_val || seenEndingElse)
+                        {
+                            symbol_stacker stacker(m_symbols);
+                            process_outcome ourOutcome;
+                            process
+                            (
+                                previousFilename,
+                                filename,
+                                marker_line_idx + 1,
+                                next_marker_line_idx - 1,
+                                ourOutcome,
+                                callDepth + 1
+                            );
+                            outcome = ourOutcome;
+                            if (ourOutcome.Return)
+                                return ourOutcome.ReturnValue;
+                            else if (ourOutcome.Continue)
+                                return object();
+                            else if (ourOutcome.Leave)
+                                break;
                             break;
-                        break;
+                        }
                     }
                 }
                 else if (first == '@') // for each loop
@@ -960,12 +961,6 @@ namespace mscript
                 {
                     outcome.Leave = true;
                     return object();
-                }
-                // execute code with a side-effect, like *some_list.add('something')
-                else if (first == '*')
-                {
-                    std::wstring valueStr = trim(line.substr(1));
-                    evaluate(valueStr, callDepth);
                 }
                 else // assignment, or function call that doesn't store return value
                 {

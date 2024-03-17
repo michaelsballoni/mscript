@@ -25,21 +25,38 @@ mscript::syncheck
 
             if (startsWith(line, L">>>"))
             {
+                // FORNOW - Parse out the fields
             }
             else if (startsWith(line, L">>"))
             {
+                // most anything goes
             }
             else if (first == '>')
             {
+                if (trim(line.substr(1)).empty())
+                    raiseError("Command statement lacks command");
             }
             else if (first == '$')
             {
+                line = line.substr(1);
+                size_t equalsIndex = line.find('=');
+                if (equalsIndex != std::wstring::npos)
+                {
+                    validateName(trim(line.substr(0, equalsIndex)));
+                    if (trim(line.substr(equalsIndex + 1)).empty())
+                        raiseError("Variable assignment lacks value");
+                }
+                else
+                    validateName(trim(line.substr(1)));
             }
             else if (first == '&')
             {
                 line = line.substr(1);
                 size_t equalsIndex = line.find('=');
                 if (equalsIndex == std::wstring::npos)
+                    raiseError("Variable assignment lacks =");
+                validateName(trim(line.substr(0, equalsIndex)));
+                if (trim(line.substr(equalsIndex + 1)).empty())
                     raiseError("Variable assignment lacks value");
             }
             else if (first == '!')
@@ -74,11 +91,13 @@ mscript::syncheck
 
                 syncheck(filename, lines, loopStart + 1, loopEnd - 1);
             }
-            else if (line == L"<-")
+            else if (startsWith(line, L"<-"))
             {
-            }
-            else if (startsWith(line, L"<- "))
-            {
+                line = line.substr(2);
+                size_t spaceIndex = line.find(' ');
+                if (spaceIndex != std::wstring::npos && trim(line.substr(spaceIndex + 1)).empty())
+                    raiseError("Return statement lacks return value");
+                // else void return
             }
             else if (first == '#' || startsWith(line, L"++") || startsWith(line, L"--"))
             {
@@ -146,6 +165,10 @@ mscript::syncheck
             }
             else if (first == '+')
             {
+                line = line.substr(1);
+                size_t spaceIndex = line.find(' ');
+                if (spaceIndex == std::wstring::npos || trim(line.substr(spaceIndex + 1)).empty())
+                    raiseError("Import statement lacks file to import");
             }
             else if (first == '?')
             {
@@ -191,7 +214,7 @@ mscript::syncheck
                         seenEndingElse = true;
                     }
                     else
-                        raiseWError(L"Invalid line, not ? or <>: " + marker_line);
+                        raiseWError(L"Invalid line, not ? or <>");
 
                     syncheck(filename, lines, marker_line_idx + 1, next_marker_line_idx - 1);
                 }
@@ -201,14 +224,17 @@ mscript::syncheck
                 size_t space = line.find(' ');
                 if (space == std::wstring::npos)
                     raiseError("% statement missing first space");
+                if (trim(line.substr(space + 1)).empty())
+                    raiseError("% statement missing comparison value");
+
+                int loopEnd = findMatchingEnd(lines, l, endLine);
+                int loopStart = l;
+                l = loopEnd;
 
                 bool seenQuestion = false;
                 bool seenEndingElse = false;
 
-                auto markers = findElses(lines, l + 1, endLine, L"= ", L"*");
-
-                int endMarker = markers.back();
-                l = endMarker;
+                auto markers = findElses(lines, loopStart + 1, loopEnd - 1, L"= ", L"*");
 
                 const int max_markers_idx = int(markers.size()) - 1;
                 for (int m = 0; m <= max_markers_idx; ++m)
@@ -244,7 +270,7 @@ mscript::syncheck
                         seenEndingElse = true;
                     }
                     else
-                        raiseWError(L"Invalid line, not = or *: " + marker_line);
+                        raiseWError(L"Invalid line, not = or *");
 
                     syncheck(filename, lines, marker_line_idx + 1, next_marker_line_idx - 1);
                 }
@@ -274,15 +300,16 @@ mscript::syncheck
             }
             else if (first == '~')
             {
-                l = findMatchingEnd(lines, l, endLine);
+                int loopEnd = findMatchingEnd(lines, l, endLine);
+                int loopStart = l;
+                l = loopEnd;
+
+                syncheck(filename, lines, loopStart + 1, loopEnd - 1);
             }
             else if (line == L"^")
             {
             }
             else if (line == L"v" || line == L"V")
-            {
-            }
-            else if (first == '*')
             {
             }
             // assign or eval, anything goes
