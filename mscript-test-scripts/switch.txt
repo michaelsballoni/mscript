@@ -30,9 +30,61 @@
 	}
 }
 
+% null
+	= "foo"
+		error("foo is not null")
+	}
+	= null
+		>> "Got null!"
+	}
+}
+
+$ val = null
+? val = null
+	>> "Val is null"
+}
+<>
+	error("val is not null")
+}
+
+$ label = "foo"
+% label.toUpper()
+	= "bar"
+		error("bar is not FOO")
+	}
+	= "FOO"
+		>> "Got FOO"
+	}
+	*
+		error("should not fall through")
+	}
+}
+
+label = "BAR"
+% label.toLower()
+	= "BAR"
+		error("BAR is not bar")
+	}
+	= "FOO"
+		error("BAR is not FOO")
+	}
+	*
+		? label = "BAR"
+			>> "Got BAR"
+		}
+		<>
+			error("BAR not found")
+		}
+	}
+}
+
 ===
 
 Got 10!
 After 10
 Got 12!
 Got 13!
+Got null!
+Val is null
+Got FOO
+Got BAR
