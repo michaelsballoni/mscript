@@ -23,7 +23,10 @@ mscript::syncheck
         {
             wchar_t first = line[0];
 
-            if (startsWith(line, L">>"))
+            if (startsWith(line, L">>>"))
+            {
+            }
+            else if (startsWith(line, L">>"))
             {
             }
             else if (first == '>')
@@ -31,10 +34,6 @@ mscript::syncheck
             }
             else if (first == '$')
             {
-                line = line.substr(1);
-                size_t equalsIndex = line.find('=');
-                if (equalsIndex == std::wstring::npos)
-                    raiseError("Variable declaraion lacks initial value");
             }
             else if (first == '&')
             {
@@ -153,7 +152,7 @@ mscript::syncheck
                 bool seenQuestion = false;
                 bool seenEndingElse = false;
 
-                auto markers = findElses(lines, l, endLine);
+                auto markers = findElses(lines, l, endLine, L"? ", L"<>");
 
                 int endMarker = markers.back();
                 l = endMarker;
@@ -193,6 +192,59 @@ mscript::syncheck
                     }
                     else
                         raiseWError(L"Invalid line, not ? or <>: " + marker_line);
+
+                    syncheck(filename, lines, marker_line_idx + 1, next_marker_line_idx - 1);
+                }
+            }
+            else if (first == '%')
+            {
+                size_t space = line.find(' ');
+                if (space == std::wstring::npos)
+                    raiseError("% statement missing first space");
+
+                bool seenQuestion = false;
+                bool seenEndingElse = false;
+
+                auto markers = findElses(lines, l + 1, endLine, L"= ", L"*");
+
+                int endMarker = markers.back();
+                l = endMarker;
+
+                const int max_markers_idx = int(markers.size()) - 1;
+                for (int m = 0; m <= max_markers_idx; ++m)
+                {
+                    const int marker_line_idx = markers[m];
+                    const std::wstring& marker_line = lines[marker_line_idx];
+                    if (marker_line == L"}")
+                        continue;
+
+                    if (m >= max_markers_idx)
+                        raiseError("No = or * at end of statement");
+
+                    int next_marker_line_idx = markers[m + 1];
+                    const std::wstring& next_marker_line = lines[next_marker_line_idx];
+                    if (next_marker_line != L"}")
+                        --next_marker_line_idx;
+
+                    if (startsWith(marker_line, L"= "))
+                    {
+                        seenQuestion = true;
+
+                        if (seenEndingElse)
+                            raiseError("Already seen * statement");
+                    }
+                    else if (marker_line == L"*")
+                    {
+                        if (seenEndingElse)
+                            raiseError("Already seen * statement");
+
+                        if (!seenQuestion)
+                            raiseError("No = statement before * statement");
+
+                        seenEndingElse = true;
+                    }
+                    else
+                        raiseWError(L"Invalid line, not = or *: " + marker_line);
 
                     syncheck(filename, lines, marker_line_idx + 1, next_marker_line_idx - 1);
                 }

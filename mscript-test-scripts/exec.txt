@@ -1,4 +1,0 @@
-$ options = index("ignore_errors", true, "method", "system")
-* exec("foo bar", options)
-
-===

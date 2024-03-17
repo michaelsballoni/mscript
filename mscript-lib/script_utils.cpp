@@ -6,9 +6,18 @@ int mscript::findMatchingEnd(const std::vector<std::wstring>& lines, int startIn
 {
     if (startsWith(lines[startIndex], L"? "))
     {
-        auto markers = findElses(lines, startIndex, endIndex);
+        auto markers = findElses(lines, startIndex, endIndex, L"? ", L"<>");
         if (markers.empty())
             raiseError("No } found in ? statement");
+        else
+            return markers.back();
+    }
+
+    if (startsWith(lines[startIndex], L"% "))
+    {
+        auto markers = findElses(lines, startIndex + 1, endIndex, L"= ", L"*");
+        if (markers.empty())
+            raiseError("No } found in % statement");
         else
             return markers.back();
     }
@@ -33,7 +42,15 @@ int mscript::findMatchingEnd(const std::vector<std::wstring>& lines, int startIn
     raiseError("End of statement not found");
 }
 
-std::vector<int> mscript::findElses(const std::vector<std::wstring>& lines, int startIndex, int endIndex)
+std::vector<int> 
+mscript::findElses
+(
+    const std::vector<std::wstring>& lines, 
+    int startIndex, 
+    int endIndex, 
+    const wchar_t* lineStart,
+    const wchar_t* lineEnd
+)
 {
     int block_depth = 0;
 
@@ -55,7 +72,7 @@ std::vector<int> mscript::findElses(const std::vector<std::wstring>& lines, int 
 
         if (block_depth == 1)
         {
-            if (startsWith(line, L"? "))
+            if (startsWith(line, lineStart))
             {
                 if (last_when_end)
                     break;
@@ -65,10 +82,10 @@ std::vector<int> mscript::findElses(const std::vector<std::wstring>& lines, int 
                 last_when_start = true;
                 last_when_end = false;
             }
-            else if (line == L"<>")
+            else if (line == lineEnd)
             {
                 if (!last_when_start)
-                    raiseError("No ? found for <>");
+                    raiseWError(L"No " + std::wstring(lineStart) + L" found for " + std::wstring(lineEnd));
                 else // fresh <>
                     retVal.push_back(i);
 
@@ -93,7 +110,7 @@ std::vector<int> mscript::findElses(const std::vector<std::wstring>& lines, int 
     }
 
     if (retVal.size() < 2)
-        raiseError("End of ? / <> statement not found");
+        raiseWError(L"End of statement not found: " + std::wstring(lineStart) + L" / " + std::wstring(lineEnd));
     else
         return retVal;
 }

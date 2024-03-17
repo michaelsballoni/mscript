@@ -47,7 +47,7 @@ namespace mscript
         dict.insert({ name_lower, value });
     }
 
-    void symbol_table::assign(const std::wstring& name, object value)
+    void symbol_table::assign(const std::wstring& name, const object& value, bool createIfMissing)
     {
         std::wstring name_lower = toLower(name);
         for (int s = int(m_symbols.size()) - 1; s >= 0; --s)
@@ -75,7 +75,10 @@ namespace mscript
                     raiseWError(L"Invalid assignment, type mismatch: " + name);
             }
         }
-        raiseWError(L"Name not set: " + name);
+        if (createIfMissing)
+            set(name, value);
+        else
+            raiseWError(L"Name not set: " + name);
     }
 
     bool symbol_table::tryGet(const std::wstring& name, object& answer)

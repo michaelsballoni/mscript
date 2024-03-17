@@ -1,12 +1,12 @@
 + "mscript-sample.dll"
 
 $ summed = ms_sample_sum(1, 2, 3)
-> "Should be 6: " + summed
+>> "Should be 6: " + summed
 
 >>
 
 $ catted = ms_sample_cat(1, 2, 3)
-> "Should be 123: " + catted
+>> "Should be 123: " + catted
 
 ===
 

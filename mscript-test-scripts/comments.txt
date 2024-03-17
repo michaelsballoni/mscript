@@ -1,13 +1,13 @@
-> "top"
-> "line 3" // after
+>> "top"
+>> "line 3" // after
 // > "nothing"
-> "after"
+>> "after"
 
 /*
-> "inside"
+>> "inside"
 */
-/  > "line 1
-// > "line 2
+/  >> "line 1
+// >> "line 2
 
 >>
 
@@ -15,7 +15,7 @@
 	/*
 	header
 	*/
-	> n // shouldn't matter
+	>> n // shouldn't matter
 	/*
 	footer
 	*/
@@ -26,15 +26,15 @@
 /* should not matter
 here either */
 
-> "foobar" /* definitely not
-in here */ > "blet monkey"
+>> "foobar" /* definitely not
+in here */ >> "blet monkey"
 
 >>
 
-> "one line" \
+>> "one line" \
 	+ " another" \
 	+ " and another"
-> "but not this"
+>> "but not this"
 
 ===
 

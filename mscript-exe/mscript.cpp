@@ -105,7 +105,7 @@ static std::wstring getModuleFilePath(const std::wstring& filename)
 #endif
 	fs::path exe_dir_path = fs::path(exe_file_path.get()).parent_path();
 	fs::path module_file_path = exe_dir_path.append(filename);
-
+	/*
 	const bin_crypt_info exe_crypt_info = getBinCryptInfo(exe_file_path.get());
 	if
 	(
@@ -125,7 +125,7 @@ static std::wstring getModuleFilePath(const std::wstring& filename)
 			raiseWError(L"Invalid module signing: " + module_file_path.wstring());
 		}
 	}
-
+	*/
 	return module_file_path;
 }
 

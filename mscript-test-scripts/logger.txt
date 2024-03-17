@@ -3,24 +3,24 @@
 $ log_level = ""
 
 log_level = mslog_getlevel()
-> "Initial log level: " + log_level
+>> "Initial log level: " + log_level
 
 mslog_start("logger.log", "NONE") // no index
 log_level = mslog_getlevel()
-> "NONE log level: " + log_level
+>> "NONE log level: " + log_level
 mslog_stop()
 
 mslog_start("logger.log", "ERROR", index("prefix", "%d %t - %l"))
 log_level = mslog_getlevel()
-> "ERROR log level: " + log_level
+>> "ERROR log level: " + log_level
 
 mslog_setlevel("INFO")
 log_level = mslog_getlevel()
-> "INFO log level: " + log_level
+>> "INFO log level: " + log_level
 
 mslog_setlevel("DEBUG")
 log_level = mslog_getlevel()
-> "DEBUG log level: " + log_level
+>> "DEBUG log level: " + log_level
 
 mslog_error("Test error")
 mslog_info("Test info")
@@ -28,7 +28,7 @@ mslog_debug("Test debug")
 
 mslog_stop()
 log_level = mslog_getlevel()
-> "NONE log level: " + log_level
+>> "NONE log level: " + log_level
 
 $ log_file_lines = readFileLines("logger.log", "utf-8")
 
@@ -37,7 +37,7 @@ $ info_seen = false
 $ debug_seen = false
 
 @ log_line : log_file_lines
-	> "TRACE: " + log_line
+	>> "TRACE: " + log_line
 	? log_line.has("ERROR")
 		error_seen = true
 	}
@@ -59,7 +59,7 @@ $ debug_seen = false
 	error("DEBUG not found")
 }
 
->> All done.
+>> "All done."
 
 ===
 

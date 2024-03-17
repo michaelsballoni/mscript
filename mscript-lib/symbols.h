@@ -71,7 +71,7 @@ namespace mscript
         /// <summary>
         /// Update the value of a named variable
         /// </summary>
-        void assign(const std::wstring& name, object value);
+        void assign(const std::wstring& name, const object& value, bool createIfMissing = false);
 
         /// <summary>
         /// Try to get the value of a named variable

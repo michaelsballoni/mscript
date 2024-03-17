@@ -29,19 +29,19 @@
 		? cur > 5
 			v
 		}
-		> cur
+		>> cur
 	}
 }
 
 ~ ager(whenny)
 	? whenny < 13
-		> "kid"
+		>> "kid"
 	}
 	? whenny >= 18
-		> "adult"
+		>> "adult"
 	}
 	<>
-		> "teen"
+		>> "teen"
 	}
 }
 
@@ -55,22 +55,22 @@
 	? command = "Add Color"
 	}
 	
-	> theColor
+	>> theColor
 }
 
 $ global = 14
 ~ inner(inc2)
 	$ var = 13
-	> "inner: " + inc2 + " - " + var
-	& global = global + inc2
-	> "inner global: " + global
+	>> "inner: " + inc2 + " - " + var
+	global = global + inc2
+	>> "inner global: " + global
 }
 ~ outer(inc1)
 	$ var = 10
-	> "outer: " + inc1 + " - " + var
+	>> "outer: " + inc1 + " - " + var
 	& global = global + inc1
 	* inner(inc1 * 2)
-	> "outer global: " + global + " - " + var
+	>> "outer global: " + global + " - " + var
 }
 
 
@@ -79,68 +79,76 @@ $ global = 14
 /
 {
 	$ addedTo2 = addone2(10)
-	> "addedTo2 should be 11: " + addedTo2
+	>> "addedTo2 should be 11: " + addedTo2
 }
 
 >>
 
 {
-	>> Evens and Odds
+	>> "Evens and Odds"
 	@ val in list(5, 6, 7, 8)
 		$ str = val + ": "
 		? iseven2(val)
-			& str = str + "even"
+			str = str + "even"
 		}
 		<>
-			& str = str + "odd"
+			str = str + "odd"
 		}
-		> str
+		>> str
 	}
 }
 
 >>
 
 {
-	>> Fib
+	>> "Fib"
 	# n : 1 -> 10
-		> fib(n)
+		>> fib(n)
+	}
+	
+	>>
+	
+	/ case sensitive?
+	>> "FIB"
+	# n : 1 -> 10
+		>> FIB(n)
 	}
 }
 
 >>
 
 {
-	>> Process Function Continue Break
-	* ranger(1, 7)
+	>> "Process Function Continue Break"
+	ranger(1, 7)
 }
 
 >>
 
 {
-	>> Ager
-	* ager(1)
-	* ager(12)
-	* ager(13)
-	* ager(16)
-	* ager(17)
-	* ager(18)
-	* ager(19)
-	* ager(20)
-	* ager(70)
+	>> "Ager"
+	ager(1)
+	ager(12)
+	ager(13)
+	ager(16)
+	ager(17)
+	ager(18)
+	ager(19)
+	ager(20)
+	ager(70)
 }
 
 >>
 
 {
-	>> Color Function
-	* colors()
+	>> "Color Function"
+	colors()
 }
 
 >>
 
 {
-	>> Inner Outer
-	* outer(1)
+	>> "Inner Outer"
+	outer(1)
 }
 
 ===
@@ -154,6 +162,18 @@ Evens and Odds
 8: even
 
 Fib
+1
+1
+2
+3
+5
+8
+13
+21
+34
+55
+
+FIB
 1
 1
 2

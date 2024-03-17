@@ -172,6 +172,7 @@ namespace mscript
         {
             const std::string& op = sm_ops[opdx];
             size_t opLen = op.length();
+            bool is_op_alpha = opLen == 3; // && isalpha(op[0]) && isalpha(op[1]) && isalpha(op[2]);
 
             size_t parenCount = 0;
 
@@ -180,7 +181,7 @@ namespace mscript
 
             // Walk the expression from the end, so that we bind to
             // the right-side of the expression
-            int expStrSize = int(expStr.size());
+            int expStrSize = int(expStr.length());
             for (int idx = expStrSize - 1; idx >= 0; --idx)
             {
                 wchar_t c = expStr[idx];
@@ -224,27 +225,15 @@ namespace mscript
                     else
                         raiseWError(L"Invalid operator length: " + expStr);
                 }
-                if (opMatches)
+                if (opMatches && is_op_alpha)
                 {
                     // don't honor alpha ops inside other alpha stuff
                     // like some_request has an equ in it
                     // in fact, let's require that alpha operators have spaces around them
-                    bool is_op_alpha = true;
-                    for (auto a : op)
-                    {
-                        if (!isalpha(a))
-                        {
-                            is_op_alpha = false;
-                            break;
-                        }
-                    }
-                    if (is_op_alpha)
-                    {
-                        wchar_t before = idx > 0 ? expStr[idx - 1] : 0;
-                        wchar_t after = idx < expStrSize - int(opLen) ? expStr[idx + opLen] : 0;
-
-                        opMatches = before == ' ' && after == ' ';
-                    }
+                    opMatches = 
+                        isCharAlphaOpBoundary(idx > 0 ? expStr[idx - 1] : 0) 
+                        && 
+                        isCharAlphaOpBoundary(idx < expStrSize - int(opLen) ? expStr[idx + opLen] : 0);
                 }
                 if (opMatches)
                 {
@@ -382,7 +371,7 @@ namespace mscript
                                             value = leftNum == rightNum;
                                         else if (_stricmp(op.c_str(), "NEQ") == 0)
                                             value = leftNum != rightNum;
-                                        if (_stricmp(op.c_str(), "LSS") == 0)
+                                        else if (_stricmp(op.c_str(), "LSS") == 0)
                                             value = leftNum < rightNum;
                                         else if (_stricmp(op.c_str(), "LEQ") == 0)
                                             value = leftNum <= rightNum;
@@ -471,6 +460,11 @@ namespace mscript
 
         // Oh well, not processed, must not be a valid expression
         raiseWError(L"Expression not evaluated: " + expStr);
+    }
+
+    bool expression::isCharAlphaOpBoundary(wchar_t c)
+    {
+        return c == ' '; // || c == '(' || c == ')' || c == 0;
     }
 
     bool expression::isOperator(const std::wstring& expr, const std::string& op, int n)

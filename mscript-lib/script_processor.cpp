@@ -140,31 +140,74 @@ namespace mscript
             try
 #endif
             {
-                if (startsWith(line, L">>")) // single line verbatim print
+                if (startsWith(line, L">>>")) // trace output in sections
                 {
-                    static size_t verbLen = strlen(">>");
-                    std::wstring valueStr = trim(line.substr(verbLen));
-                    m_output(valueStr);
+                    static size_t verbLen = strlen(">>>");
+                    // FORNOW - Implement section tracing
                 }
-                else if (first == '>') // single line expression print
+                else if (startsWith(line, L">>")) // single line expression print
                 {
-                    std::wstring valueStr = trim(line.substr(1));
-                    object answer = evaluate(valueStr, callDepth);
-                    m_output(answer.toString());
+                    std::wstring valueStr = trim(line.substr(2));
+                    if (!valueStr.empty())
+                    {
+                        object answer = evaluate(valueStr, callDepth);
+                        m_output(answer.toString());
+                    }
+                    else
+                        m_output(std::wstring());
+                }
+                else if (first == '>') // single line command execution, >! means raise errors on non-zero exit code
+                {
+                    // get set up
+                    bool raise_errors = line.length() > 1 && line[1] == '!';
+                    size_t cmd_start = raise_errors ? 2 : 1;
+                    std::wstring commandStr = trim(line.substr(cmd_start));
+                    m_symbols.assign(L"LastCommand", commandStr, true);
+
+                    // initialize the command results into local variables
+                    m_symbols.assign(L"ErrorLevel", double(-1), true);
+                    m_symbols.assign(L"CommandOutput", std::wstring(), true);
+
+                    // start the command
+                    FILE* file = _wpopen(commandStr.c_str(), L"rt");
+                    if (file == nullptr)
+                        raiseError("Command could not be started");
+
+                    // slurp up the command's output
+                    std::string output;
+                    {
+                        char buffer[4096];
+                        while (fgets(buffer, sizeof(buffer), file))
+                            output.append(buffer);
+                    }
+
+                    // finish up
+                    double exit_code = double(_pclose(file));
+                    std::wstring cmd_output = toWideStr(output);
+
+                    // set the command results into local variables
+                    m_symbols.assign(L"ErrorLevel", exit_code, true);
+                    m_symbols.assign(L"CommandOutput", cmd_output, true);
+
+                    // raise hell if that didn't work out...if the user wants to
+                    if (raise_errors && exit_code != 0)
+                        raiseWError(L"Command failed with exit code " + object(exit_code).toString());
                 }
                 else if (first == '$') // variable declaration, initial value optional
                 {
                     line = line.substr(1);
                     size_t equalsIndex = line.find('=');
-                    if (equalsIndex == std::wstring::npos)
-                        raiseError("Variable declaraion lacks initial value");
+                    if (equalsIndex != std::wstring::npos)
+                    {
+                        std::wstring nameStr = trim(line.substr(0, equalsIndex));
+                        std::wstring valueStr = trim(line.substr(equalsIndex + 1));
 
-                    std::wstring nameStr = trim(line.substr(0, equalsIndex));
-                    std::wstring valueStr = trim(line.substr(equalsIndex + 1));
+                        object answer = evaluate(valueStr, callDepth);
 
-                    object answer = evaluate(valueStr, callDepth);
-
-                    m_symbols.set(nameStr, answer);
+                        m_symbols.set(nameStr, answer);
+                    }
+                    else
+                        m_symbols.set(trim(line), object());
                 }
                 else if (first == '&') // variable assignment
                 {
@@ -541,7 +584,7 @@ namespace mscript
                     bool seenQuestion = false;
                     bool seenEndingElse = false;
                     
-                    auto markers = findElses(lines, l, endLine);
+                    auto markers = findElses(lines, l, endLine, L"? ", L"<>");
 
                     int endMarker = markers.back();
                     l = endMarker;
@@ -611,6 +654,87 @@ namespace mscript
                             return object();
                         else if (ourOutcome.Leave)
                             return object();
+                        break;
+                    }
+                }
+                else if (first == '%') // switch
+                {
+                    size_t space = line.find(' ');
+                    if (space == std::wstring::npos)
+                        raiseError("% statement missing switch value expression");
+
+                    object switch_val = evaluate(line.substr(space + 1), callDepth);
+
+                    bool seenQuestion = false;
+                    bool seenEndingElse = false;
+
+                    auto markers = findElses(lines, l, endLine, L"= ", L"*");
+
+                    int endMarker = markers.back();
+                    l = endMarker;
+
+                    const int max_markers_idx = int(markers.size()) - 1;
+                    for (int m = 0; m <= max_markers_idx; ++m)
+                    {
+                        const int marker_line_idx = markers[m];
+                        const std::wstring& marker_line = lines[marker_line_idx];
+                        if (marker_line == L"}")
+                            continue;
+
+                        if (m >= max_markers_idx)
+                            raiseError("No = or * at end of statement");
+
+                        int next_marker_line_idx = markers[m + 1];
+                        const std::wstring& next_marker_line = lines[next_marker_line_idx];
+                        if (next_marker_line != L"}")
+                            --next_marker_line_idx;
+
+                        object case_val;
+                        if (startsWith(marker_line, L"= "))
+                        {
+                            seenQuestion = true;
+
+                            if (seenEndingElse)
+                                raiseError("Already seen <> statement");
+
+                            size_t spaceIndex = marker_line.find(' ');
+                            std::wstring criteria = marker_line.substr(spaceIndex + 1);
+                            case_val = evaluate(criteria, callDepth);
+                        }
+                        else if (marker_line == L"*")
+                        {
+                            if (seenEndingElse)
+                                raiseError("Already seen * statement");
+
+                            if (!seenQuestion)
+                                raiseError("No = statement before * statement");
+
+                            seenEndingElse = true;
+                        }
+                        else
+                            raiseWError(L"Invalid line, not ? or <>: " + marker_line);
+
+                        if (case_val != switch_val || seenEndingElse)
+                            continue;
+
+                        symbol_stacker stacker(m_symbols);
+                        process_outcome ourOutcome;
+                        process
+                        (
+                            previousFilename,
+                            filename,
+                            marker_line_idx + 1,
+                            next_marker_line_idx - 1,
+                            ourOutcome,
+                            callDepth + 1
+                        );
+                        outcome = ourOutcome;
+                        if (ourOutcome.Return)
+                            return ourOutcome.ReturnValue;
+                        else if (ourOutcome.Continue)
+                            return object();
+                        else if (ourOutcome.Leave)
+                            break;
                         break;
                     }
                 }
@@ -843,7 +967,7 @@ namespace mscript
                     std::wstring valueStr = trim(line.substr(1));
                     evaluate(valueStr, callDepth);
                 }
-                else
+                else // assignment, or function call that doesn't store return value
                 {
                     bool assign_worked = false;
                     size_t equals_idx = line.find('=');

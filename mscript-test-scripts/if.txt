@@ -1,12 +1,12 @@
-> "Should be true before"
+>> "Should be true before"
 ? true
-	> "Should be true"
+	>> "Should be true"
 }
 
 ? true
-	> "Should be true again"
+	>> "Should be true again"
 }
-> "Should be true after"
+>> "Should be true after"
 
 ===
 

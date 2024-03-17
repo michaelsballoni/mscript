@@ -36,6 +36,7 @@ namespace mscript
         object evaluate(std::wstring expStr);
 
     private: // implementation
+        static bool isCharAlphaOpBoundary(wchar_t c);
         static bool isOperator(const std::wstring& expr, const std::string& op, int n);
         static int reverseFind(const std::wstring& source, const std::wstring& searchW, int start);
         static std::vector<std::wstring> parseParameters(const std::wstring& expStr);

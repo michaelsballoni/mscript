@@ -28,15 +28,15 @@ This function also takes the version of the mscript EXE that is processing the a
 	
 	/ Add the list for the raw, non-flag or flag-related arguments
 	$ raw_arg_list = list()
-	* ret_val.add("", raw_arg_list)
+	ret_val.add("", raw_arg_list)
 	
 	/ Validate the arguments list
 	? getType(arguments) != "list"
-		* error("arguments must be a list")
+		error("arguments must be a list")
 	}
 	@ cur_arg : arguments
 		? getType(cur_arg) != "string"
-			* error("All arguments must be strings")
+			error("All arguments must be strings")
 		}
 	}
 	
@@ -44,63 +44,63 @@ This function also takes the version of the mscript EXE that is processing the a
 	$ already_had_help = false
 	@ cur_spec : argumentSpecs
 		? cur_spec.get("flag") == "-?" || cur_spec.get("long-flag") == "--help"
-			& already_had_help = true
+			already_had_help = true
 			V
 		}
 	}
 	? !already_had_help
-		* argumentSpecs.add(index("flag", "-?", \
-								  "long-flag", "--help", \
-								  "description", "Get the usage info about this script"))
+		argumentSpecs.add(index("flag", "-?", \
+								"long-flag", "--help", \
+								"description", "Get the usage info about this script"))
 	}
 			
 	/ Put the -v flag into the mix, if not already there
 	$ already_had_version = false
 	@ cur_spec : argumentSpecs
 		? cur_spec.get("flag") == "-v" || cur_spec.get("long-flag") == "--version"
-			& already_had_version = true
+			already_had_version = true
 			V
 		}
 	}
 	? !already_had_version
-		* argumentSpecs.add(index("flag", "-v", \
-								  "long-flag", "--version", \
-								  "description", "Get the version of mscript running this script"))
+		argumentSpecs.add(index("flag", "-v", \
+								"long-flag", "--version", \
+								"description", "Get the version of mscript running this script"))
 	}
 	
 	/ Validate the argument specifications
 	@ cur_spec : argumentSpecs
 		? getType(cur_spec) != "index"
-			* error("All argumentSpecs must be indexes")
+			error("All argumentSpecs must be indexes")
 		}
 		? !cur_spec.has("flag") \
 		  || getType(cur_spec.get("flag")) != "string" \
 		  || trimmed(cur_spec.get("flag")) = ""
-			* error('All argumentSpecs must have "flag" string setting')
+			error('All argumentSpecs must have "flag" string setting')
 		}
 		? !cur_spec.has("long-flag") \
 		  || getType(cur_spec.get("long-flag")) != "string" \
 		  || trimmed(cur_spec.get("long-flag")) = ""
-			* error('All argumentSpecs must have "long-flag" string setting')
+			error('All argumentSpecs must have "long-flag" string setting')
 		}
 		? !cur_spec.has("description") \
 		  || getType(cur_spec.get("description")) != "string" \
 		  || trimmed(cur_spec.get("description")) = ""
-			* error('All argumentSpecs must have "description" string setting')
+			error('All argumentSpecs must have "description" string setting')
 		}
 		? cur_spec.has("takes") && getType(cur_spec.get("takes")) != "bool"
-			* error('argumentSpecs "takes" setting value must be bool')
+			error('argumentSpecs "takes" setting value must be bool')
 		}
 	}
 	
 	/ Add default values to the return value
 	@ cur_spec : argumentSpecs
-		* ret_val.add(cur_spec.get("flag"), null)
+		ret_val.add(cur_spec.get("flag"), null)
 	}
 	
 	/ Validate the EXE version
 	? getType(exeVersion) != "string" || exeVersion.length() = 0
-		* error("exeVersion must be a non-empty string")
+		error("exeVersion must be a non-empty string")
 	}
 
 	/ Loop over the arguments
@@ -110,12 +110,12 @@ This function also takes the version of the mscript EXE that is processing the a
 		/ Compute the next argument
 		$ next_arg = null
 		? a < arguments.length() - 1
-			& next_arg = arguments.get(a + 1)
+			next_arg = arguments.get(a + 1)
 		}
 		
 		/ If it's not a flag, it's raw output
 		? cur_arg.get(0) != '-'
-			* raw_arg_list.add(cur_arg)
+			raw_arg_list.add(cur_arg)
 			^
 		}
 		
@@ -127,14 +127,14 @@ This function also takes the version of the mscript EXE that is processing the a
 					  cur_spec.get("long-flag"), \
 					  cur_spec.get("description"))
 			}
-			* ret_val.set(cur_arg, true)
+			ret_val.set(cur_arg, true)
 			^
 		}
 		
 		/ Handle -v
 		? !already_had_version && (cur_arg = "-v" || cur_arg = "--version")
 			> "mscript version: " + exeVersion
-			* ret_val.set(cur_arg, true)
+			ret_val.set(cur_arg, true)
 			^
 		}
 		
@@ -149,15 +149,15 @@ This function also takes the version of the mscript EXE that is processing the a
 			
 			? cur_spec.has("takes") and cur_spec.get("takes")
 				? next_arg = null
-					* error("No value for flag that takes next argument: " + cur_arg)
+					error("No value for flag that takes next argument: " + cur_arg)
 				}
 				<>
-					* ret_val.set(cur_flag, next_arg)
-					& a = a + 1 // skip the next arg we just processed
+					ret_val.set(cur_flag, next_arg)
+					a = a + 1 // skip the next arg we just processed
 				}
 			}
 			<>
-				* ret_val.set(cur_flag, true)
+				ret_val.set(cur_flag, true)
 			}
 			
 			& found_flag = true
@@ -165,7 +165,7 @@ This function also takes the version of the mscript EXE that is processing the a
 		}
 		
 		? !found_flag
-			* error("Unknown command line flag: " + cur_arg)
+			error("Unknown command line flag: " + cur_arg)
 		}
 	}
 	

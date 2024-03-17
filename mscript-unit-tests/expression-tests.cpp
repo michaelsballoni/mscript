@@ -111,13 +111,24 @@ namespace mscript
 
             ValidateExpression("3=3", true, symbols);
             ValidateExpression("3==3", true, symbols);
+            ValidateExpression("3 EQU 3", true, symbols);
             ValidateExpression("3!=3", false, symbols);
             ValidateExpression("3<>3", false, symbols);
+            ValidateExpression("3 NEQ 3", false, symbols);
             ValidateExpression("3<=4", true, symbols);
-            ValidateExpression("3<=4 and 3<4", true, symbols);
-            ValidateExpression("3<=4 AND 3<4", true, symbols);
+            ValidateExpression("3 LEQ 4", true, symbols);
+            ValidateExpression("3<4", true, symbols);
+            ValidateExpression("3 LSS 4", true, symbols);
+            ValidateExpression("3>4", false, symbols);
+            ValidateExpression("3 GTR 4", false, symbols);
+            ValidateExpression("3>=4", false, symbols);
+            ValidateExpression("3 GEQ 4", false, symbols);
+            ValidateExpression("3<=4 && 3<4", true, symbols);
+            ValidateExpression("3 LEQ 4 AND 3 LSS 4", true, symbols);
             ValidateExpression("3<4 and 5 <= 4 or 12<=50 and 6 <= 13", true, symbols);
             ValidateExpression("3<4 AND 5 <= 4 OR 12<=50 AND 6 <= 13", true, symbols);
+
+            // FORNOW - Flex new alpha ops (and existing ops) for string comparisons
 
             ValidateExpression("2 + 3", 5.0, symbols);
             ValidateExpression("2 - 3", -1.0, symbols);

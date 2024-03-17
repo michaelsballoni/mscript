@@ -1,0 +1,37 @@
+> echo foobar
+>> "LastCommand: " + LastCommand
+>> "CommandOutput: " + trimmed(CommandOutput)
+>> "ErrorLevel: " + ErrorLevel
+
+>>
+
+> bletmonkey foo foo bar
+>> "LastCommand: " + LastCommand
+>> "CommandOutput: " + trimmed(CommandOutput)
+>> "ErrorLevel: " + ErrorLevel
+
+
+>>
+
+>! foofoofoo bletblet monkey
+! err
+	>> "Error: " + err
+	>> "LastCommand: " + LastCommand
+	>> "CommandOutput: " + trimmed(CommandOutput)
+	>> "ErrorLevel: " + ErrorLevel
+}
+
+===
+
+LastCommand: echo foobar
+CommandOutput: foobar
+ErrorLevel: 0
+
+LastCommand: bletmonkey foo foo bar
+CommandOutput: 
+ErrorLevel: 1
+
+Error: Command failed with exit code 1
+LastCommand: foofoofoo bletblet monkey
+CommandOutput: 
+ErrorLevel: 1

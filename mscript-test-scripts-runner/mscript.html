@@ -1,0 +1,1069 @@
+<html>
+<head>
+<title>mscript - replace nasty batch files with simple mscripts</title>
+<style>
+        BODY {
+            font-family: monospace;
+            font-size: 16pt;
+            margin: 0;
+            padding: 0;
+        }
+
+        BODY A {
+            color: black;
+        }
+
+        pre {
+            font-family: monospace;
+			white-space: pre-wrap; 
+        }
+
+        #navbar {
+            background-color: black;
+            color: white;
+            width: 17em;
+            height: 100%;
+            margin: 0;
+            position: fixed;
+            overflow: auto;
+        } 
+        
+        #navbar a {
+            color: white;
+        }
+
+        #contentDiv {
+            margin-left: 17em;
+            padding-left: 1em;
+            margin-right: 1em;
+        }
+    </style>
+</head>
+<body>
+<div id="navbar">
+<ul>
+<li>
+<b>Getting Started</b>
+<ol>
+<li><a href="#home">home</a></li>
+<li><a href="#downloads">downloads</a></li>
+<li><a href="#licenses">licenses</a></li>
+<li><a href="#example">example script</a></li>
+<li><a href="#history">version history</a></li>
+</ol>
+<br>
+</li>
+<li>
+<b>Contact</b>
+<ul>
+<li><a href="/cdn-cgi/l/email-protection#187a7974747776713675717b70797d74366b617c767d6158776d6c74777773367b7775">balloni.michael...</a></li>
+</ul>
+<br>
+</li>
+<li>
+<b>Reference</b>
+<ul>
+<li><a href="#overview">overview</a></li>
+<li><a href="#functions">functions</a></li>
+<li><a href="#dlls">dlls</a></li>
+<li>&nbsp;&nbsp;<a href="#mscript-timestamp">mscript-timestamp</a></li>
+<li>&nbsp;&nbsp;<a href="#mscript-registry">mscript-registry</a></li>
+<li>&nbsp;&nbsp;<a href="#mscript-log">mscript-log</a></li>
+<li>&nbsp;&nbsp;<a href="#mscript-db">mscript-db</a></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#mscript-db-sql">sql</a></li>
+<li>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#mscript-db-4db">4db</a></li>
+<li><a href="#statements">statements</a></li>
+<li><a href="#expressions">expressions</a></li>
+<li><a href="#errors">error handling</a></li>
+<li><a href="#dllintegration">dll integration</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div id="contentDiv">
+<div style="height: 1px"></div>
+<h1><a name="home">mscript</a></h1>
+<p>
+replace nasty batch files with simple mscripts
+</p>
+<ul>
+<li>
+mscript is a scripting language for automating command line operations
+</li>
+<li>
+alternative to Powershell and Python for jobs too much for batch files
+</li>
+<li>
+if mscript can solve your problem, there's no need to get a bigger gun
+</li>
+</ul>
+<p>
+Code Project articles on development of mscript:
+<ul>
+<li><a target="_blank" href="https://www.codeproject.com/Articles/5333516/mscript-3-0-Database-Programming-Logging-and-Many">3.0</a>
+<li><a target="_blank" href="https://www.codeproject.com/Articles/5329153/mscript-2-0-2-DLL-Authoring-Registry-DLL-exec-Erro">2.0.2</a>
+<li><a target="_blank" href="https://www.codeproject.com/Articles/5328249/mscript-Version-2-0-Adds-Error-Handling-New-Functi">2.0</a>
+<li><a target="_blank" href="https://www.codeproject.com/Articles/5324522/mscript-A-Programming-Language-for-Scripting-Comma">1.0</a>
+</ul>
+</p>
+<p>
+mscript is open source, and contributions are welcome,
+especially <a href="#dllintegration">dll integrations</a>
+<br/>
+<br/>
+See GitHub for source code and a description of project layout:
+<br/>
+<a target="_blank" href="https://github.com/michaelsballoni/mscript">https://github.com/michaelsballoni/mscript</a>
+</p>
+<p>
+questions or comments?
+<a href="/cdn-cgi/l/email-protection#1072717c7c7f7e793e7d79737871757c3e6369747e7569507f65647c7f7f7b3e737f7d"><span class="__cf_email__" data-cfemail="6705060b0b08090e490a0e040f06020b49141e0309021e270812130b08080c4904080a">[email&#160;protected]</span></a>
+</p>
+<h2><a name="downloads">downloads</a></h2>
+<p>
+installer:
+<a href="releases/3.0.0/mscript3.msi">mscript.msi</a>
+-
+standalone EXE (&lt; 1 MB):
+<a href="releases/3.0.0/mscript3.exe">mscript3.exe</a>
+<p>
+For your use of mscript3.exe,
+these <a href="mscript.rtf">TERMS OF USE</a> apply
+</p>
+<p>
+The mscript.msi installer includes the terms of use
+</p>
+</p>
+<h2><a name="licenses">licenses</a></h2>
+<p>
+mscript is an open source project hosted by
+<a target="_blank" href="https://github.com/michaelsballoni/mscript">GitHub</a>
+under the <a target="_blank" href="https://github.com/michaelsballoni/mscript/blob/main/LICENSE">Apache 2.0 license</a>
+</p>
+<p>
+mscript relies on other open source libraries, each of which has its own license:
+<ul>
+<li><a target="_blank" href="https://github.com/anthony-tuininga/cx_Logging/blob/main/LICENSE.txt">cx_Logging</a></li>
+<li><a target="_blank" href="https://github.com/nlohmann/json/blob/develop/LICENSE.MIT">nlohmann JSON</a></li>
+<li><a target="_blank" href="https://sqlite.org/copyright.html">SQLite</a></li>
+</ul>
+</p>
+<h2><a name="example">example script</a></h2>
+<pre>/ Import the timestamp DLL that handles file timestamps
++ "mscript-timestamp.dll"
+
+/ See if we have our one parameter, the path to the file to touch
+? arguments.length() != 1
+	&gt;&gt; Provide the path to the file to touch
+	exit(0)
+}
+
+/ Output the given path and its current timestamp
+$ file_path = arguments.get(0)
+&gt; "File: " + file_path
+&gt; "Last Modified Be4: " + msts_last_modified(file_path)
+
+/ Do the deed
+msts_touch(file_path)
+
+/ Report the new timestamp
+&gt; "Last Modified Now: " + msts_last_modified(file_path)
+</pre>
+<hr/>
+<p>
+For more samples, check out...
+<ul>
+<li><a target="_blank" href="samples/touch.ms">simple file touch</a></li>
+<li><a target="_blank" href="samples/build.ms">mscript's build script</a></li>
+<li><a target="_blank" href="samples/extensions.ms">file extension stats</a></li>
+<li><a target="_blank" href="samples/musicdb.ms">music artist database</a></li>
+<li><a target="_blank" href="samples/file_search.ms">file full-text search</a></li>
+<li><a target="_blank" href="samples/file_sizes.ms">directory file size stats</a></li>
+</ul>
+</p>
+<p>
+For those programmers familiar with the wonderful text processing program awk, not only is mscript fully capable as an awk replacement, it can, during processing, categorize to a database, which awk could only dream of
+</p>
+<p>
+For those programmers that have tried to distribute their python code and failed, mscript is a stand-alone script processor that is simple to download, without any ugly setup required
+</p>
+<h2><a name="history">version history</a></h2>
+<p>
+<h3>3.0</h3>
+<ul>
+<li>BREAKING CHANGES</li>
+<li>
+each ? part of an if-then-else statement must end with its own closing }
+</li>
+<li>
+eliminated block verbatim print statement, {&gt;&gt; &gt;&gt;}
+</li>
+<li>
+isMatch() and getMatches() now look for matches anywhere in the string by default
+</li>
+</ul>
+<ul>
+<li>BIG CHANGES</li>
+<li>
+statement prefixes &amp; and * are now optional
+</li>
+<li>
+<a href="#mscript-log">mscript-log</a> DLL for simple logging based on
+<a target="_blank" href="https://github.com/anthony-tuininga/cx_Logging">cx_Logging</a>
+</li>
+<li>
+<a href="#mscript-db">mscript-db</a> DLL for SQL and NoSQL programming based on
+<a target="_blank" href="https://sqlite.org">SQLite</a>
+and
+<a target="_blank" href="https://github.com/michaelsballoni/4db">4db</a>
+</li>
+<li>
+preprocessor allows for \ line continuations
+and // comments that can appear anywhere
+</li>
+<li>
+added ++ and -- statements, like # statements,
+with control over loop direction
+</li>
+<li>
+syntax checker catches malformed scripts before executing them
+</li>
+<li>
+fixed bug with incorrect filenames and line numbers in error messages
+</li>
+</ul>
+<ul>
+<li>NEW FUNCTIONS</li>
+<li>
+parseArgs() for powerful command-line argument processing
+</li>
+<li>
+readFileLines() and splitLines()
+process line-delimited files and strings
+</li>
+<li>
+getExeFilePath() gets the path to the mscript EXE
+</li>
+<li>
+getBinaryVersion() gets the version of any EXE or DLL
+</li>
+<li>
+getIniString() and getIniNumber() provide INI file support
+</li>
+<li>
+expandedEnvVars() gets string with expanded substrings like %PATH%
+</li>
+<li>
+getLastError() and getLastErrorMsg() for info on Win32 errors
+</li>
+</ul>
+</p>
+<p>
+<h3>2.0.4</h3>
+<ul>
+<li>Added cd() and curDir() functions</li>
+</ul>
+</p>
+<p>
+<h3>2.0.3</h3>
+<ul>
+<li>Performance improvement to built-in function calls</li>
+<li>Fix for broken x64 builds</li>
+<li>Added more JSON character entities</li>
+<li>Added built-in function fmt() for formatting strings with parameters</li>
+<li>
+<a target="_blank" href="samples/build.ms">NEW Sample build.ms</a> shows off the real world mscript for...building mscript!
+<br/>
+setEnv is used to establish settings that exec()-run commands use, powerful stuff
+</li>
+</ul>
+</p>
+<p>
+<h3>2.0.2</h3>
+<ul>
+<li>
+BREAKING CHANGE:
+! is no longer a single line comment,
+it is used for <a href="#errors">error handling</a>
+</li>
+<li>
+Use / for single line comments; you can use // if that makes you feel better ;-)
+</li>
+</ul>
+</p>
+<h2><a name="overview">overview</a></h2>
+<p>
+mscript is a line-based scripting language that uses symbols instead of keywords
+</p>
+<p>
+<ul>
+<li>It doesn't care about most whitespace</li>
+<li>Half the curly braces</li>
+<li>No semicolons</li>
+<li>
+You have to declare variables, and once a variable is non-null, it can only be assigned values of the type of its initial non-null value, and you can't go back to null
+</li>
+<li>No truth-y or false-y</li>
+<li>Arrays and hash tables and global functions; no classes</li>
+</ul>
+</p>
+<h2><a name="functions">functions</a></h2>
+<pre>exec(cmd_line, setttings)
+ - This is the main function that gives mscript meaning in life
+ - Build your command line, call exec, and get back an index with all you need to know: 
+ -       success, exit_code, and output
+ - pass in an index of settings:
+         "ignore_errors" defaults to false
+            any command not returning a zero exit code will raise an error
+            set to true to tolerate errors
+         "method" can be "popen" or "system"
+            to get output from the command the default "popen" works
+            to just get an exit code you can use "system"
+ - Write all the script you want around calls to exec, and get a lot done
+
+getEnv(name)
+ - get the value of an environment variable
+
+putEnv(name, value) 
+ - Set the value of an environment value
+ - This affects the environment inside mscript and in programs run by exec()
+
+cd(newDirectory)
+ - change the current working directory for all programs run with exec()
+
+curDir(optional_drive_letter)
+ - get the current working directory, with an optional drive letter
+
+obj.toJson()
+ - convert any value into JSON
+
+fromJson(json)
+ - take JSON and return any kind of object
+
+error(error_msg)
+ - raise an error, more on this later
+
+getExeFilePath()
+ - return the path to the mscript EXE
+
+getBinaryVersion(binary_file_path)
+ - return the four-part version number of any EXE or DLL
+
+readFile(file_path, encoding)
+ - read a text file into a string, using the specified encoding, either "ascii", "utf8", or "utf16"
+
+readFileLines(file_path, encoding)
+ - read the lines in a text file into a list strings
+
+writeFile(file_path, file_contents, encoding)
+ - write a string to a text file with an encoding
+
+getIniString(file_path, section_name, setting_name, default_value)
+getIniNumber(file_path, section_name, setting_name, default_value)
+ - provide INI file support
+
+expandedEnvVars()
+ - return a string with substrings like %PATH% 
+ - expanded to their environment variable values
+
+getLastError()
+ - get the last Win32 error number
+
+getLastErrorMsg()
+ - get the string description and number of the last Win32 error
+   like, "Access denied. (5)"
+ - you can pass in an error number to get its error message
+
+exit(exit_code)
+ - exit the script with an exit code
+
+parseArgs(arguments_list, argument_specs_list)
+ - pass the global string list variable arguments as the first parameter
+ - pass a list of indexes defining the arguments your mscript takes
+ - index fields are:
+    flag: -i
+    long-flag: --input
+    description: Specify the input to this script
+    takes: bool, if true means that a value for the flag is expected
+    required: bool, if no value for the flag then an error is raised
+    default: a default value for the flag if no value given for the flag
+    numeric: bool, if true tries to treat the taken value as a number
+
+obj.getType()
+ - the type of an object obj as a string
+
+number(val)
+ - convert a string or bool into a number
+string(val)
+ - convert anything into a string
+
+list(item1, item2...)
+ - create a list with the elements passed in
+
+index(key1, value1, key2, value2...)
+ - create an index with the pairs of keys and values passed in
+
+obj.clone()
+ - deeply clone an object, including indexes containing list values, etc.
+
+obj.length()
+ - string or list length, or index pair count
+
+obj.add(to_add1, to_add2...)
+ - append to a string, add to a list, or add pairs to an index
+
+obj.set(key, value)
+ - set a character in a string, change the value at a key in a list or index
+
+obj.get(key)
+ - return character of string, element in list, or value for key in index
+
+obj.has(value)
+ - returns whether a string has a substring, a list has an item, or an index has key
+
+obj.keys()
+obj.values()
+ - index collection access
+
+obj.reversed()
+ - returns copy of obj with elements reversed, including keys of an index
+
+obj.sorted()
+ - returns a copy of obj with elements sorted, including index keys
+
+list.join(separator)
+ - join list items together into a string
+
+str.split(separator)
+ - split a string into a list of substrings
+
+str.splitLines()
+ - split a string into a list of line strings
+
+str.trimmed()
+ - return a copy of a string with any leading or trailing whitespace removed
+
+str.toUpper(), str.toLower()
+ - return a copy of a string in upper or lower case
+
+str.replaced(from, to)
+ - return a copy of a string with a substring replaced with another substring
+
+str.fmt(parameter0, ...)
+ - replace "{0}" with parameter0, "{1}" with parameter1, etc.
+
+random(min, max)
+ - return a random value in the range min -> max
+
+obj.firstLocation(toFind), obj.lastLocation(toFind)
+ - find the first or last location of an a substring in a string or item in a list
+
+obj.subset(startIndex[, length])
+ - get a substring of a string or a slice of a list, with an optional length
+
+str.isMatch(regex)
+ - see if a string is a match for a regular expression
+ - by default matches are looked for anywhere in the string
+ - pass true as a second parameter to require a match against the full string
+
+str.getMatches(regex)
+ - return a list of matches from a regular expression applied to a string
+ - by default matches are looked for anywhere in the string
+ - pass true as a second parameter to require a match against the full string
+
+Standard math functions, for your math homework:
+    abs asin acos atan ceil cos cosh exp floor 
+    log log2 log10 round sin sinh sqrt tan tanh
+
+sleep(seconds)
+ - pause the program for a number of seconds
+</pre>
+<h2><a name="dlls">dlls</a></h2>
+<p>
+mscript has a useful set of built-in functions,
+but adding significant new functionality to the built-in functions is undesirable. Instead, most new functionality will be developed in separate <a href="#dllintegration">dll integrations</a>.
+mscript ships with these useful DLLs:
+<ol>
+<li><a href="#mscript-timestamp">mscript-timestamp</a></li>
+<li><a href="#mscript-registry">mscript-registry</a></li>
+<li><a href="#mscript-log">mscript-log</a></li>
+<li><a href="#mscript-db">mscript-db</a></li>
+</ol>
+</p>
+<h3><a name="mscript-timestamp">mscript-timestamp</a></h3>
+<pre>This DLL let's you work with timestamps, in particular last modified times of files.  It exports a number of functions, notice the unique prefix of the function names:
+
+    msts_build(year, month, day) or msts_build(year, month, day, hour, minute, second)
+     - takes three date parameters or six date-time parameters, returning a string usable by the rest of the functions
+    msts_add(timestamp string, part to add to string, and amount to add number)
+     - adds a number of date units to a timestamp, returning the new timestamp
+     - part to add can be "day", "hour", "minute", or "second"
+    msts_diff(date1, data2, part)
+     - returns the number of date units, date1 - date2
+     - part can be "day", "hour", "minute", or "second"
+    msts_format(timestamp, format_string)
+     - format_string using <a target="_blank" href="https://en.cppreference.com/w/cpp/io/manip/put_time">put_time syntax</a>
+     - you can use this to get parts of the timestamp
+
+    msts_now()
+     - get the current date-time, you can optionally pass in a bool to use UTC or local time
+     - uses UTC by default
+
+    msts_to_utc(timestamp)
+     - convert a local date-time to UTC
+    msts_to_local(timestamp)
+     - convert a UTC date-time to local
+
+    msts_last_modified(file_path)
+     - when was a file last modified?
+    msts_created(file_path)
+     - when was a file created?
+    msts_last_accessed(file_path)
+    - when was a file last accessed?
+
+    msts_touch(file_path, optional_timestamp)
+     - touch a file, marking its last modified timestamp to be now or optionally a given timestamp
+
+To call these functions from your scripts, use a + statement, like so
+    
++ "mscript-timestamp.dll"
+> "Now: " + msts_now()
+</pre>
+<br/>
+<br/>
+<h3><a name="mscript-registry">mscript-registry</a></h3>
+<pre>This simple DLL makes working with the registry a breeze...
+
+    msreg_create_key(key)
+     - ensure that a registry key exists
+
+    msreg_delete_key(key)
+     - ensure that a registry key no longer exists
+     - deltes the keys, its values, and all sub-keys and their values
+
+    msreg_get_sub_keys(key)
+     - get a list of the names of the sub-keys of a key
+     - just the names of the sub-keys, not full keys
+
+    msreg_put_settings(key, settings_index)
+     - add settings to a key with the name-values in an index
+     - you can send in number and string settings
+     - to remove a setting, pass null as the index value
+
+    msreg_get_settings(key)
+     - get the settings on a key in a name-values index
+     - you only get back REG_DWORD and REG_SZ values
+       no, multi-strings or expanded-strings
+</pre>
+<br/>
+<br/>
+<h3><a name="mscript-log">mscript-log</a></h3>
+<pre>This DLL is a simplified logging library based on cx_Logging:
+http://cx-logging.readthedocs.io/en/latest/
+
+There is one global logging facility
+
+You call mslog_start() with the filename to use and the log level to start with, and with an optional index of logging parameters, such as the prefix for each log line
+
+You can call mslog_setlevel(log_level) to set what kinds of logging to write to the file.  Log levels from least to most are "NONE", "ERROR", "INFO", "DEBUG"
+
+With logging set up, you call mslog_error(), mslog_info(), and mslog_debug() to write messages to the log
+
+All routines return bool success; errors are only raised for invalid parameters
+
+mslog_start(filename, log_level, options_index)
+ - specify the log file path to use, and the initial log level
+ - you can call mslog_setlevel() to set the level later on
+ - options_index can contain the followings options:
+    prefix - what to start each log line with
+    maxFiles - how many numbered files to preserve
+    maxFileSizeBytes - file size reached to start a new log file
+    - see: <a target="_blank" href="https://cx-logging.readthedocs.io/en/latest/overview.html">online documentation</a>
+      for more information about these settings
+
+mslog_stop()
+ - turn off logging to the file entirely
+		
+mslog_setlevel(log_level)
+ - set the logging level as a string, "NONE", "INFO", "ERROR", "DEBUG"
+
+mslog_getlevel()
+ - get the log level back out as a string
+
+mslog_error(message)
+mslog_info(message)
+mslog_debug(message)
+ - write a string message to the log
+</pre>
+<br/>
+<br/>
+<h3><a name="mscript-db">mscript-db</a></h3>
+This DLL implements wrapper APIs for:
+<ol>
+<li><a target="_blank" href="https://sqlite.org">SQLite</a></li>
+<li><a target="_blank" href="https://github.com/michaelsballoni/4db">4db</a></li>
+</ol>
+<h4><a name="mscript-db-sql">SQLite</a></h4>
+<p>
+<a target="_blank" href="https://sqlite.org">SQLite</a>
+is a file-based database engine that allows powerful database querying in an easy-to-use package.
+mscript-db.dll includes SQLite functionality, making it possible to do SQL in a very clean and simple fashion:
+</p>
+<pre>
+msdb_sql_init(db_name, db_file_path)
+ - specify a name for the database, db_name, and connect to the database at db_file_path, creating the database if it does not already exist
+ - you use the database name in all other API functions
+
+msdb_sql_close(db_name)
+ - close the database connection associated with the given db_name
+
+msdb_sql_exec(db_name, sql_query, optional_query_parameters_index)
+ - issue any sort of SQL statement, including things like CREATE TABLE
+ - returns a list of lists, with the first list containing the column names
+
+msdb_sql_rows_affected(db_name)
+ - get the number of rows affected by the most recent SQL query, such as rows UPDATE'd or DELETE'd
+
+msdb_sql_last_inserted_id()
+ - get the autonumber row ID of the most recent SQL INSERT query
+</pre>
+<h4><a name="mscript-db-4db">4db</a></h4>
+<p>
+4db is a file-based NoSQL database engine. You develop the database schema based on the data you add
+</p>
+<p>
+There are no CREATE TABLE statements. Instead you call the msdb_4db_define() function specifying a table name, a primary key value, and an index of name-value columns to associate with the primary key. It is an UPSERT that defines schema as you go, adding new and updating existing data
+</p>
+<p>
+Once you have loaded data into your database, you access the data using a simplified SQL SELECT statement, msdb_4db_query().
+</p>
+<p>
+<h4>4db SQL querying</h4>
+<ol>
+<li>
+SELECT columns can be "value" to get the primary key, or the name of another column you've defined with msdb_4db_define()
+</li>
+<li>
+FROM can specify one table
+</li>
+<li>
+WHERE can include simple comparisons against "value" or a column name, and the values for the comparisons must be parameters. You can use the MATCH operator for full-text keyword search.
+You can join multiple comparisons with an AND or an OR. Parentheses are not supported at this time
+</li>
+<li>
+ORDER BY can only include columns from the SELECT columns
+</li>
+<li>LIMIT is supported, no parameter needed</li>
+</ol>
+This would be a valid msdb_4db_query() call:
+<br/>
+<pre>$ query_results = \
+msdb_4db_query \
+( \
+    "SELECT value, column1, column2 \
+    FROM my_table \
+    WHERE column1 MATCHES @match AND column2 <= @max_val \
+    ORDER BY column2 DESC \
+    LIMIT 10", \
+    index("@match", "some thing not other", @max_val, 10) \
+)
+</pre>
+</p>
+<p>Extra built-in columns you can include in your query:</p>
+<ol>
+<li>
+id - Row ID in the table in 4db's own schema, useful for sorting oldest to newest
+</li>
+<li>created - when the row was added to the database</li>
+<li>lastmodified - when the row was last modified</li>
+<li>
+count - the number of rows you would get if you SELECT'd out the rows
+</li>
+<li>
+rank - for full-text searches, automatically added to ORDER BY
+</li>
+</ol>
+<p>
+When you want to remove data from your database, you use msdb_4db_delete(). Just pass in the table name and primary key value, and it's gone
+</p>
+<h4>4db API Reference</h4>
+<pre>
+msdb_4db_init(ctxt_name, db_file_path)
+ - associate a ctxt_name with a new 4db database, creating the database file if it does not exist
+
+msdb_4db_close(ctxt_name)
+ - free the 4db context associated with the given ctxt_name
+
+msdb_4db_define(ctxt_name, table_name, primary_key_value, metadata_index)
+ - create a row in the schema in table_name, with primary_key_value, and the columns and values in metadata_index
+ - 4db only supports strings and numbers, so only pass those types of data in   if you expect to get those types of data back out
+
+msdb_4db_undefine(ctxt_name, table_name, primary_key_value, metadata_name)
+ - erase from table_name with primary_key_value the metadata value for the given metadata_name
+
+msdb_4db_query(ctxt_name, sql_query, parameters_index)
+ - issue a simple subset of SQL using sql_query using parameters from parameters_index
+ - hands back a list of lists, with the first list having the column names
+
+msdb_4db_delete(ctxt_name, table_name, primary_key_value)
+ - erase a row from table_name with primary_key_value
+
+msdb_4db_drop(ctxt_name, table_name)
+ - drop table_name from the schema
+
+msdb_4db_get_schema(ctxt_name)
+ - get an index mapping the name of each table in the schema to a list of the table's column names
+</pre>
+<h2><a name="statements">statements</a></h2>
+<pre>/*
+a block
+comment
+*/
+
+/ a single-line comment, on its own line, can't be at the end of a line
+
+// another single-line comment, can appear anywhere in a line
+
+NOTE: You used to use ! for single-line comments; ! is now used for <a href="#errors">error handling</a>
+
+&gt; "print the value of an expression, like this string, including pi: " + round(pi, 4)
+
+&gt;&gt; print exaclty what is on this line, allowing for any "! '= " 0!')* anything you'd like
+
+/ Declare a variable with an initial value
+$ new_variable = "initial value"
+
+/ A variable assignment
+&amp; new_variable = "some other value"
+/ Once a variable has be assigned a non-null value
+/ the variable cannot be assigned to a value of another type, including null
+/ So mscript has some type safety.  Some...
+
+/ The O signifies an unbounded loop, a while(true) or for (;;)
+/ All loops end in a closing curly brace, but do not start with an opening one
+O
+    ...
+    / the V statement is break
+    &gt; "gotta get out!"
+    V
+}
+
+/ If, else if, else
+/ Curly braces are required at the ends of each if or else if clause, 
+/ and at the end of the overall if-else statement
+? some_number = 12
+    some_number = 13
+}
+? some_number = 15
+    some_number = 16
+}
+&lt;&gt;
+    some_number = -1
+}
+
+/ A foreach loop
+/ list(1, 2, 3) creates a new list with the given items
+/ This statements processes each item in the list, printing them out
+/ Note the string promotion in the print line
+@ item : list(1, 2, 3)
+    &gt; "Item: " + item
+}
+
+/ Indexing loops
+/ Notice the pseudo-OOP of the my_list.length() and my_list.get() calls
+$ my_list = list(1, 2, 3)
+
+/ Use a ++ loop to go up from a starting index to an ending index
+++ idx : 0 -&gt; my_list.length() - 1
+    &gt; "Item: " + my_list.get(idx)
+}
+
+/ Use a -- loop to go down from a starting index to an ending index
+-- idx : my_list.length() - 1 -&gt; 0
+    &gt; "Item: " + my_list.get(idx)
+}
+
+/ Use a # loop to go in either direction between start and end
+# i : 1 -> 10
+    &gt; "i: " + i
+/ NOTE: If you use a # loop to iterate an index number over the size of a list
+/       and the list is empty:
+# i : 0 -> length(list()) - 1
+    / i will be -1 in here
+}
+/ Hence the ++ and -- statements.  
+/ # is kept for simplicity and backwards compatibility
+
+{
+    / Just a little block statement for keeping variable scopes separate
+    / Useful for freeing resources like large strings as soon as they've been used
+    / Variables declared in here...
+}
+/ ...are not visible out here
+
+/ Functions are declared like other statements
+~ my_function (param1, param2)
+    / do something with param1 and param2
+
+    / Function return values...
+
+    /...with a value
+    &lt;- 15
+
+    / ...or without a value
+    &lt;-
+}
+
+/ A little loop example
+~ counter(low_value, high_value)
+    $ cur_value = low_value
+    $ counted = list()
+    O
+        / Use the * statement to evaluate an expression and ignore its return value
+        / Used for adding to lists or indexes or executing functions with no return values
+        counted.add(cur_value)
+        cur_value = cur_value + 1
+        ? cur_value &gt; high_value
+            / Use the V statement to leave the loop, a break statement
+            V
+        &lt;&gt;
+            / Use the ^ statement to go back up to the start of the loop, a continue statement
+            ^
+        }
+    }
+    &lt;- counted
+}
+
+/ Load and run another script here, an import statement of sorts
++ "some_other_script.ms"
+
+/ The script path is an expression, so you can dynamically load different things
+/ Scripts are loaded relative to the script they are imported from
+/ Imported scripts are processed just like top-level scripts;
+/ they can declare global variables, define functions, and...execute script!
+</pre>
+<h2><a name="expressions">expressions</a></h2>
+<p>
+A value in mscript can be one of six types of things:
+<ol>
+<li>null</li>
+<li>number</li>
+<li>string</li>
+<li>bool</li>
+<li>list</li>
+<li>index - with order of insertion preserved</li>
+</ol>
+<ul>
+<li>list and index are copied by reference, the rest by value</li>
+<li>If you modify a list inside a function, the list outside the function will be modified</li>
+<li>If you modify a string inside a function, the string outside the function will not be changed</li>
+</ul>
+</p>
+<pre>Binary operators, from least to highest precedence:
+or || and && <> != <= >= < > == = % - + / * ^
+
+Unary operators: - ! not
+
+An expression can be:
+    null
+    true
+    false
+    number
+    string
+    dquote
+    squote
+    tab
+    lf
+    cr
+    crlf
+    pi
+    e
+    variable as defined by a $ statement
+
+Strings can be double- or single-quoted, both 'foo ("bar")' and "foo ('bar')" are valid 
+This is handy for building command lines that involve double-quotes
+Just use single quotes around them
+
+String promotion:
+    If either side of binary expression evaluates to a string, 
+    the expression promotes both sides to string
+
+Bool short-circuiting:
+    The left expression is evaluated first
+        If && and left is false, expression is false
+        If || and left is true, expression is true
+</pre>
+<h2><a name="errors">error handling</a></h2>
+<pre>
+Error handling revolves around the error() function, and ! error handling statements
+Note that ! was used for single line comments in mscript 1.0
+This is a breaking change to the meaning of !
+Use / for single line comments going forward; you can use // if that makes you happy
+
+Say we have...
+
+~ verifyLow(value)
+    ? value &gt;= 10
+        * error("Value is not low: " + value)
+    }
+}
+
+Then we call it...
+
+    * verifyLow(11)
+
+As written, the error() function call will cause mscript to output the error message and exit
+Not very useful
+
+Now we have error handling!  Simply add a ! statement after code that you want to handle the errors of:
+
+* verifyLow(23)
+! err
+    > "verifyLow fails: " + err
+}
+
+In this case the call to verifyLow causes an error, then mscript looks for the first ! statement
+in the verifyLow function.  Not found there, the error bubbles up to the top-level, where mscript
+finds the ! statement following the call to verifyLow
+
+You can pass any kind of object to the error() function, not just strings
+You can handle any type of object in your ! statements
+Using indexes for error objects could provide just the sophistication you need
+
+With the ! statement, you can name the error handler's variable whatever you like
+It doesn't have to be err
+
+You can have any number of statements before a ! statement, it's not just one ! per prior statement
+
+This is sort of like error handling in other languages, 
+just with a lot less code organization and finger wear,
+which is mscript's mantra
+</pre>
+<h2><a name="dllintegration">dll integration</a></h2>
+<pre>mscript is a great little language with a fun little runtime
+
+At the end of the day, I think I left you wanting more with version 1.0 
+
+So to give you more, mscript now supports dll integration
+
+You can write DLLs that export functions that you call from mscripts,
+just like built-in functions or your own mscript functions
+
+To develop an mscript DLL...
+
+Use Visual Studio 2022
+
+Clone the mscript solution from <a target="_blank" href="https://github.com/michaelsballoni/mscript">GitHub</a>
+
+Clone the <a target="_blank" href="https://github.com/nlohmann/json/">nlohmann JSON library on GitHub</a>
+and put it alongside the mscript solution's directory, not inside it, next to it
+
+Get the mscript solution to build and get the unit tests to pass
+
+To understand dll integration, it's best to look at the mscript-dll-sample project
+
+pch.h:
+#pragma once
+#include "../mscript-core/module.h"
+#pragma comment(lib, "mscript-core")
+
+That alone brings in everything you need for doing mscript DLL work
+
+Then you write a dllinterface.cpp file to implement your DLL
+
+Here is mscript-dll-sample's dllinterface.cpp:
+
+#include "pch.h"
+
+using namespace mscript;
+
+// You implement mscript_GetExports to specify which functions you will be exporting
+// Your function names have to be globally unique, and can't have dots, so use underscores and make it unique
+wchar_t* __cdecl mscript_GetExports()
+{
+    std::vector&lt;std::wstring&gt; exports
+    {
+        L"ms_sample_sum",
+        L"ms_sample_cat"
+    };
+    return module_utils::getExports(exports);
+}
+
+// You need to provide a memory freeing function for strings that your DLL allocates
+void mscript_FreeString(wchar_t* str)
+{
+    delete[] str;
+}
+
+// Here's the big one.  You get a function name, and JSON for a list of parameters, 
+// and you return JSON of an object
+wchar_t* mscript_ExecuteFunction(const wchar_t* functionName, const wchar_t* parametersJson)
+{
+    try
+    {
+        std::wstring funcName = functionName;
+        if (funcName == L"ms_sample_sum")
+        {
+            double retVal = 0.0;
+            for (double numVal : module_utils::getNumberParams(parametersJson))
+                retVal += numVal;
+            return module_utils::jsonStr(retVal);
+        }
+        else if (funcName == L"ms_sample_cat")
+        {
+            std::wstring retVal;
+            for (double numVal : module_utils::getNumberParams(parametersJson))
+                retVal += num2wstr(numVal);
+            return module_utils::jsonStr(retVal);
+        }
+        else
+            raiseWError(L"Unknown mscript-dll-sample function: " + funcName);
+    }
+    catch (const user_exception&amp; exp)
+    {
+        return module_utils::errorStr(functionName, exp);
+    }
+    catch (const std::exception&amp; exp)
+    {
+        return module_utils::errorStr(functionName, exp);
+    }
+    catch (...)
+    {
+        return nullptr;
+    }
+}
+// module_utils implements useful routines for command object / JSON operations
+// module_utils::getNumberParams keeps this code pristine, returning vector&lt;double&gt;
+// Use module_utils::getParams instead for more general parameter handling
+// module_utils::jsonStr(retVal) turns any object into a JSON wchar_t* to return to mscript
+// module_utils::errorStr(functionName, exp) gives you consolidated error handling,
+// returning an error message JSON wchar_t* that mscript expects
+
+You can tread far off this beaten path
+
+Process the parameter list JSON and return JSON that maps to an mscript value
+That's all that's assumed
+
+Once you've created your own DLL, in mscript code you import it with the same + statement as 
+importing mscripts
+
+DLLs are searched in the folder the mscript EXE resides in,
+and for security, not from anywhere else
+
+Also DLLs must have the same code signing certificate 
+as the mscript EXE
+
+So...
+
+dll integrations need to happen inside the mscript solution,
+where I can review the code, sign the DLL like the mscript EXE,
+and include the DLL in the mscript installer hosted on this website
+</pre>
+<center>
+Write to <a href="/cdn-cgi/l/email-protection#7b191a171714151255161218131a1e175508021f151e023b140e0f1714141055181416"><span class="__cf_email__" data-cfemail="096b6865656667602764606a61686c65277a706d676c7049667c7d65666662276a6664">[email&#160;protected]</span></a>
+with questions and comments
+</center>
+<br/>
+</div>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

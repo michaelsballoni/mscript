@@ -12,16 +12,16 @@
 		) \
 	)
 	$ parsed1 = parseArgs(list(), argument_specs)	
-	> "8a. ERROR: Missing required flag not caught!"
+	>> "8a. ERROR: Missing required flag not caught!"
 	! err
-		> "8a. Caught error"
+		>> "8a. Caught error"
 	}
 	
 	$ parsed2 = parseArgs(list("-i", "foo"), argument_specs)
 	? not parsed2.has("-i")
-		> "8b. ERROR: Specified required flag not found!"
+		>> "8b. ERROR: Specified required flag not found!"
 	}
-	> "8b. Should be foo: " + parsed2.get("-i")
+	>> "8b. Should be foo: " + parsed2.get("-i")
 }
 
 >>
@@ -30,7 +30,7 @@
 	$ arguments = list("-n", "10")
 	$ argument_specs = list(index("flag", "-n", "long-flag", "--number", "description", "A number", "takes", true, "numeric", true))
 	$ parsed = parseArgs(arguments, argument_specs)
-	> "7a. Should be: " + parsed.string()
+	>> "7a. Should be: " + parsed.string()
 }
 {
 	$ arguments = list("-n", "foo")
@@ -38,21 +38,21 @@
 	$ parsed = parseArgs(arguments, argument_specs)
 	* error("Non-numeric argument should have been caught")
 	! err
-		> "7b. Error caught"
+		>> "7b. Error caught"
 	}
 }
 {
 	$ arguments = list("-n")
 	$ argument_specs = list(index("flag", "-n", "long-flag", "--number", "description", "A number", "takes", true, "numeric", true, "default", 5))
 	$ parsed = parseArgs(arguments, argument_specs)
-	> "7c. Should be: " + parsed.string()
+	>> "7c. Should be: " + parsed.string()
 }
 
 {
 	$ arguments = list("-?", "--suppress-help-quit")
 	$ argument_specs = list(index("flag", "-n", "long-flag", "--number", "description", "A number", "takes", true, "numeric", true, "default", 5, "required", true))
 	$ parsed = parseArgs(arguments, argument_specs)
-	> "7d. Should be: " + parsed.string()
+	>> "7d. Should be: " + parsed.string()
 }
 
 >>
@@ -61,7 +61,7 @@
 	$ arguments = list("-i", "foo", "bar", "--help", "--suppress-help-quit")
 	$ argument_specs = list(index("flag", "-i", "long-flag", "--input", "description", "Input file", "takes", true))
 	$ parsed = parseArgs(arguments, argument_specs)
-	> "6. Should be: " + parsed.string()
+	>> "6. Should be: " + parsed.string()
 }
 
 >>
@@ -70,7 +70,7 @@
 	$ arguments = list("-i", "foo")
 	$ argument_specs = list(index("flag", "-i", "long-flag", "--input", "description", "Input file", "takes", true))
 	$ parsed = parseArgs(arguments, argument_specs)
-	> "5a. Should be: " + parsed.string()
+	>> "5a. Should be: " + parsed.string()
 }
 {
 	$ arguments = list("-i")
@@ -78,7 +78,7 @@
 	$ parsed = parseArgs(arguments, argument_specs)
 	* error("Missing argument should have been caught")
 	! err
-		> "5b. Error caught"
+		>> "5b. Error caught"
 	}
 }
 
@@ -88,13 +88,13 @@
 	$ arguments = list("-q")
 	$ argument_specs = list(index("flag", "-q", "long-flag", "--quiet", "description", "Suppress program output"))
 	$ parsed = parseArgs(arguments, argument_specs)
-	> "4a. Should be: " + parsed.string()
+	>> "4a. Should be: " + parsed.string()
 }
 {
 	$ arguments = list("--quiet")
 	$ argument_specs = list(index("flag", "-q", "long-flag", "--quiet", "description", "Suppress program output"))
 	$ parsed = parseArgs(arguments, argument_specs)
-	> "4b. Should be: " + parsed.string()
+	>> "4b. Should be: " + parsed.string()
 }
 
 >>
@@ -103,7 +103,7 @@
 	$ arguments = list("-?", "--suppress-help-quit")
 	$ argument_specs = list()
 	$ parsed = parseArgs(arguments, argument_specs)
-	> "3. Should be: " + parsed.string()
+	>> "3. Should be: " + parsed.string()
 }
 
 >>
@@ -112,7 +112,7 @@
 	$ arguments = list("foo", "bar")
 	$ argument_specs = list()
 	$ parsed = parseArgs(arguments, argument_specs)
-	> "2. Should be: " + parsed.string()
+	>> "2. Should be: " + parsed.string()
 }
 
 >>
@@ -121,19 +121,19 @@
 	$ arguments = list()
 	$ argument_specs = list()
 	$ parsed = parseArgs(arguments, argument_specs)
-	> "1a. Should be: " + parsed.string()
+	>> "1a. Should be: " + parsed.string()
 }
 {
 	$ arguments = list("foo", "bar")
 	$ argument_specs = list()
 	$ parsed = parseArgs(arguments, argument_specs)
-	> "1b. Should be: " + parsed.string()
+	>> "1b. Should be: " + parsed.string()
 }
 {
 	$ arguments = list("-?", "--suppress-help-quit")
 	$ argument_specs = list()
 	$ parsed = parseArgs(arguments, argument_specs)
-	> "1c. Should be: " + parsed.string()
+	>> "1c. Should be: " + parsed.string()
 }
 
 ===
