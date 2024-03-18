@@ -37,7 +37,8 @@ namespace mscript
         static void ValidateExpression(const std::string& expStr, object expected, symbol_table& symbols)
         {
             no_op_callable callable;
-            expression exp(symbols, callable);
+            tracing trace_info;
+            expression exp(symbols, callable, trace_info);
             object answer = exp.evaluate(toWideStr(expStr));
 
             Assert::IsTrue(answer.type() == expected.type());
@@ -55,7 +56,8 @@ namespace mscript
         {
             symbol_table symtable;
             TestCallable callable;
-            expression exp(symtable, callable);
+            tracing trace_info;
+            expression exp(symtable, callable, trace_info);
             {
                 object result = exp.evaluate(L"length(list(1.0, 2.0))");
                 Assert::AreEqual(2.0, result.numberVal());
@@ -128,7 +130,29 @@ namespace mscript
             ValidateExpression("3<4 and 5 <= 4 or 12<=50 and 6 <= 13", true, symbols);
             ValidateExpression("3<4 AND 5 <= 4 OR 12<=50 AND 6 <= 13", true, symbols);
 
-            // FORNOW - Flex new alpha ops (and existing ops) for string comparisons
+            symbols.set(toWideStr("str1"), std::wstring(L"a"));
+            symbols.set(toWideStr("str2"), std::wstring(L"b"));
+            symbols.set(toWideStr("str3"), std::wstring(L"c"));
+
+            ValidateExpression("str1 = str1", true, symbols);
+            ValidateExpression("str1 == str1", true, symbols);
+            ValidateExpression("str1 EQU str1", true, symbols);
+
+            ValidateExpression("str1 != str2", true, symbols);
+            ValidateExpression("str1 <> str2", true, symbols);
+            ValidateExpression("str1 NEQ str2", true, symbols);
+
+            ValidateExpression("str1 < str2", true, symbols);
+            ValidateExpression("str1 LSS str2", true, symbols);
+
+            ValidateExpression("str1 <= str2", true, symbols);
+            ValidateExpression("str1 LEQ str2", true, symbols);
+
+            ValidateExpression("str2 > str1", true, symbols);
+            ValidateExpression("str2 GTR str1", true, symbols);
+
+            ValidateExpression("str2 >= str1", true, symbols);
+            ValidateExpression("str2 GEQ str1", true, symbols);
 
             ValidateExpression("2 + 3", 5.0, symbols);
             ValidateExpression("2 - 3", -1.0, symbols);

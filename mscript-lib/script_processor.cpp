@@ -142,8 +142,40 @@ namespace mscript
             {
                 if (startsWith(line, L">>>")) // trace output in sections
                 {
-                    static size_t verbLen = strlen(">>>");
-                    // FORNOW - Implement section tracing
+                    static size_t verbLen = strlen(">>>"); // >>> section_label : label_level : msg_expression
+                    
+                    size_t first_colon = line.find(':');
+                    if (first_colon == std::wstring::npos)
+                        raiseError("Trace statement lacks colon between section and level");
+                    
+                    std::wstring section_label = trim(line.substr(0, first_colon).substr(verbLen));
+                    if (section_label.empty())
+                        raiseError("Trace statement section is missing");
+
+                    if (m_traceInfo.DoesSectionMatch(section_label))
+                    {
+                        size_t second_colon = line.find(':', first_colon + 1);
+                        if (second_colon == std::wstring::npos)
+                            raiseError("Trace statement lacks colon between level and message");
+                        
+                        std::wstring level_str = trim(line.substr(first_colon + 1, second_colon - first_colon - 1));
+                        if (level_str.empty())
+                            raiseError("Trace statement level is missing");
+                        
+                        object level_obj = evaluate(level_str, callDepth);
+                        if (level_obj.type() != object::NUMBER)
+                            raiseError("Trace statement level is not number");
+                        
+                        TraceLevel label_level = (TraceLevel)(int)level_obj.numberVal();
+                        if (m_traceInfo.DoesLevelMatch(label_level))
+                        {
+                            std::wstring msg_exp_str = trim(line.substr(second_colon + 1));
+                            if (msg_exp_str.empty())
+                                raiseError("Trace statement output is missing");
+                            
+                            m_output(evaluate(msg_exp_str, callDepth).toString());
+                        }
+                    }
                 }
                 else if (startsWith(line, L">>")) // single line expression print
                 {
@@ -1045,7 +1077,7 @@ namespace mscript
     {
         m_tempCallDepth = callDepth;
 
-        expression exp(m_symbols, *this);
+        expression exp(m_symbols, *this, m_traceInfo);
         object answer = exp.evaluate(valueStr);
         return answer;
     }

@@ -158,6 +158,24 @@ namespace mscript
         if (upper == "E")
             return M_E;
 
+        if (upper == "TRACE_NONE")
+            return double(TRACE_NONE);
+
+        if (upper == "TRACE_CRITICAL")
+            return double(TRACE_CRITICAL);
+
+        if (upper == "TRACE_ERROR")
+            return double(TRACE_ERROR);
+
+        if (upper == "TRACE_WARNING")
+            return double(TRACE_WARNING);
+
+        if (upper == "TRACE_INFO")
+            return double(TRACE_INFO);
+
+        if (upper == "TRACE_DEBUG")
+            return double(TRACE_DEBUG);
+
         {
             object symvalue;
             if (m_symbols.tryGet(expStr, symvalue))
@@ -1810,6 +1828,28 @@ namespace mscript
                         output_str += input_str[i];
                 }
                 return output_str;
+            } },
+
+            { "settraceinfo", [this](object& first, const object::list& paramList) -> object {
+                if
+                (
+                    paramList.size() != 2
+                    ||
+                    first.type() != object::object_type::LIST
+                    ||
+                    paramList[1].type() != object::object_type::NUMBER
+                )
+                {
+                    raiseError("setTraceInfo() takes a list of sections to enable, and a level to trace at");
+                }
+
+                this->m_traceInfo.ActiveSections.clear();
+                for (auto section_obj : first.listVal())
+                    this->m_traceInfo.ActiveSections.push_back(section_obj.toString());
+
+                this->m_traceInfo.CurrentTraceLevel = (TraceLevel)(int)paramList[1].numberVal();
+
+                return object();
             } },
         };
 

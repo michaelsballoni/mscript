@@ -1,0 +1,28 @@
+>>> sec1 : TRACE_INFO : "msg0"
+
+setTraceInfo(list("sec1"), TRACE_INFO)
+>>>sec1:TRACE_INFO:"msg1"
+>>> sec2 : TRACE_DEBUG : "msg2"
+
+setTraceInfo(list("sec1", "sec2"), TRACE_INFO)
+>>>sec1:TRACE_INFO:"msg1 2"
+>>> sec2 : TRACE_DEBUG : "msg2 2"
+
+setTraceInfo(list("sec1", "sec2"), TRACE_DEBUG)
+>>>sec1:TRACE_INFO:"msg1 3"
+>>> sec2 : TRACE_DEBUG : "msg2 3"
+
+setTraceInfo(list(), TRACE_DEBUG)
+>>>sec1:TRACE_INFO:"msg1 4"
+>>> sec2 : TRACE_DEBUG : "msg2 4"
+
+setTraceInfo(list("sec1", "sec2"), TRACE_NONE)
+>>>sec1:TRACE_INFO:"msg1 5"
+>>> sec2 : TRACE_DEBUG : "msg2 5"
+
+===
+
+msg1
+msg1 2
+msg1 3
+msg2 3

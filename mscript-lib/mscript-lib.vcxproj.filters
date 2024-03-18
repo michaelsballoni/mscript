@@ -63,6 +63,9 @@
     <ClInclude Include="exe_version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tracing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

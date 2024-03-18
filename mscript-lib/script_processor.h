@@ -5,6 +5,7 @@
 #include "object.h"
 #include "symbols.h"
 #include "script_exception.h"
+#include "tracing.h"
 #include "user_exception.h"
 
 #include <functional>
@@ -102,5 +103,7 @@ namespace mscript
 
         std::function<std::optional<std::wstring>()> m_input;
         std::function<void(const std::wstring& text)> m_output;
+
+        tracing m_traceInfo;
     };
 }

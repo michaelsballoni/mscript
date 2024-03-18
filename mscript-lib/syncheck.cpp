@@ -25,7 +25,27 @@ mscript::syncheck
 
             if (startsWith(line, L">>>"))
             {
-                // FORNOW - Parse out the fields
+                static size_t verbLen = strlen(">>>"); // >>> section_label : label_level : msg_expression
+
+                size_t first_colon = line.find(':');
+                if (first_colon == std::wstring::npos)
+                    raiseError("Trace statement lacks colon between section and level");
+                
+                std::wstring section_label = trim(line.substr(0, first_colon).substr(verbLen));
+                if (section_label.empty())
+                    raiseError("Trace statement section is blank");
+
+                size_t second_colon = line.find(':', first_colon + 1);
+                if (second_colon == std::wstring::npos)
+                    raiseError("Trace statement lacks colon between level and message");
+                
+                std::wstring label_level = trim(line.substr(first_colon + 1, second_colon - first_colon - 1));
+                if (label_level.empty())
+                    raiseError("Trace statement level is blank");
+
+                std::wstring msg_exp_str = trim(line.substr(second_colon + 1));
+                if (msg_exp_str.empty())
+                    raiseError("Trace statement message is blank");
             }
             else if (startsWith(line, L">>"))
             {

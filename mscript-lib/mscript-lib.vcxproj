@@ -185,6 +185,7 @@
     <ClInclude Include="script_utils.h" />
     <ClInclude Include="symbols.h" />
     <ClInclude Include="syncheck.h" />
+    <ClInclude Include="tracing.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bin_crypt.cpp" />

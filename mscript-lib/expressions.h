@@ -3,6 +3,7 @@
 #include "callable.h"
 #include "object.h"
 #include "symbols.h"
+#include "tracing.h"
 
 #include <string>
 
@@ -23,9 +24,10 @@ namespace mscript
         /// </summary>
         /// <param name="symbols"></param>
         /// <param name="callable"></param>
-        expression(symbol_table& symbols, callable& callable)
+        expression(symbol_table& symbols, callable& callable, tracing& traceInfo)
             : m_symbols(symbols)
             , m_callable(callable)
+            , m_traceInfo(traceInfo)
         {}
 
         /// <summary>
@@ -47,8 +49,9 @@ namespace mscript
         object::list processParameters(const std::vector<std::wstring>& expStrs);
         object executeFunction(std::wstring functionW, const object::list& paramList);
 
-    private:
+    private: // member data
         symbol_table& m_symbols;
         callable& m_callable;
+        tracing& m_traceInfo;
     };
 }
