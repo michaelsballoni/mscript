@@ -13,16 +13,16 @@ $ utc2 = msts_to_utc(local2)
 
 >>
 
-exec("del test.txt")
-now = msts_now()
-writeFile("test.txt", "foobar", "utf-8")
+> "del test.txt"
+* now = msts_now()
+* writeFile("test.txt", "foobar", "utf-8")
 $ first_last_modified = msts_last_modified("test.txt")
 >> "Should be true (last modified 0): " + (first_last_modified = now)
 
-sleep(1)
+* sleep(1)
 
-& now = msts_now()
-msts_touch("test.txt")
+* now = msts_now()
+* msts_touch("test.txt")
 $ second_last_modified = msts_last_modified("test.txt")
 
 >> "Should be true (last modified 1): " + (second_last_modified <> first_last_modified)
@@ -57,7 +57,7 @@ $ diff = msts_diff(dt1, dt2, "hour")
 >> "Should be (1973-12-21 11:15:07): " + msts_format("1973-12-21 11:15:07", "%F %T")
 }
 
-exec("del test.txt")
+> "del test.txt"
 
 >>
 

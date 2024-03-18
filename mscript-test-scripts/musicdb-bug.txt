@@ -10,12 +10,12 @@ $ matching_artists = list()
 	$ match = true
 	@ part : normalized_parts
 		? !artist_lower.has(part)
-			match = false
+			* match = false
 			V
 		}
 	}
 	? match
-		matching_artists.add(artist)
+		* matching_artists.add(artist)
 	}
 }
 >> "Should be " + matching_artists

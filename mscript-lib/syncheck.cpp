@@ -54,7 +54,7 @@ mscript::syncheck
             else if (first == '>')
             {
                 if (trim(line.substr(1)).empty())
-                    raiseError("Command statement lacks command");
+                    raiseError("Command statement lacks command to run");
             }
             else if (first == '$')
             {
@@ -78,6 +78,11 @@ mscript::syncheck
                 validateName(trim(line.substr(0, equalsIndex)));
                 if (trim(line.substr(equalsIndex + 1)).empty())
                     raiseError("Variable assignment lacks value");
+            }
+            else if (first == '*')
+            {
+                if (trim(line.substr(1)).empty())
+                    raiseError("Script statement lacks command to run");
             }
             else if (first == '!')
             {
@@ -254,7 +259,7 @@ mscript::syncheck
                 bool seenQuestion = false;
                 bool seenEndingElse = false;
 
-                auto markers = findElses(lines, loopStart + 1, loopEnd - 1, L"= ", L"*");
+                auto markers = findElses(lines, loopStart + 1, loopEnd - 1, L"= ", L"<>");
 
                 const int max_markers_idx = int(markers.size()) - 1;
                 for (int m = 0; m <= max_markers_idx; ++m)
@@ -279,7 +284,7 @@ mscript::syncheck
                         if (seenEndingElse)
                             raiseError("Already seen * statement");
                     }
-                    else if (marker_line == L"*")
+                    else if (marker_line == L"<>")
                     {
                         if (seenEndingElse)
                             raiseError("Already seen * statement");
@@ -290,7 +295,7 @@ mscript::syncheck
                         seenEndingElse = true;
                     }
                     else
-                        raiseWError(L"Invalid line, not = or *");
+                        raiseWError(L"Invalid line, not = or <>");
 
                     syncheck(filename, lines, marker_line_idx + 1, next_marker_line_idx - 1);
                 }
@@ -332,9 +337,7 @@ mscript::syncheck
             else if (line == L"v" || line == L"V")
             {
             }
-            // assign or eval, anything goes
-            //else
-            //    raiseWError(L"Invalid statement: " + line);
+            //else command line to run
         }
         catch (user_exception userExp)
         {

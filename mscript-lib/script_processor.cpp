@@ -188,43 +188,6 @@ namespace mscript
                     else
                         m_output(std::wstring());
                 }
-                else if (first == '>') // single line command execution, >! means raise errors on non-zero exit code
-                {
-                    // get set up
-                    bool raise_errors = line.length() > 1 && line[1] == '!';
-                    size_t cmd_start = raise_errors ? 2 : 1;
-                    std::wstring commandStr = trim(line.substr(cmd_start));
-                    m_symbols.assign(L"LastCommand", commandStr, true);
-
-                    // initialize the command results into local variables
-                    m_symbols.assign(L"ErrorLevel", double(-1), true);
-                    m_symbols.assign(L"CommandOutput", std::wstring(), true);
-
-                    // start the command
-                    FILE* file = _wpopen(commandStr.c_str(), L"rt");
-                    if (file == nullptr)
-                        raiseError("Command could not be started");
-
-                    // slurp up the command's output
-                    std::string output;
-                    {
-                        char buffer[4096];
-                        while (fgets(buffer, sizeof(buffer), file))
-                            output.append(buffer);
-                    }
-
-                    // finish up
-                    double exit_code = double(_pclose(file));
-                    std::wstring cmd_output = toWideStr(output);
-
-                    // set the command results into local variables
-                    m_symbols.assign(L"ErrorLevel", exit_code, true);
-                    m_symbols.assign(L"CommandOutput", cmd_output, true);
-
-                    // raise hell if that didn't work out...if the user wants to
-                    if (raise_errors && exit_code != 0)
-                        raiseWError(L"Command failed with exit code " + object(exit_code).toString());
-                }
                 else if (first == '$') // variable declaration, initial value optional
                 {
                     line = line.substr(1);
@@ -254,6 +217,29 @@ namespace mscript
                     object answer = evaluate(valueStr, callDepth);
 
                     m_symbols.assign(nameStr, answer);
+                }
+                else if (first == '*') // assignment or statement that doesn't store return value
+                {
+                    line = line.substr(1);
+
+                    bool assign_worked = false;
+                    size_t equals_idx = line.find('=');
+                    if (equals_idx != std::wstring::npos)
+                    {
+                        std::wstring name_str = trim(line.substr(0, equals_idx));
+                        if (isName(name_str))
+                        {
+                            std::wstring value_str = trim(line.substr(equals_idx + 1));
+
+                            object answer = evaluate(value_str, callDepth);
+
+                            m_symbols.assign(name_str, answer);
+                            assign_worked = true;
+                        }
+                    }
+
+                    if (!assign_worked)
+                        evaluate(line, callDepth);
                 }
                 else if (first == '!') // exception handler
                 {
@@ -704,7 +690,7 @@ namespace mscript
                     bool seenQuestion = false;
                     bool seenEndingElse = false;
 
-                    auto markers = findElses(lines, loopStart + 1, loopEnd - 1, L"= ", L"*");
+                    auto markers = findElses(lines, loopStart + 1, loopEnd - 1, L"= ", L"<>");
 
                     const int max_markers_idx = int(markers.size()) - 1;
                     for (int m = 0; m <= max_markers_idx; ++m)
@@ -734,7 +720,7 @@ namespace mscript
                             std::wstring criteria = marker_line.substr(spaceIndex + 1);
                             case_val = evaluate(criteria, callDepth);
                         }
-                        else if (marker_line == L"*")
+                        else if (marker_line == L"<>")
                         {
                             if (seenEndingElse)
                                 raiseError("Already seen * statement");
@@ -745,7 +731,7 @@ namespace mscript
                             seenEndingElse = true;
                         }
                         else
-                            raiseWError(L"Invalid line, not ? or <>");
+                            raiseWError(L"Invalid line, not = or <>");
 
                         if (case_val == switch_val || seenEndingElse)
                         {
@@ -994,26 +980,52 @@ namespace mscript
                     outcome.Leave = true;
                     return object();
                 }
-                else // assignment, or function call that doesn't store return value
+                else // a command line to run
                 {
-                    bool assign_worked = false;
-                    size_t equals_idx = line.find('=');
-                    if (equals_idx != std::wstring::npos)
+                    // get set up
+                    bool raise_errors = true;
+                    std::wstring command_str;
+                    if (first == '>')
                     {
-                        std::wstring name_str = trim(line.substr(0, equals_idx));
-                        if (isName(name_str))
-                        {
-                            std::wstring value_str = trim(line.substr(equals_idx + 1));
+                        raise_errors = line.length() > 1 && line[1] == '!';
+                        command_str = trim(line.substr(raise_errors ? 2 : 1));
+                        object command_obj = evaluate(command_str, callDepth);
+                        if (command_obj.type() != object::STRING)
+                            raiseError("Command expression does not result in string");
+                        command_str = command_obj.stringVal();
+                    }
+                    else
+                        command_str = line;
+                    m_symbols.assign(L"LastCommand", command_str, true);
 
-                            object answer = evaluate(value_str, callDepth);
+                    // initialize the command results into local variables
+                    m_symbols.assign(L"ErrorLevel", double(-1), true);
+                    m_symbols.assign(L"CommandOutput", std::wstring(), true);
 
-                            m_symbols.assign(name_str, answer);
-                            assign_worked = true;
-                        }
+                    // start the command
+                    FILE* file = _wpopen(command_str.c_str(), L"rt");
+                    if (file == nullptr)
+                        raiseError("Command could not be started");
+
+                    // slurp up the command's output
+                    std::string output;
+                    {
+                        char buffer[4096];
+                        while (fgets(buffer, sizeof(buffer), file))
+                            output.append(buffer);
                     }
 
-                    if (!assign_worked)
-                        evaluate(line, callDepth);
+                    // finish up
+                    double exit_code = double(_pclose(file));
+                    std::wstring cmd_output = toWideStr(output);
+
+                    // set the command results into local variables
+                    m_symbols.assign(L"ErrorLevel", exit_code, true);
+                    m_symbols.assign(L"CommandOutput", cmd_output, true);
+
+                    // raise hell if that didn't work out...if the user wants to
+                    if (raise_errors && exit_code != 0)
+                        raiseWError(L"Command failed with exit code " + object(exit_code).toString());
                 }
 
                 curException.obj = object();

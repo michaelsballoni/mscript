@@ -21,10 +21,10 @@ $ afterBlockComment = 2
 {
 	$ flowValue = null
 	? 14 > 17
-		flowValue = "false"
+		* flowValue = "false"
 	}
 	<>
-		flowValue = "true"
+		* flowValue = "true"
 	}
 	>> "flowValue should be 'true': " + flowValue
 }
@@ -36,7 +36,7 @@ $ afterBlockComment = 2
 	>> "foobar"
 	$ blet = "monkey"
 	>> blet
-	blet = "barry"
+	* blet = "barry"
 	>> blet
 }
 
@@ -72,7 +72,7 @@ $ afterBlockComment = 2
 >>
 
 $ foo = null
-foo = 12
+* foo = 12
 >> "Should be foo: " + foo
 $ bar = 13
 >> "Should be bar: " + bar
@@ -86,7 +86,7 @@ $ got_there = false
 	}
 }
 <>
-	got_there = true
+	* got_there = true
 }
 >> "Should be got_there true: " + got_there
 

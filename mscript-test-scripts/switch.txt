@@ -8,22 +8,22 @@
 
 % 11
 	= 4
-		error("4 is not 11")
+		* error("4 is not 11")
 	}
 }
 
 % 12
 	= 4
-		error("4 is not 12")
+		* error("4 is not 12")
 	}
-	*
+	<>
 		>> "Got 12!"
 	}
 }
 
 % 13
 	= 4
-		error("4 is not 13")
+		* error("4 is not 13")
 	}
 	= 13
 		>> "Got 13!"
@@ -32,7 +32,7 @@
 
 % null
 	= "foo"
-		error("foo is not null")
+		* error("foo is not null")
 	}
 	= null
 		>> "Got null!"
@@ -44,36 +44,41 @@ $ val = null
 	>> "Val is null"
 }
 <>
-	error("val is not null")
+	* error("val is not null")
 }
 
 $ label = "foo"
 % label.toUpper()
 	= "bar"
-		error("bar is not FOO")
+		* error("bar is not FOO")
 	}
 	= "FOO"
 		>> "Got FOO"
 	}
-	*
-		error("should not fall through")
+	<>
+		* error("should not fall through")
 	}
 }
 
-label = "BAR"
+* label = "BAR"
 % label.toLower()
 	= "BAR"
 		error("BAR is not bar")
 	}
 	= "FOO"
-		error("BAR is not FOO")
+		? true
+			* error("BAR is not FOO")
+		}
+		<>
+			* error("not possible")
+		}
 	}
-	*
+	<>
 		? label = "BAR"
 			>> "Got BAR"
 		}
 		<>
-			error("BAR not found")
+			* error("BAR not found")
 		}
 	}
 }

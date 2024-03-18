@@ -1,7 +1,7 @@
 {
 	$ counter2 = 0
 	O
-		& counter2 = counter2 + 1
+		* counter2 = counter2 + 1
 		? counter2 >= 10
 			v
 		}
@@ -12,7 +12,7 @@
 {
 	$ total2 = 0
 	@ val : list(1, 2, 3)
-		& total2 = total2 + val
+		* total2 = total2 + val
 	}
 	>> "total2 should be '6': " + total2
 }
@@ -22,10 +22,10 @@
 	@ val : list(5, 6, 7, 8)
 		$ str = val + ": "
 		? (val % 2) = 0
-			str = str + "even"
+			* str = str + "even"
 		}
 		<>
-			str = str + "odd"
+			* str = str + "odd"
 		}
 		>> str
 	}

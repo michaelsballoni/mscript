@@ -1,28 +1,28 @@
 ? curDir("C") != curDir()
-	error('curDir("C") does not match curDir()')
+	* error('curDir("C") does not match curDir()')
 }
 
 ? curDir("C:") != curDir()
-	error('curDir("C:") does not match curDir()')
+	* error('curDir("C:") does not match curDir()')
 }
 
 $ previous_dir = curDir()
 
-cd("c:\")
+* cd("c:\")
 
 $ first_index = exec("dir /B")
 $ found = false
 @ part : split(replaced(first_index.get("output"), crlf, lf), lf)
 	? toLower(part) = "windows"
-		found = true
+		* found = true
 		v
 	}
 }
 
 ? !found
-	error("boot.ini not found")
+	* error("boot.ini not found")
 }
 
-cd(previous_dir)
+* cd(previous_dir)
 
 ===

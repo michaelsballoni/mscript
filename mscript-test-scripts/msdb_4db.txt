@@ -1,12 +1,12 @@
 + "mscript-db.dll"
 
 >> "Creating 4db ctxt..."
-exec("del " + "monkey.db") // start from scratch
-msdb_4db_init("blet", "monkey.db")
+> "del monkey.db" // start from scratch
+* msdb_4db_init("blet", "monkey.db")
 
 >> "Provoking duplicate init..."
 {
-	msdb_4db_init("blet", "monkey.db")
+	* msdb_4db_init("blet", "monkey.db")
 	! err
 		>> "Duplicate msdb_4db_init handled"
 	}
@@ -15,7 +15,7 @@ msdb_4db_init("blet", "monkey.db")
 >>
 
 >> "Define some data..."
-msdb_4db_define \
+* msdb_4db_define \
 ( \
 	"blet", \
 	"table_name", \
@@ -39,7 +39,7 @@ msdb_4db_define \
 >>
 
 >> "Undefining..."
-msdb_4db_undefine("blet", "table_name", "key_value", "foo")
+* msdb_4db_undefine("blet", "table_name", "key_value", "foo")
 
 {
 	$ query_results = \
@@ -56,7 +56,7 @@ msdb_4db_undefine("blet", "table_name", "key_value", "foo")
 >>
 
 >> "Deleting..."
-msdb_4db_delete("blet", "table_name", "key_value")
+* msdb_4db_delete("blet", "table_name", "key_value")
 
 {
 	$ query_results = \
@@ -72,19 +72,19 @@ msdb_4db_delete("blet", "table_name", "key_value")
 >>
 
 >> "Dropping..."
-msdb_4db_drop("blet", "table_name")
+* msdb_4db_drop("blet", "table_name")
 >> "Schema: " + msdb_4db_get_schema("blet")
 
 >>
 
 >> "Resetting..."
-msdb_4db_reset("blet")
+* msdb_4db_reset("blet")
 >> "Schema: " + msdb_4db_get_schema("blet")
 
 >>
 
 >> "Closing ctxt..."
-msdb_4db_close("blet")
+* msdb_4db_close("blet")
 
 >>
 

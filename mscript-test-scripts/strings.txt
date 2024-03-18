@@ -2,14 +2,14 @@ $ str = "foo"
 >> "Should be 'foo': " + str
 >> "Should be 'o': " + str.get(1)
 >>
-str = str + "bar"
+* str = str + "bar"
 >> "Should be 'foobar': " + str
 >> "Should be 'raboof': " + str.reversed()
 >> "Should be 'abfoor': " + str.sorted()
 >>
 >> "Should be true: " + string(str.has("oba"))
 >>
-str = str + " " + "blet" + " " + "monkey"
+* str = str + " " + "blet" + " " + "monkey"
 >> "Should be 'foobar blet monkey': " + str
 >>
 >> "Should be 1: " + str.firstLocation("o")
@@ -18,10 +18,10 @@ str = str + " " + "blet" + " " + "monkey"
 >> "Should be 'obar blet monkey': " + str.subset(2)
 >> "Should be 'ob': " + str.subset(2, 2)
 >>
-str = "foo bar"
+* str = "foo bar"
 >> "Should be 'foo bar': " + str.clone()
 >>
-str = input()
+* str = input()
 >> "Should be 'input': " + str
 
 ===

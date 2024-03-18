@@ -6,8 +6,8 @@ $ result = exec("echo foobar")
 
 >>
 
-setEnv("foo", "bar")
-result = exec("echo %foo%")
+* setenv("foo", "bar")
+* result = exec("echo %foo%")
 
 >> "Should be true: " + result.get("success")
 >> "Should be 0: " + result.get("exit_code")

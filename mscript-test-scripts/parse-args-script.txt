@@ -12,7 +12,7 @@ $ exe_version = "4.0.0"
 	$ arguments = list("-i")
 	$ argument_specs = list(index("flag", "-i", "long-flag", "--input", "description", "Input file", "takes", true))
 	$ parsed = parseArgsScript(arguments, argument_specs, exe_version)
-	error("Missing argument should have been caught")
+	* error("Missing argument should have been caught")
 	! err
 		>> "5b. Error caught"
 	}

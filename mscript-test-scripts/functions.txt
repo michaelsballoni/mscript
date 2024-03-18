@@ -62,14 +62,14 @@ $ global = 14
 ~ inner(inc2)
 	$ var = 13
 	>> "inner: " + inc2 + " - " + var
-	global = global + inc2
+	* global = global + inc2
 	>> "inner global: " + global
 }
 ~ outer(inc1)
 	$ var = 10
 	>> "outer: " + inc1 + " - " + var
-	& global = global + inc1
-	inner(inc1 * 2)
+	* global = global + inc1
+	* inner(inc1 * 2)
 	>> "outer global: " + global + " - " + var
 }
 
@@ -89,10 +89,10 @@ $ global = 14
 	@ val in list(5, 6, 7, 8)
 		$ str = val + ": "
 		? iseven2(val)
-			str = str + "even"
+			* str = str + "even"
 		}
 		<>
-			str = str + "odd"
+			* str = str + "odd"
 		}
 		>> str
 	}
@@ -119,36 +119,36 @@ $ global = 14
 
 {
 	>> "Process Function Continue Break"
-	ranger(1, 7)
+	* ranger(1, 7)
 }
 
 >>
 
 {
 	>> "Ager"
-	ager(1)
-	ager(12)
-	ager(13)
-	ager(16)
-	ager(17)
-	ager(18)
-	ager(19)
-	ager(20)
-	ager(70)
+	* ager(1)
+	* ager(12)
+	* ager(13)
+	* ager(16)
+	* ager(17)
+	* ager(18)
+	* ager(19)
+	* ager(20)
+	* ager(70)
 }
 
 >>
 
 {
 	>> "Color Function"
-	colors()
+	* colors()
 }
 
 >>
 
 {
 	>> "Inner Outer"
-	outer(1)
+	* outer(1)
 }
 
 ===

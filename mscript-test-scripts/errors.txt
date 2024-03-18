@@ -1,4 +1,4 @@
-error("foo")
+* error("foo")
 ! err
 	>> "Should be foo: " + err
 }
@@ -6,7 +6,7 @@ error("foo")
 >>
 
 {
-	error("inner")
+	* error("inner")
 }
 ! err
 	>> "Should be inner: " + err
@@ -20,8 +20,8 @@ $ foo = "bar"
 		>> "Should not get here!"
 	}
 
-	error("later")
-	foo = "blet"
+	* error("later")
+	* foo = "blet"
 	
 	! err
 		>> "Should be later: " + err
@@ -36,7 +36,7 @@ $ foo = "bar"
 }
 {
 	! err
-		error("in here?!?!")
+		* error("in here?!?!")
 	}
 }
 ! outer_err

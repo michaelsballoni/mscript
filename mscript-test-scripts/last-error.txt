@@ -4,7 +4,7 @@ $ last_error = getLastError()
 $ last_error_msg = getLastErrorMsg(last_error)
 >> 'Should be "The operation completed successfully. (0)": ' + last_error_msg
 
-last_error_msg = getLastErrorMsg(5)
+* last_error_msg = getLastErrorMsg(5)
 >> 'Should be "Access is denied. (5)": ' + last_error_msg
 
 ===

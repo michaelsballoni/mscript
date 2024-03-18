@@ -2,24 +2,24 @@
 	>> "Should be true"
 }
 <>
-	error("? was true")
+	* error("? was true")
 }
 
 ? false
-	error("? was false")
+	* error("? was false")
 }
 <>
 	>> "Should be false"
 }
 
 ? false
-	error("? was false")
+	* error("? was false")
 }
 ? true
 	>> "Should be second ?"
 }
 <>
-	error("? was true")
+	* error("? was true")
 }
 
 

@@ -1,19 +1,18 @@
-> echo foobar
+echo foobar
 >> "LastCommand: " + LastCommand
 >> "CommandOutput: " + trimmed(CommandOutput)
 >> "ErrorLevel: " + ErrorLevel
 
 >>
 
-> bletmonkey foo foo bar
+> "bletmonkey foo foo bar"
 >> "LastCommand: " + LastCommand
 >> "CommandOutput: " + trimmed(CommandOutput)
 >> "ErrorLevel: " + ErrorLevel
 
-
 >>
 
->! foofoofoo bletblet monkey
+>! "foofoofoo bletblet monkey"
 ! err
 	>> "Error: " + err
 	>> "LastCommand: " + LastCommand
