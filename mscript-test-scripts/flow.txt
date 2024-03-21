@@ -14,9 +14,9 @@ $ beforeBlockComment = 1
 foobar
 */
 $ afterBlockComment = 2
->> "Should be 3: " + (beforeBlockComment + afterBlockComment)
+> "Should be 3: " + (beforeBlockComment + afterBlockComment)
 
->>
+>
 
 {
 	$ flowValue = null
@@ -26,69 +26,69 @@ $ afterBlockComment = 2
 	<>
 		* flowValue = "true"
 	}
-	>> "flowValue should be 'true': " + flowValue
+	> "flowValue should be 'true': " + flowValue
 }
 
->>
+>
 
 {
-	>> "Print Set Update"
-	>> "foobar"
+	> "Print Set Update"
+	> "foobar"
 	$ blet = "monkey"
-	>> blet
+	> blet
 	* blet = "barry"
-	>> blet
+	> blet
 }
 
->>
+>
 
 {
-	>> "Begin"
+	> "Begin"
 	$ outer = 75
 	{
 		$ inner = outer - 20
-		>> inner
+		> inner
 	}
 	$ inner = "65"
-	>> inner
+	> inner
 }
 
->>
+>
 
 {
-	>> "When"
+	> "When"
 	$ whenny = 13
 	? whenny < 13
-		>> "kid"
+		> "kid"
 	}
 	? whenny >= 18
-		>> "adult"
+		> "adult"
 	}
 	<>
-		>> "teen"
+		> "teen"
 	}
 }
 
->>
+>
 
 $ foo = null
 * foo = 12
->> "Should be foo: " + foo
+> "Should be foo: " + foo
 $ bar = 13
->> "Should be bar: " + bar
+> "Should be bar: " + bar
 
->>
+>
 
 $ got_there = false
 ? false
 	@ a : list("a")
-		>> "something"
+		> "something"
 	}
 }
 <>
 	* got_there = true
 }
->> "Should be got_there true: " + got_there
+> "Should be got_there true: " + got_there
 
 ===
 

@@ -1,35 +1,35 @@
 * error("foo")
 ! err
-	>> "Should be foo: " + err
+	> "Should be foo: " + err
 }
 
->>
+>
 
 {
 	* error("inner")
 }
 ! err
-	>> "Should be inner: " + err
+	> "Should be inner: " + err
 }
 
->>
+>
 
 $ foo = "bar"
 {
 	! err
-		>> "Should not get here!"
+		> "Should not get here!"
 	}
 
 	* error("later")
 	* foo = "blet"
 	
 	! err
-		>> "Should be later: " + err
+		> "Should be later: " + err
 	}
 }
->> "Should be bar: " + foo
+> "Should be bar: " + foo
 
->> ""
+>
 
 {
 	error("above within")
@@ -40,7 +40,7 @@ $ foo = "bar"
 	}
 }
 ! outer_err
-	>> "Should be out_err"
+	> "Should be out_err"
 }
 
 ===

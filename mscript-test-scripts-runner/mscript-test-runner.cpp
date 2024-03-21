@@ -93,12 +93,17 @@ int main(int argc, char* argv[])
 						},
 						symbols,
 						[]() { return L"input"; },
-						[&output](const std::wstring& text) 
+						[&output, specificTest](const std::wstring& text)
 						{ 
-							if (!startsWith(text, L"TRACE: "))
-								output += text + L"\n";
-							else
+							bool is_trace = startsWith(text, L"TRACE: ");
+							
+							bool should_print = is_trace || !specificTest.empty();
+							bool should_collect = !is_trace;
+
+							if (should_print)
 								printf("%S\n", text.c_str());
+							if (should_collect)
+								output += text + L"\n";
 						}
 					);
 				processor.process(std::wstring(), it.first.filename());

@@ -1,10 +1,10 @@
 % 10
 	= 10
-		>> "Got 10!"
+		> "Got 10!"
 	}
 }
 
->> "After 10"
+> "After 10"
 
 % 11
 	= 4
@@ -17,7 +17,7 @@
 		* error("4 is not 12")
 	}
 	<>
-		>> "Got 12!"
+		> "Got 12!"
 	}
 }
 
@@ -26,7 +26,7 @@
 		* error("4 is not 13")
 	}
 	= 13
-		>> "Got 13!"
+		> "Got 13!"
 	}
 }
 
@@ -35,13 +35,13 @@
 		* error("foo is not null")
 	}
 	= null
-		>> "Got null!"
+		> "Got null!"
 	}
 }
 
 $ val = null
 ? val = null
-	>> "Val is null"
+	> "Val is null"
 }
 <>
 	* error("val is not null")
@@ -53,7 +53,7 @@ $ label = "foo"
 		* error("bar is not FOO")
 	}
 	= "FOO"
-		>> "Got FOO"
+		> "Got FOO"
 	}
 	<>
 		* error("should not fall through")
@@ -75,7 +75,7 @@ $ label = "foo"
 	}
 	<>
 		? label = "BAR"
-			>> "Got BAR"
+			> "Got BAR"
 		}
 		<>
 			* error("BAR not found")

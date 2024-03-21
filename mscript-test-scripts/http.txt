@@ -1,80 +1,80 @@
 + "mscript-http.dll"
 
 {
->> "TRACE: HTML ENCODING"
->> "htmlEncode"
+> "TRACE: HTML ENCODING"
+> "htmlEncode"
 $ encoded = htmlencoded("foo&bar") // lower
->> "foo&amp;bar : " + encoded
+> "foo&amp;bar : " + encoded
 $ decoded = htmlDecoded(encoded)
->> "foo&bar : " + decoded
+> "foo&bar : " + decoded
 }
->>
+>
 
 {
->> "TRACE: URL ENCODING"
->> "urlEncode"
+> "TRACE: URL ENCODING"
+> "urlEncode"
 $ encoded = urlEncoded("foo bar")
->> "foo%20bar : " + encoded
+> "foo%20bar : " + encoded
 $ decoded = urlDecoded(encoded)
->> "foo bar : " + decoded
+> "foo bar : " + decoded
 }
->>
+>
 
 {
->> "No params"
+> "No params"
 $ out_idx = mshttp_process_request()
 ! err
-	>> err.has("one param")
+	> err.has("one param")
 }
 }
->>
+>
 
 {
->> "Two params"
+> "Two params"
 $ in_idx = index()
 $ out_idx = mshttp_process_request(in_idx, "foo")
 ! err
-	>> err.has("one param")
+	> err.has("one param")
 }
 }
->>
+>
 
 {
->> "Bad input"
+> "Bad input"
 $ out_idx = mshttp_process_request("foo")
 ! err
-	>> err.has("index")
+	> err.has("index")
 }
 }
->>
+>
 
 {
->> "Empty input"
+> "Empty input"
 $ in_idx = index()
 $ out_idx = mshttp_process_request(in_idx)
 ! err
-	>> "got err"
+	> "got err"
 }
 }
->>
+>
 
 {
->> "Basic input"
+> "Basic input"
 $ in_idx = index("server", "mscript.io", \
 				 "path", "/", \
 				 "outputfile", "mscript.html")
 $ out_idx = mshttp_process_request(in_idx)
->> "TRACE: headers: " + out_idx.get("headers")
+> "TRACE: headers: " + out_idx.get("headers")
 $ html = readFile("mscript.html", "utf-8")
->> "TRACE: HTML len: " + html.length()
->> out_idx.get("statuscode")
+> "TRACE: HTML len: " + html.length()
+> out_idx.get("statuscode")
 }
->>
+>
 
->> "All done."
+> "All done."
 
 ! err
-	>> "TRACE: err: " + err
+	> "TRACE: err: " + err
 }
 
 ===

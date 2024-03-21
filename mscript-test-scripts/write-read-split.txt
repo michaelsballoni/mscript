@@ -23,7 +23,7 @@
 	* validateLines(splitLines(readFile("test.txt", encoding)))
 }
 	
->> "All done."
+> "All done."
 	
 ===
 

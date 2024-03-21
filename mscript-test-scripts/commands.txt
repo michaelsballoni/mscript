@@ -1,23 +1,23 @@
 $ result = exec("echo foobar")
 
->> "Should be true: " + result.get("success")
->> "Should be 0: " + result.get("exit_code")
->> "Should be foobar: " + trimmed(result.get("output"))
+> "Should be true: " + result.get("success")
+> "Should be 0: " + result.get("exit_code")
+> "Should be foobar: " + trimmed(result.get("output"))
 
->>
+>
 
 * setenv("foo", "bar")
 * result = exec("echo %foo%")
 
->> "Should be true: " + result.get("success")
->> "Should be 0: " + result.get("exit_code")
->> "Should be bar: " + trimmed(result.get("output"))
+> "Should be true: " + result.get("success")
+> "Should be 0: " + result.get("exit_code")
+> "Should be bar: " + trimmed(result.get("output"))
 
->>
+>
 
 $ expanded = expandedEnvVars("%path%")
 $ gotten = getEnv("path")
->> "expandedEnvVars: Should be true: " + (expanded == gotten)
+> "expandedEnvVars: Should be true: " + (expanded == gotten)
 
 ===
 

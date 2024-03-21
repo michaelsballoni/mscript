@@ -1,5 +1,5 @@
 ? true
-	>> "Should be true"
+	> "Should be true"
 }
 <>
 	* error("? was true")
@@ -9,14 +9,14 @@
 	* error("? was false")
 }
 <>
-	>> "Should be false"
+	> "Should be false"
 }
 
 ? false
 	* error("? was false")
 }
 ? true
-	>> "Should be second ?"
+	> "Should be second ?"
 }
 <>
 	* error("? was true")

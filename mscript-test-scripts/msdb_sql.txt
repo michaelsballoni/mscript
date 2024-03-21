@@ -1,20 +1,21 @@
 + "mscript-db.dll"
 
->> "Creating DB..."
-> "del bar.db" // start from scratch
+> "Creating DB..."
+>!
+del bar.db // start from scratch
 * msdb_sql_init("foo", "bar.db")
 
->> "Provoking duplicate init..."
+> "Provoking duplicate init..."
 {
 	* msdb_sql_init("foo", "bar.db")
 	! err
-		>> "Duplicate msdb_sql_init handled"
+		> "Duplicate msdb_sql_init handled"
 	}
 }
 
->>
+>
 
->> "Creating test_table..."
+> "Creating test_table..."
 * msdb_sql_exec \
 ( \
 	"foo", \
@@ -25,40 +26,40 @@
 	)" \
 )
 
->>
+>
 
->> "Insert a row..."
+> "Insert a row..."
 * msdb_sql_exec("foo", "INSERT INTO test_table (val) VALUES (@val)", index("@val", "foo"))
 $ first_id = msdb_sql_last_inserted_id("foo")
->> "first id: " + first_id
+> "first id: " + first_id
 
->>
+>
 
->> "Pull out the row..."
+> "Pull out the row..."
 $ first_by_id = msdb_sql_exec("foo", "SELECT id, val FROM test_table WHERE id = " + first_id)
->> "first row: " + first_by_id.get(0)
->> "second row: " + first_by_id.get(1)
+> "first row: " + first_by_id.get(0)
+> "second row: " + first_by_id.get(1)
 
->>
+>
 
->> "Delete the row..."
+> "Delete the row..."
 * msdb_sql_exec("foo", "DELETE FROM test_table WHERE id = " + first_id)
 $ rows_affected = msdb_sql_rows_affected("foo")
->> "rows_affected: " + rows_affected
+> "rows_affected: " + rows_affected
 
->>
+>
 
->> "Dropping test_table..."
+> "Dropping test_table..."
 * msdb_sql_exec("foo", "DROP TABLE test_table")
 
->>
+>
 
->> "Closing DB..."
+> "Closing DB..."
 * msdb_sql_close("foo")
 
->>
+>
 
->> "All done."
+> "All done."
 
 ===
 

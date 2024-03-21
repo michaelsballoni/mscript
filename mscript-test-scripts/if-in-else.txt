@@ -4,9 +4,9 @@ O
         V
 	}
     <>
-        >> "idx: " + idx
+        > "idx: " + idx
         ? idx < 1
-            >> idx + " is zero"
+            > idx + " is zero"
         }
     }
     * idx = idx + 1

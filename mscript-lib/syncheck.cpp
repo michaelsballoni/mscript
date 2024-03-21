@@ -47,15 +47,6 @@ mscript::syncheck
                 if (msg_exp_str.empty())
                     raiseError("Trace statement message is blank");
             }
-            else if (startsWith(line, L">>"))
-            {
-                // most anything goes
-            }
-            else if (first == '>')
-            {
-                if (trim(line.substr(1)).empty())
-                    raiseError("Command statement lacks command to run");
-            }
             else if (first == '$')
             {
                 line = line.substr(1);
@@ -337,7 +328,18 @@ mscript::syncheck
             else if (line == L"v" || line == L"V")
             {
             }
-            //else command line to run
+            else if (line == L">!")
+            {
+            }
+            else if (startsWith(line, L">>"))
+            {
+                if (trim(line.substr(2)).empty())
+                    raiseError("Command for >> statement not provided");
+            }
+            else if (first == '>')
+            {
+            }
+            // else anything goes, it's just a fancy .bat file after all
         }
         catch (user_exception userExp)
         {

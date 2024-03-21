@@ -17,7 +17,7 @@ $ cache = index()
 	* error("foo is not bar!")
 }
 <>
-	>> "Success!!"
+	> "Success!!"
 }
 
 ===

@@ -18,7 +18,7 @@ $ matching_artists = list()
 		* matching_artists.add(artist)
 	}
 }
->> "Should be " + matching_artists
+> "Should be " + matching_artists
 
 ===
 

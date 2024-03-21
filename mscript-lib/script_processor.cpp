@@ -177,17 +177,6 @@ namespace mscript
                         }
                     }
                 }
-                else if (startsWith(line, L">>")) // single line expression print
-                {
-                    std::wstring valueStr = trim(line.substr(2));
-                    if (!valueStr.empty())
-                    {
-                        object answer = evaluate(valueStr, callDepth);
-                        m_output(answer.toString());
-                    }
-                    else
-                        m_output(std::wstring());
-                }
                 else if (first == '$') // variable declaration, initial value optional
                 {
                     line = line.substr(1);
@@ -980,52 +969,92 @@ namespace mscript
                     outcome.Leave = true;
                     return object();
                 }
-                else // a command line to run
+                else // a command line to run...or text to print?
                 {
                     // get set up
-                    bool raise_errors = true;
                     std::wstring command_str;
-                    if (first == '>')
+                    if (startsWith(line, L">>")) // command expression to execute
                     {
-                        raise_errors = line.length() > 1 && line[1] == '!';
-                        command_str = trim(line.substr(raise_errors ? 2 : 1));
+                        command_str = trim(line.substr(2));
+                        if (command_str.empty())
+                            raiseError("Command for >> statement not provided");
                         object command_obj = evaluate(command_str, callDepth);
                         if (command_obj.type() != object::STRING)
                             raiseError("Command expression does not result in string");
                         command_str = command_obj.stringVal();
                     }
+                    else if (line == L">!")
+                    {
+                        m_symbols.assign(L"ms_SuppressCommandError", true, true);
+                    }
+                    else if (first == '>') // single line expression print
+                    {
+                        std::wstring valueStr = trim(line.substr(1));
+                        if (!valueStr.empty())
+                        {
+                            object answer = evaluate(valueStr, callDepth);
+                            m_output(answer.toString());
+                        }
+                        else
+                            m_output(std::wstring());
+                    }
                     else
                         command_str = line;
-                    m_symbols.assign(L"LastCommand", command_str, true);
 
-                    // initialize the command results into local variables
-                    m_symbols.assign(L"ErrorLevel", double(-1), true);
-                    m_symbols.assign(L"CommandOutput", std::wstring(), true);
-
-                    // start the command
-                    FILE* file = _wpopen(command_str.c_str(), L"rt");
-                    if (file == nullptr)
-                        raiseError("Command could not be started");
-
-                    // slurp up the command's output
-                    std::string output;
+                    if (!command_str.empty())
                     {
+                        m_symbols.assign(L"ms_LastCommand", command_str, true);
+
+                        // see if we should raise an error if the command fails
+                        bool raise_error = true;
+                        {
+                            object suppress_error_obj;
+                            if (m_symbols.tryGet(L"ms_SuppressCommandError", suppress_error_obj))
+                            {
+                                if (suppress_error_obj.boolVal())
+                                {
+                                    raise_error = false;
+                                    m_symbols.assign(L"ms_SuppressCommandError", false, true);
+                                }
+                            }
+                        }
+
+                        // initialize the command results into local variables
+                        m_symbols.assign(L"ms_ErrorLevel", double(-1), true);
+                        m_symbols.assign(L"ms_CommandOutput", std::wstring(), true);
+
+                        // start the command
+                        FILE* file = _wpopen(command_str.c_str(), L"rt");
+                        if (file == nullptr)
+                            raiseError("Command could not be started");
+
+                        // slurp up the command's output
+                        std::string output;
                         char buffer[4096];
                         while (fgets(buffer, sizeof(buffer), file))
                             output.append(buffer);
+
+                        // finish up
+                        double exit_code = double(_pclose(file));
+                        std::wstring cmd_output = toWideStr(output);
+
+                        // set the command results into local variables
+                        m_symbols.assign(L"ms_ErrorLevel", exit_code, true);
+                        m_symbols.assign(L"ms_CommandOutput", cmd_output, true);
+
+                        // raise hell if that didn't work out...if the user wants to
+                        // NOTE: store off all the command info as the code that handles the error 
+                        //       may be distant from these local variables
+                        if (raise_error && exit_code != 0)
+                        {
+                            object::index error_idx;
+                            error_idx.set(std::wstring(L"Error"), std::wstring(L"Command failed with exit code " + num2wstr(exit_code)));
+                            error_idx.set(std::wstring(L"Command"), command_str);
+                            error_idx.set(std::wstring(L"ErrorLevel"), double(exit_code));
+                            error_idx.set(std::wstring(L"CommandOutput"), cmd_output);
+                            throw mscript::user_exception(error_idx);
+                        }
                     }
-
-                    // finish up
-                    double exit_code = double(_pclose(file));
-                    std::wstring cmd_output = toWideStr(output);
-
-                    // set the command results into local variables
-                    m_symbols.assign(L"ErrorLevel", exit_code, true);
-                    m_symbols.assign(L"CommandOutput", cmd_output, true);
-
-                    // raise hell if that didn't work out...if the user wants to
-                    if (raise_errors && exit_code != 0)
-                        raiseWError(L"Command failed with exit code " + object(exit_code).toString());
                 }
 
                 curException.obj = object();
