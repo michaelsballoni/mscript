@@ -44,72 +44,73 @@ $ input_file_path = args.get("-in")
 $ database_file_path = args.get("-db")
 $ text_encoding = args.get("-enc")
 
->>
+>
 
->> Command line arguments:
+> "Command line arguments:"
 > "Input file:     " + input_file_path
 > "Database file:  " + database_file_path
 > "Text encoding:  " + text_encoding
 ! err
 	> "Error processing command line parameters: " + err
-	exit(1)
+	* exit(1)
 }
 
->>
+>
 
->> Reading lines from input file...
+> "Reading lines from input file..."
 $ file_lines = readFileLines(input_file_path, text_encoding)
 ! err
 	> "Error reading input file: " + err
-	exit(1)
+	* exit(1)
 }
 > "File Line Count: " + file_lines.length()
 
->> Getting 4db database up and running...
-exec('del "' + database_file_path + '"') // fresh DB file every time
-msdb_4db_init("db", database_file_path)
+> "Getting 4db database up and running..."
+>!
+>> 'del "' + database_file_path + '"' // fresh DB file every time
+* msdb_4db_init("db", database_file_path)
 ! err
 	> "Error initializing database: " + err
-	exit(1)
+	* exit(1)
 }
 
->> Importing lines into database...
+> "Importing lines into database..."
 ++ f : 0 -> file_lines.length() -1
 	/ NOTE: Using line as the primary key did not handle identical lines,
 	/ 		hence the line number
 	$ line = file_lines.get(f)
 	$ line_number = f + 1
-	msdb_4db_define("db", "lines", line_number + ": " + line, index("len", length(line)))
+	* msdb_4db_define("db", "lines", line_number + ": " + line, index("len", length(line)))
 }
 ! err
 	> "Error importing lines into database: " + err
-	exit(1)
+	* exit(1)
 }
 
 
->> Database loaded, ready to query!
+> "Database loaded, ready to query!"
 O // loop forever...until Ctrl-C at least
-	>>
-	>> Enter your search criteria:
+	>
+	> "Enter your search criteria:"
 	$ criteria = trimmed(input())
 	? criteria.length() == 0
 		^
 	}
-	>>
+	>
 	> "Criteria: " + criteria
-	>>
+	>
 	
 	/ Get the results, using the "value" column, which is the primary key
 	/ which is the text of the line, to SELECT out, and to MATCH the criteria
 	/ We sort by id for top-to-bottom file output
 	/ The criteria is passed into msdb_4db_query as a param->value index
 	$ results = \
-	msdb_4db_query \
-	( \
-		"db", \
-		"SELECT value, id FROM lines WHERE value MATCHES @criteria ORDER BY id", \
-		index("@criteria", criteria) \
-	)
+		msdb_4db_query \
+		( \
+			"db", \
+			"SELECT value, id FROM lines WHERE value MATCHES @criteria ORDER BY id", \
+			index("@criteria", criteria) \
+		)
 	
 	/ Process the results
 	$ result_count = results.length()

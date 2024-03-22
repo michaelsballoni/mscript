@@ -4,29 +4,29 @@
 	$ lines = loadLines()
 	
 	$ db = index()
-	processLines(db, lines, false)
+	* processLines(db, lines, false)
 
 	$ matching_artists = getMatchingArtistNames(db, arguments)
 	@ matching_artist : matching_artists
-		summarizeArtist(db, matching_artist)
-		>>
+		* summarizeArtist(db, matching_artist)
+		>
 	}
 	/ Exit the script with a good exit code
 	<- 0
 }
 
->> Loading music files...
+> "Loading music files..."
 $ lines = loadLines()
 > "Music Files: " + lines.length()
 
 $ db = index()
-processLines(db, lines, true)
->> All done
-outputStats(db)
+* processLines(db, lines, true)
+> "All done"
+* outputStats(db)
 
 O
-	>>
-	>> Enter artist name search string, as much as you'd like, however you'd like:
+	>
+	> "Enter artist name search string, as much as you'd like, however you'd like:"
 	$ matching_artists = getMatchingArtistNames(db, split(input(), " "))
 
 	> fmt("Matching Artists: ({0})", matching_artists.length())
@@ -35,20 +35,21 @@ O
 	}
 
 	@ matching_artist : matching_artists
-		summarizeArtist(db, matching_artist)
-		>>
+		* summarizeArtist(db, matching_artist)
+		>
 	}
 }
 
 / Do the dir of the user's Music directory
 / Surprisingly fast/
 ~ loadLines()
-	$ result_index = exec('dir /B /S "C:\Users\%USERNAME%\Music"')
-	? !result_index.get("success")
-		> fmt("Running the dir command failed with exit code {0}", result_index.get("exit_code"))
+	>!
+	dir /B /S "C:\Users\%USERNAME%\Music"
+	? ms_ErrorLevel <> 0
+		> fmt("Running the dir command failed with exit code {0}", ms_ErrorLevel)
 		<- list()
 	}
-	<- splitLines(result_index.get("output"))
+	<- splitLines(ms_CommandOutput)
 }
 
 / Walk dir output processing each line in turn
@@ -56,8 +57,8 @@ O
 	? should_pacify
 		$ line_count = 0
 		@ line : lines
-			processLine(db, line)
-			line_count = line_count + 1
+			* processLine(db, line)
+			* line_count = line_count + 1
 			? (line_count % 5000) = 0
 				> line_count
 			}
@@ -65,7 +66,7 @@ O
 	}
 	<>
 		@ line : lines
-			processLine(db, line)
+			* processLine(db, line)
 		}
 	}
 }
@@ -74,7 +75,7 @@ O
 / ...if it's a somewhat valid line
 ~ processLine(db, line)
 	/ Split up path, bail if not at least artist\album\track
-	line = line.trimmed()
+	* line = line.trimmed()
 	$ parts = line.split('\')
 	? parts.length() < 3
 		/ not deep enough
@@ -94,18 +95,18 @@ O
 
 	/ Ensure the artist is in the DB
 	? !db.has(artist)
-		db.add(artist, index())
+		* db.add(artist, index())
 	}
 	$ artist_index = db.get(artist)
 
 	/ Ensure the artist has the album
 	? !artist_index.has(album)
-		artist_index.add(album, list())
+		* artist_index.add(album, list())
 	}
 	$ album_list = artist_index.get(album)
 
 	/ Add the track to the album
-	album_list.add(track)
+	* album_list.add(track)
 
 	/ All done
 	<- true
@@ -119,12 +120,12 @@ O
 	@ artist : artists
 		$ artist_index = db.get(artist)
 		@ album_name : artist_index.keys()
-			album_count = album_count + 1
+			* album_count = album_count + 1
 			$ album_tracks = artist_index.get(album_name)
-			track_count = track_count + album_tracks.length()
+			* track_count = track_count + album_tracks.length()
 		}
 	}
-	>>
+	>
 	> fmt("Artists: {0}", artists.length())
 	? artists.length() > 0
 		> fmt("Albums: {0} - albums / artist = {1}", album_count, round(album_count / artists.length()))
@@ -139,7 +140,7 @@ O
 	@ part : parts
 		$ normalized_part = trimmed(toLower(part))
 		? normalized_part.length() > 0
-			normalized_parts.add(normalized_part)
+			* normalized_parts.add(normalized_part)
 		}
 	}
 
@@ -153,12 +154,12 @@ O
 		$ match = true
 		@ part : normalized_parts
 			? !artist_lower.has(part)
-				match = false
+				* match = false
 				V
 			}
 		}
 		? match
-			matching_artists.add(artist)
+			* matching_artists.add(artist)
 		}
 	}
 	<- matching_artists

@@ -5,35 +5,42 @@
 / One parameter -> that's the directory to process
 / Otherwise, error out
 $ dir_path = ""
-? arguments.length() = 0
-	dir_path = "."
-}
-? arguments.length() = 1
-	dir_path = arguments.get(0)
-}
-<>
-	>> Either specify no parameters, or pass one directory path parameter
-	exit(0)
+% arguments.length()
+	= 0
+		* dir_path = "."
+	}
+	= 1
+		* dir_path = arguments.get(0)
+	}
+	<>
+		>> Either specify no parameters, or pass one directory path parameter
+		* exit(0)
+	}
 }
 
 / Run the dir command to enumerate all paths
 / The /B gives us a bare list of full paths
 / The /S gives us all paths in the directory and all of its subdirectories
->> Getting file paths...
-$ exec_result = exec('dir /B /S "' + dir_path + '"')
-
-/ Extract a list of paths from the raw dir output
->> Processing file paths...
-$ paths = splitLines(exec_result.get("output"))
+echo Getting file paths...
+>> 'dir /B /S "' + dir_path + '"'
+$ paths = splitLines(ms_CommandOutput)
 
 / Loop over the paths collecting extension stats
 / An index is like a Scripting.Dictionary
 $ ext_stats = index()
 @ path : paths
 	/ Find the last dot
-	/ Failing that use the ^ command to skip to the next path in the list
+	/ Failing that process the extension specially
+	/ and use the ^ command to skip to the next path in the list
 	$ dot_index = path.lastLocation('.')
 	? dot_index <= 0
+		$ ext = "<none>"
+		? ext_stats.has(ext)
+			* ext_stats.set(ext, ext_stats.get(ext) + 1)
+		}
+		<>
+			* ext_stats.set(ext, 1)
+		}
 		^
 	}
 	
@@ -45,10 +52,10 @@ $ ext_stats = index()
 	
 	/ Add to our stats
 	? ext_stats.has(ext)
-		ext_stats.set(ext, ext_stats.get(ext) + 1)
+		* ext_stats.set(ext, ext_stats.get(ext) + 1)
 	}
 	<>
-		ext_stats.set(ext, 1)
+		* ext_stats.set(ext, 1)
 	}
 }
 
@@ -61,12 +68,12 @@ $ ext_stats = index()
 / making for a unique set of count values with the counts as keys
 $ unique_counts = index()
 @ count : reversed(sorted(ext_stats.values()))
-	unique_counts.set(count, 0)
+	* unique_counts.set(count, 0)
 }
 
 / Output what we've found
 / Loop over the counts output extensions that have that count
->>
+>
 > "File extensions: " + ext_stats.length()
 @ count : unique_counts
 	@ ext : ext_stats
