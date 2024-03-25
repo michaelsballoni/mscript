@@ -96,7 +96,7 @@ static std::wstring getModuleFilePath(const std::wstring& filename)
 		raiseWError(L"Invalid module file path: " + filename);
 	}
 
-	const int max_path = 32 * 1024;
+	const unsigned int max_path = 32 * 1024;
 	std::unique_ptr<wchar_t[]> exe_file_path(new wchar_t[max_path + 1]);
 	exe_file_path[max_path] = '\0';
 #if defined(_WIN32) || defined(_WIN64)
@@ -105,27 +105,6 @@ static std::wstring getModuleFilePath(const std::wstring& filename)
 #endif
 	fs::path exe_dir_path = fs::path(exe_file_path.get()).parent_path();
 	fs::path module_file_path = exe_dir_path.append(filename);
-	/*
-	const bin_crypt_info exe_crypt_info = getBinCryptInfo(exe_file_path.get());
-	if
-	(
-		!exe_crypt_info.subject.empty() 
-		&&
-		!exe_crypt_info.publisher.empty()
-	)
-	{
-		const bin_crypt_info module_crypt_info = getBinCryptInfo(module_file_path);
-		if 
-		(
-			module_crypt_info.subject != exe_crypt_info.subject
-			||
-			module_crypt_info.publisher != exe_crypt_info.publisher
-		)
-		{
-			raiseWError(L"Invalid module signing: " + module_file_path.wstring());
-		}
-	}
-	*/
 	return module_file_path;
 }
 

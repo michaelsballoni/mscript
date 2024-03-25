@@ -183,6 +183,11 @@
   <ItemGroup>
     <ClCompile Include="mscript-test-runner.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscript-exe\mscript-exe.vcxproj">
+      <Project>{17f11ce7-e2d8-44d5-83cc-700fddd4a2c6}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

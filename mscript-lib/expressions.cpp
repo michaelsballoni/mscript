@@ -1386,7 +1386,7 @@ namespace mscript
 #endif
             { "getexefilepath", [](object&, const object::list& paramList) -> object {
                 if (!paramList.empty())
-                    raiseError("getExeFilePath() takes parameters");
+                    raiseError("getExeFilePath() takes no parameters");
                 return getExeFilePath();
             } },
 

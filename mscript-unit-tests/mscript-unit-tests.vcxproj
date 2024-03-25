@@ -191,6 +191,14 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscript-core\mscript-core.vcxproj">
+      <Project>{415bc572-48cb-4fb1-8090-b49c172eadd7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\mscript-lib\mscript-lib.vcxproj">
+      <Project>{bfab6023-e2f9-4b7d-9384-5090e1034092}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
