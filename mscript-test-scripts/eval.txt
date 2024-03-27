@@ -1,0 +1,9 @@
+~ doprint(s)
+	> s
+}
+
+** "doprint(" + squote + 'foo' + 'bar' + squote + ")"
+
+===
+
+foobar
