@@ -689,7 +689,6 @@ namespace mscript
             { "tanh", [](object& first, const object::list& paramList) -> object { (void)first; return tanh(getOneDouble(paramList, "tanh")); }},
 
             { "round", [](object& first, const object::list& paramList) -> object {
-                (void)first;
                 if (paramList.size() == 1)
                     return round(getOneDouble(paramList, "round"));
                 if (paramList.size() != 2 || first.type() != object::NUMBER || paramList[1].type() != object::NUMBER)
@@ -1231,7 +1230,6 @@ namespace mscript
             } },
 
             { "getmatches", [](object& first, const object::list& paramList) -> object {
-                (void)first;
                 bool full_match = false;
                 if (paramList.size() < 2 || paramList.size() > 3)
                     raiseError("getMatches() works string to match and pattern");
@@ -1374,7 +1372,6 @@ namespace mscript
             } },
 #if defined(_WIN32) || defined(_WIN64)
             { "expandedenvvars", [](object& first, const object::list& paramList) -> object {
-                (void)first;
                 if (paramList.size() != 1 || first.type() != object::STRING)
                     raiseError("expandedEnvVars() works with one string parameter");
 
@@ -1594,7 +1591,6 @@ namespace mscript
             // File I/O
             //
             { "readfile", [](object& first, const object::list& paramList) -> object {
-                (void)first;
                 if (paramList.size() != 2
                     || first.type() != object::STRING
                     || paramList[1].type() != object::STRING)
@@ -1637,7 +1633,6 @@ namespace mscript
             } },
 
             { "readfilelines", [](object& first, const object::list& paramList) -> object {
-                (void)first;
                 if (paramList.size() != 2
                     || first.type() != object::STRING
                     || paramList[1].type() != object::STRING)
@@ -1688,7 +1683,6 @@ namespace mscript
             } },
 
             { "writefile", [](object& first, const object::list& paramList) -> object {
-                (void)first;
                 if (paramList.size() != 3
                     || first.type() != object::STRING
                     || paramList[1].type() != object::STRING
@@ -1830,6 +1824,7 @@ namespace mscript
                 return output_str;
             } },
 
+            // section / level tracing
             { "settraceinfo", [this](object& first, const object::list& paramList) -> object {
                 if
                 (
@@ -1850,6 +1845,14 @@ namespace mscript
                 this->m_traceInfo.CurrentTraceLevel = (TraceLevel)(int)paramList[1].numberVal();
 
                 return object();
+            } },
+
+            // Add evil, I mean, eval()
+            { "eval", [this](object& first, const object::list& paramList) -> object {
+                if (paramList.size() != 1 || first.type() != object::object_type::STRING)
+                    raiseError("eval() takes one string expression to evaluate");
+                else
+                    return evaluate(first.stringVal());
             } },
         };
 
@@ -1880,20 +1883,36 @@ namespace mscript
         }
 
         // Do object-like member function-ish expression processing
-        size_t dotIndex = function.find('.');
-        if (dotIndex != std::string::npos)
         {
-            std::wstring symbol = functionW.substr(0, dotIndex);
-            std::wstring memberFunc = functionW.substr(dotIndex + 1);
-
-            object value;
-            if (m_symbols.tryGet(symbol, value))
+            size_t dotIndex = function.find('.');
+            if (dotIndex != std::string::npos)
             {
-                object::list newVals;
-                newVals.reserve(paramList.size() + 1);
-                newVals.push_back(value);
-                newVals.insert(newVals.end(), paramList.begin(), paramList.end());
-                return executeFunction(memberFunc, newVals);
+                std::wstring symbol = functionW.substr(0, dotIndex);
+                std::wstring memberFunc = functionW.substr(dotIndex + 1);
+
+                object value;
+                if (m_symbols.tryGet(symbol, value))
+                {
+                    object::list newVals;
+                    newVals.reserve(paramList.size() + 1);
+                    newVals.push_back(value);
+                    newVals.insert(newVals.end(), paramList.begin(), paramList.end());
+                    return executeFunction(memberFunc, newVals);
+                }
+            }
+        }
+
+        // If the function name is the name of a variable
+        if (m_allowDynamicCalls)
+        {
+            object value;
+            if (m_symbols.tryGet(functionW, value))
+            {
+                if (value.type() != object::STRING)
+                    raiseWError(L"Dynamic function variable does not resolve to string function name: " + functionW);
+
+                std::wstring new_function = value.stringVal();
+                return executeFunction(new_function, paramList);
             }
         }
 

@@ -175,40 +175,34 @@ namespace mscript
                     line = trim(line.substr(1));
                     if (line.empty())
                         raiseError("* lacks expression");
-                    
-                    if (line[0] == '*') // eval
+
+                    bool allow_dynamic_calls = false;
+                    if (line[0] == '*')
                     {
                         line = trim(line.substr(1));
                         if (line.empty())
                             raiseError("** lacks expression");
-
-                        object new_line = evaluate(line, callDepth);
-                        if (new_line.type() != object::STRING)
-                            raiseError("** expression does not evaluate to string");
-
-                        evaluate(new_line.stringVal(), callDepth);
+                        allow_dynamic_calls = true;
                     }
-                    else // anything really
+                    
+                    bool assign_worked = false;
+                    size_t equals_idx = line.find('=');
+                    if (equals_idx != std::wstring::npos)
                     {
-                        bool assign_worked = false;
-                        size_t equals_idx = line.find('=');
-                        if (equals_idx != std::wstring::npos)
+                        std::wstring name_str = trim(line.substr(0, equals_idx));
+                        if (isName(name_str))
                         {
-                            std::wstring name_str = trim(line.substr(0, equals_idx));
-                            if (isName(name_str))
-                            {
-                                std::wstring value_str = trim(line.substr(equals_idx + 1));
+                            std::wstring value_str = trim(line.substr(equals_idx + 1));
 
-                                object answer = evaluate(value_str, callDepth);
+                            object answer = evaluate(value_str, callDepth, allow_dynamic_calls);
 
-                                m_symbols.assign(name_str, answer);
-                                assign_worked = true;
-                            }
+                            m_symbols.assign(name_str, answer);
+                            assign_worked = true;
                         }
-
-                        if (!assign_worked)
-                            evaluate(line, callDepth);
                     }
+
+                    if (!assign_worked)
+                        evaluate(line, callDepth, allow_dynamic_calls);
                 }
                 else if (first == '!') // exception handler
                 {
@@ -1131,11 +1125,11 @@ namespace mscript
         throw script_exception(exp.what(), filename, l, line);
     }
 
-    object script_processor::evaluate(const std::wstring& valueStr, unsigned callDepth)
+    object script_processor::evaluate(const std::wstring& valueStr, unsigned callDepth, bool allowDynamicCalls)
     {
         m_tempCallDepth = callDepth;
 
-        expression exp(m_symbols, *this, m_traceInfo);
+        expression exp(m_symbols, *this, m_traceInfo, allowDynamicCalls);
         object answer = exp.evaluate(valueStr);
         return answer;
     }

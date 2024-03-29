@@ -24,10 +24,11 @@ namespace mscript
         /// </summary>
         /// <param name="symbols"></param>
         /// <param name="callable"></param>
-        expression(symbol_table& symbols, callable& callable, tracing& traceInfo)
+        expression(symbol_table& symbols, callable& callable, tracing& traceInfo, bool allowDynamicCalls = false)
             : m_symbols(symbols)
             , m_callable(callable)
             , m_traceInfo(traceInfo)
+            , m_allowDynamicCalls(allowDynamicCalls)
         {}
 
         /// <summary>
@@ -53,5 +54,6 @@ namespace mscript
         symbol_table& m_symbols;
         callable& m_callable;
         tracing& m_traceInfo;
+        bool m_allowDynamicCalls;
     };
 }

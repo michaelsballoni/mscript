@@ -2,8 +2,12 @@
 	> s
 }
 
-** "doprint(" + squote + 'foo' + 'bar' + squote + ")"
+$ print_func = "doprint"
+** print_func("foobar")
+
+* eval("doprint('barfoo')")
 
 ===
 
 foobar
+barfoo

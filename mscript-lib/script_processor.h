@@ -88,7 +88,7 @@ namespace mscript
         void preprocessFunctions(const std::wstring& previousFilename, const std::wstring& filename);
 
         void handleException(const std::exception& exp, const std::wstring& filename, const std::wstring& line, int l);
-        object evaluate(const std::wstring& valueStr, unsigned callDepth);
+        object evaluate(const std::wstring& valueStr, unsigned callDepth, bool allowDynamicCalls = false);
 
     private:
         std::function<std::vector<std::wstring>(const std::wstring& current, const std::wstring& filename)> m_scriptLoader;
