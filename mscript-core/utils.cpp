@@ -167,15 +167,16 @@ std::wstring mscript::replace(const std::wstring& str, const std::wstring& from,
     return retVal;
 }
 
-bool mscript::startsWith(const std::wstring& str, const std::wstring& starter)
+bool mscript::startsWith(const std::wstring& str, const wchar_t* starter)
 {
-    if (str.empty() || starter.empty())
+    if (str.empty() || !*starter)
         return false;
 
-    if (starter.length() > str.length())
+    size_t starter_len = wcslen(starter);
+    if (starter_len > str.length())
         return false;
 
-    for (size_t s = 0; s < starter.length(); ++s)
+    for (size_t s = 0; s < starter_len; ++s)
     {
         if (str[s] != starter[s])
             return false;
@@ -184,16 +185,17 @@ bool mscript::startsWith(const std::wstring& str, const std::wstring& starter)
     return true;
 }
 
-bool mscript::endsWith(const std::wstring& str, const std::wstring& finisher)
+bool mscript::endsWith(const std::wstring& str, const wchar_t* finisher)
 {
-    if (str.empty() || finisher.empty())
+    if (str.empty() || !*finisher)
         return false;
 
-    if (finisher.length() > str.length())
+    size_t finisher_len = wcslen(finisher);
+    if (finisher_len > str.length())
         return false;
 
-    size_t startingPoint = str.length() - finisher.length();
-    for (size_t s = 0; s < finisher.length(); ++s)
+    size_t startingPoint = str.length() - finisher_len;
+    for (size_t s = 0; s < finisher_len; ++s)
     {
         if (str[s + startingPoint] != finisher[s])
             return false;

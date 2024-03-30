@@ -127,7 +127,7 @@ namespace mscript
 		{
 			static const std::wstring expPrefix = 
 				L"mscript EXCEPTION ~~~ mscript_ExecuteFunction: ";
-			if (startsWith(output_obj.stringVal(), expPrefix))
+			if (startsWith(output_obj.stringVal(), expPrefix.c_str()))
 			{
 				raiseWError(L"Executing function failed: " + m_filePath \
 							+ L" - " + output_obj.stringVal().substr(expPrefix.size()));

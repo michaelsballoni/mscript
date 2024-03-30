@@ -64,14 +64,14 @@ void mscript::preprocess(std::vector<std::wstring>& lines)
     const std::wstring continue_str = L" \\";
     for (size_t l = 0; l < lines.size(); ++l)
     {
-        if (endsWith(lines[l], continue_str))
+        if (endsWith(lines[l], continue_str.c_str()))
         {
             size_t continue_start = l;
             size_t continue_end = continue_start;
             for (size_t l2 = l + 1; l2 < lines.size(); ++l2)
             {
                 continue_end = l2;
-                if (!endsWith(lines[l2], continue_str))
+                if (!endsWith(lines[l2], continue_str.c_str()))
                     break;
             }
 

@@ -32,8 +32,8 @@ namespace mscript
 
     std::wstring replace(const std::wstring& str, const std::wstring& from, const std::wstring& to);
 
-    bool startsWith(const std::wstring& str, const std::wstring& starter);
-    bool endsWith(const std::wstring& str, const std::wstring& finisher);
+    bool startsWith(const std::wstring& str, const wchar_t* starter);
+    bool endsWith(const std::wstring& str, const wchar_t* finisher);
 
 #if defined(_WIN32) || defined(_WIN64)
     std::wstring getLastErrorMsg(DWORD dwErrorCode = ::GetLastError());

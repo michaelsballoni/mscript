@@ -638,6 +638,7 @@ namespace mscript
                         break;
                     }
                 }
+                /* SWITCH NO MORE
                 else if (first == '%') // switch
                 {
                     size_t space = line.find(' ');
@@ -720,6 +721,7 @@ namespace mscript
                         }
                     }
                 }
+                */
                 else if (first == '@') // for each loop
                 {
                     size_t firstSpace = line.find(' ');

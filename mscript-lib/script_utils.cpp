@@ -13,6 +13,7 @@ int mscript::findMatchingEnd(const std::vector<std::wstring>& lines, int startIn
             return markers.back();
     }
 
+    /* SWITCH NO MORE
     if (startsWith(lines[startIndex], L"% "))
     {
         auto markers = findElses(lines, startIndex + 1, endIndex, L"= ", L"<>");
@@ -21,6 +22,7 @@ int mscript::findMatchingEnd(const std::vector<std::wstring>& lines, int startIn
         else
             return markers.back() + 1;
     }
+    */
 
     int block_depth = 0;
     for (int i = startIndex; i <= endIndex; ++i)
