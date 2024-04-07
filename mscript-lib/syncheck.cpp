@@ -23,31 +23,7 @@ mscript::syncheck
         {
             wchar_t first = line[0];
 
-            if (startsWith(line, L">>>"))
-            {
-                static size_t verbLen = strlen(">>>"); // >>> section_label : label_level : msg_expression
-
-                size_t first_colon = line.find(':');
-                if (first_colon == std::wstring::npos)
-                    raiseError("Trace statement lacks colon between section and level");
-                
-                std::wstring section_label = trim(line.substr(0, first_colon).substr(verbLen));
-                if (section_label.empty())
-                    raiseError("Trace statement section is blank");
-
-                size_t second_colon = line.find(':', first_colon + 1);
-                if (second_colon == std::wstring::npos)
-                    raiseError("Trace statement lacks colon between level and message");
-                
-                std::wstring label_level = trim(line.substr(first_colon + 1, second_colon - first_colon - 1));
-                if (label_level.empty())
-                    raiseError("Trace statement level is blank");
-
-                std::wstring msg_exp_str = trim(line.substr(second_colon + 1));
-                if (msg_exp_str.empty())
-                    raiseError("Trace statement message is blank");
-            }
-            else if (first == '$')
+            if (first == '$')
             {
                 line = line.substr(1);
                 size_t equalsIndex = line.find('=');
@@ -81,12 +57,7 @@ mscript::syncheck
                 int loopStart = l;
                 l = loopEnd;
 
-                line = line.substr(1);
-                size_t spaceIndex = line.find(' ');
-                if (spaceIndex == std::wstring::npos)
-                    raiseError("Exception handler lacks catch variable");
-
-                std::wstring label = trim(line.substr(spaceIndex + 1));
+                std::wstring label = trim(line.substr(1));
                 validateName(label);
 
                 syncheck(filename, lines, loopStart + 1, loopEnd - 1);
@@ -109,11 +80,7 @@ mscript::syncheck
             }
             else if (startsWith(line, L"<-"))
             {
-                line = line.substr(2);
-                size_t spaceIndex = line.find(' ');
-                if (spaceIndex != std::wstring::npos && trim(line.substr(spaceIndex + 1)).empty())
-                    raiseError("Return statement lacks return value");
-                // else void return
+                // void return okay
             }
             else if (first == '#' || startsWith(line, L"++") || startsWith(line, L"--"))
             {
@@ -181,9 +148,7 @@ mscript::syncheck
             }
             else if (first == '+')
             {
-                line = line.substr(1);
-                size_t spaceIndex = line.find(' ');
-                if (spaceIndex == std::wstring::npos || trim(line.substr(spaceIndex + 1)).empty())
+                if (trim(line.substr(1)).empty())
                     raiseError("Import statement lacks file to import");
             }
             else if (first == '?')
@@ -191,7 +156,7 @@ mscript::syncheck
                 bool seenQuestion = false;
                 bool seenEndingElse = false;
 
-                auto markers = findElses(lines, l, endLine, L"? ", L"<>");
+                auto markers = findElses(lines, l, endLine, L"?", L"<>");
 
                 int endMarker = markers.back();
                 l = endMarker;
@@ -212,7 +177,7 @@ mscript::syncheck
                     if (next_marker_line != L"}")
                         --next_marker_line_idx;
 
-                    if (startsWith(marker_line, L"? "))
+                    if (startsWith(marker_line, L"?"))
                     {
                         seenQuestion = true;
 
@@ -235,13 +200,11 @@ mscript::syncheck
                     syncheck(filename, lines, marker_line_idx + 1, next_marker_line_idx - 1);
                 }
             }
-            else if (first == '%')
+            else if (startsWith(line, L"[]"))
             {
-                size_t space = line.find(' ');
-                if (space == std::wstring::npos)
-                    raiseError("% statement missing first space");
-                if (trim(line.substr(space + 1)).empty())
-                    raiseError("% statement missing comparison value");
+                line = trim(line.substr(2));
+                if (line.empty())
+                    raiseError("[] statement missing comparison value");
 
                 int loopEnd = findMatchingEnd(lines, l, endLine);
                 int loopStart = l;
@@ -250,7 +213,7 @@ mscript::syncheck
                 bool seenQuestion = false;
                 bool seenEndingElse = false;
 
-                auto markers = findElses(lines, loopStart + 1, loopEnd - 1, L"= ", L"<>");
+                auto markers = findElses(lines, loopStart + 1, loopEnd - 1, L"=", L"<>");
 
                 const int max_markers_idx = int(markers.size()) - 1;
                 for (int m = 0; m <= max_markers_idx; ++m)
@@ -268,20 +231,20 @@ mscript::syncheck
                     if (next_marker_line != L"}")
                         --next_marker_line_idx;
 
-                    if (startsWith(marker_line, L"= "))
+                    if (startsWith(marker_line, L"="))
                     {
                         seenQuestion = true;
 
                         if (seenEndingElse)
-                            raiseError("Already seen * statement");
+                            raiseError("Already seen <> statement");
                     }
                     else if (marker_line == L"<>")
                     {
                         if (seenEndingElse)
-                            raiseError("Already seen * statement");
+                            raiseError("Already seen <> statement");
 
                         if (!seenQuestion)
-                            raiseError("No = statement before * statement");
+                            raiseError("No = statement before <> statement");
 
                         seenEndingElse = true;
                     }
@@ -330,6 +293,30 @@ mscript::syncheck
             }
             else if (line == L">!")
             {
+            }
+            else if (startsWith(line, L">>>"))
+            {
+                static size_t verbLen = strlen(">>>"); // >>> section_label : label_level : msg_expression
+
+                size_t first_colon = line.find(':');
+                if (first_colon == std::wstring::npos)
+                    raiseError("Trace statement lacks colon between section and level");
+
+                std::wstring section_label = trim(line.substr(0, first_colon).substr(verbLen));
+                if (section_label.empty())
+                    raiseError("Trace statement section is blank");
+
+                size_t second_colon = line.find(':', first_colon + 1);
+                if (second_colon == std::wstring::npos)
+                    raiseError("Trace statement lacks colon between level and message");
+
+                std::wstring label_level = trim(line.substr(first_colon + 1, second_colon - first_colon - 1));
+                if (label_level.empty())
+                    raiseError("Trace statement level is blank");
+
+                std::wstring msg_exp_str = trim(line.substr(second_colon + 1));
+                if (msg_exp_str.empty())
+                    raiseError("Trace statement message is blank");
             }
             else if (startsWith(line, L">>"))
             {

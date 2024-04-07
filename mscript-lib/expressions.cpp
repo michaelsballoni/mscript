@@ -1327,7 +1327,7 @@ namespace mscript
                 }
                 else if (method == L"system")
                 {
-                    exit_code = ::system(toNarrowStr(first.stringVal()).c_str());
+                    exit_code = ::_wsystem(first.stringVal().c_str());
                     retVal.set(toWideStr("success"), true);
                 }
                 else
@@ -1854,7 +1854,31 @@ namespace mscript
                 else
                     return evaluate(first.stringVal());
             } },
-        };
+
+            { "system", [this](object& first, const object::list& paramList) -> object {
+                if
+                (
+                    paramList.empty() 
+                    || 
+                    paramList.size() > 2 
+                    ||
+                    first.type() != object::object_type::STRING 
+                    || 
+                    (paramList.size() == 2 && paramList[1].type() != object::object_type::BOOL)
+                )
+                {
+                    raiseError("system() takes one string expression for the command to run, "
+                               "and a boolean for whether to raise errors on failure");
+                }
+
+                // raise errors by default, users to pass true to suppress them
+                bool raise_errors = paramList.size() < 2 || !paramList[1].boolVal(); 
+                int exit_code = ::_wsystem(first.stringVal().c_str());
+                if (raise_errors && exit_code != 0)
+                    raiseError("system() failed with exit code " + std::to_string(exit_code));
+                return object(double(exit_code));
+            } },
+         };
 
         //
         // Function calls

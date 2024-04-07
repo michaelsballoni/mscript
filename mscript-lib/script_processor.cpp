@@ -147,6 +147,8 @@ namespace mscript
                     if (equalsIndex != std::wstring::npos)
                     {
                         std::wstring nameStr = trim(line.substr(0, equalsIndex));
+                        validateName(nameStr);
+
                         std::wstring valueStr = trim(line.substr(equalsIndex + 1));
 
                         object answer = evaluate(valueStr, callDepth);
@@ -154,7 +156,11 @@ namespace mscript
                         m_symbols.set(nameStr, answer);
                     }
                     else
-                        m_symbols.set(trim(line), object());
+                    {
+                        std::wstring nameStr = trim(line);
+                        validateName(nameStr);
+                        m_symbols.set(nameStr, object());
+                    }
                 }
                 else if (first == '&') // variable assignment
                 {
@@ -164,6 +170,8 @@ namespace mscript
                         raiseError("Variable assignment lacks value");
 
                     std::wstring nameStr = trim(line.substr(0, equalsIndex));
+                    validateName(nameStr);
+
                     std::wstring valueStr = trim(line.substr(equalsIndex + 1));
 
                     object answer = evaluate(valueStr, callDepth);
@@ -212,12 +220,7 @@ namespace mscript
 
                     if (curException.obj != object::NOTHING)
                     {
-                        line = line.substr(1);
-                        size_t spaceIndex = line.find(' ');
-                        if (spaceIndex == std::wstring::npos)
-                            raiseError("Exception handler lacks catch variable");
-
-                        std::wstring label = trim(line.substr(spaceIndex + 1));
+                        std::wstring label = trim(line.substr(1));
                         validateName(label);
 
                         symbol_stacker stacker(m_symbols);
@@ -320,17 +323,12 @@ namespace mscript
                     outcome.Return = true;
                     return object();
                 }
-                else if (startsWith(line, L"<- ")) // valued return statement
+                else if (startsWith(line, L"<-")) // valued return statement
                 {
-                    size_t space = line.find(' ');
-                    if (space == std::wstring::npos)
-                        raiseError("return statement has no value");
-
-                    std::wstring expStr = line.substr(space + 1);
-
-                    object returnValue = evaluate(expStr, callDepth);
-
-                    outcome.ReturnValue = returnValue;
+                    std::wstring ret_exp_str = trim(line.substr(2));
+                    if (ret_exp_str.empty())
+                        raiseError("<- statement lacks return value");
+                    outcome.ReturnValue = evaluate(ret_exp_str, callDepth);
                     outcome.Return = true;
                     return outcome.ReturnValue;
                 }
@@ -543,10 +541,12 @@ namespace mscript
                     std::wstring newFilename = trim(line.substr(1));
                     if (newFilename.empty())
                         raiseError("import statement has no file name");
+
                     object filenameObj = evaluate(newFilename, callDepth);
                     if (filenameObj.type() != object::STRING)
                         raiseError("import statement does not evaluate as string");
-                    newFilename = filenameObj.stringVal();
+
+                    newFilename = trim(filenameObj.stringVal());
                     if (newFilename.empty())
                         raiseError("import statement evaluates to an empty string");
 
@@ -565,7 +565,7 @@ namespace mscript
                     bool seenQuestion = false;
                     bool seenEndingElse = false;
                     
-                    auto markers = findElses(lines, l, endLine, L"? ", L"<>");
+                    auto markers = findElses(lines, l, endLine, L"?", L"<>");
 
                     int endMarker = markers.back();
                     l = endMarker;
@@ -587,7 +587,7 @@ namespace mscript
                             --next_marker_line_idx;
 
                         object answer;
-                        if (startsWith(marker_line, L"? "))
+                        if (startsWith(marker_line, L"?"))
                         {
                             seenQuestion = true;
 
@@ -638,14 +638,13 @@ namespace mscript
                         break;
                     }
                 }
-                /* SWITCH NO MORE
-                else if (first == '%') // switch
+                else if (startsWith(line, L"[]")) // switch
                 {
-                    size_t space = line.find(' ');
-                    if (space == std::wstring::npos)
-                        raiseError("% statement missing switch value expression");
+                    line = trim(line.substr(2));
+                    if (line.empty())
+                        raiseError("[] statement missing switch value expression");
 
-                    object switch_val = evaluate(line.substr(space + 1), callDepth);
+                    object switch_val = evaluate(line, callDepth);
 
                     int loopEnd = findMatchingEnd(lines, l, endLine);
                     int loopStart = l;
@@ -654,7 +653,7 @@ namespace mscript
                     bool seenQuestion = false;
                     bool seenEndingElse = false;
 
-                    auto markers = findElses(lines, loopStart + 1, loopEnd - 1, L"= ", L"<>");
+                    auto markers = findElses(lines, loopStart + 1, loopEnd - 1, L"=", L"<>");
 
                     const int max_markers_idx = int(markers.size()) - 1;
                     for (int m = 0; m <= max_markers_idx; ++m)
@@ -665,7 +664,7 @@ namespace mscript
                             continue;
 
                         if (m >= max_markers_idx)
-                            raiseError("No = or * at end of statement");
+                            raiseError("No = or <> at end of statement");
 
                         int next_marker_line_idx = markers[m + 1];
                         const std::wstring& next_marker_line = lines[next_marker_line_idx];
@@ -673,7 +672,7 @@ namespace mscript
                             --next_marker_line_idx;
 
                         object case_val;
-                        if (startsWith(marker_line, L"= "))
+                        if (startsWith(marker_line, L"="))
                         {
                             seenQuestion = true;
 
@@ -687,10 +686,10 @@ namespace mscript
                         else if (marker_line == L"<>")
                         {
                             if (seenEndingElse)
-                                raiseError("Already seen * statement");
+                                raiseError("Already seen <> statement");
 
                             if (!seenQuestion)
-                                raiseError("No = statement before * statement");
+                                raiseError("No = statement before <> statement");
 
                             seenEndingElse = true;
                         }
@@ -721,7 +720,6 @@ namespace mscript
                         }
                     }
                 }
-                */
                 else if (first == '@') // for each loop
                 {
                     size_t firstSpace = line.find(' ');
@@ -991,14 +989,27 @@ namespace mscript
                         command_str = trim(line.substr(2));
                         if (command_str.empty())
                             raiseError("Command for >> statement not provided");
+
                         object command_obj = evaluate(command_str, callDepth);
                         if (command_obj.type() != object::STRING)
                             raiseError("Command expression does not result in string");
+                        
                         command_str = command_obj.stringVal();
                     }
-                    else if (line == L">!")
+                    else if (startsWith(line, L">!"))
                     {
+                        line = trim(line.substr(2));
+                        
                         m_symbols.assign(L"ms_SuppressCommandError", true, true);
+
+                        if (!line.empty())
+                        {
+                            object command_obj = evaluate(line, callDepth);
+                            if (command_obj.type() != object::STRING)
+                                raiseError("Command expression does not result in string");
+
+                            command_str = command_obj.stringVal();
+                        }
                     }
                     else if (first == '>') // single line expression print
                     {

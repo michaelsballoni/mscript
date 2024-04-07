@@ -19,6 +19,19 @@ $ expanded = expandedEnvVars("%path%")
 $ gotten = getEnv("path")
 > "expandedEnvVars: Should be true: " + (expanded == gotten)
 
+>
+
+$ sys_val0 = system("echo foo")
+> "sys_val0 = " + sys_val0
+
+$ sys_val1 = system("bletbletbletfoofoobar")
+! err
+	> "sys_val1 error"
+}
+
+$ sys_val1 = system("bletbletbletfoofoobar", true)
+> "sys_val1 = " + sys_val1
+
 ===
 
 Should be true: true
@@ -30,3 +43,7 @@ Should be 0: 0
 Should be bar: bar
 
 expandedEnvVars: Should be true: true
+
+sys_val0 = 0
+sys_val1 error
+sys_val1 = 1

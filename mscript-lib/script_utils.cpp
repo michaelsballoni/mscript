@@ -4,25 +4,23 @@
 
 int mscript::findMatchingEnd(const std::vector<std::wstring>& lines, int startIndex, int endIndex)
 {
-    if (startsWith(lines[startIndex], L"? "))
+    if (startsWith(lines[startIndex], L"?"))
     {
-        auto markers = findElses(lines, startIndex, endIndex, L"? ", L"<>");
+        auto markers = findElses(lines, startIndex, endIndex, L"?", L"<>");
         if (markers.empty())
             raiseError("No } found for ? statement");
         else
             return markers.back();
     }
 
-    /* SWITCH NO MORE
-    if (startsWith(lines[startIndex], L"% "))
+    if (startsWith(lines[startIndex], L"[]"))
     {
-        auto markers = findElses(lines, startIndex + 1, endIndex, L"= ", L"<>");
+        auto markers = findElses(lines, startIndex + 1, endIndex, L"=", L"<>");
         if (markers.empty())
             raiseError("No } found for % statement");
         else
             return markers.back() + 1;
     }
-    */
 
     int block_depth = 0;
     for (int i = startIndex; i <= endIndex; ++i)
@@ -136,7 +134,7 @@ bool mscript::isLineBlockBegin(const std::wstring& line)
     if (line == L"<>" || line == L"{" || line == L"O")
         return true;
 
-    if (startsWith(line, L"++") || startsWith(line, L"--"))
+    if (startsWith(line, L"++") || startsWith(line, L"--") || startsWith(line, L"[]"))
         return true;
 
     return false;
