@@ -26,7 +26,7 @@ $ sys_val0 = system("echo foo")
 
 $ sys_val1 = system("bletbletbletfoofoobar")
 ! err
-	> "sys_val1 error"
+	> "bletbletbletfoofoobar error: " + err
 }
 
 $ sys_val1 = system("bletbletbletfoofoobar", true)
@@ -45,5 +45,5 @@ Should be bar: bar
 expandedEnvVars: Should be true: true
 
 sys_val0 = 0
-sys_val1 error
+bletbletbletfoofoobar error: system() failed with exit code 1
 sys_val1 = 1
