@@ -984,6 +984,7 @@ namespace mscript
                 {
                     // get set up
                     std::wstring command_str;
+                    bool is_local_error_suppress = false;
                     if (startsWith(line, L">>")) // command expression to execute
                     {
                         command_str = trim(line.substr(2));
@@ -1000,8 +1001,6 @@ namespace mscript
                     {
                         line = trim(line.substr(2));
                         
-                        m_symbols.assign(L"ms_SuppressCommandError", true, true);
-
                         if (!line.empty())
                         {
                             object command_obj = evaluate(line, callDepth);
@@ -1009,7 +1008,12 @@ namespace mscript
                                 raiseError("Command expression does not result in string");
 
                             command_str = command_obj.stringVal();
+
+                            is_local_error_suppress = true;
                         }
+                        else
+                            m_symbols.assign(L"ms_SuppressCommandError", true, true);
+
                     }
                     else if (first == '>') // single line expression print
                     {
@@ -1031,6 +1035,12 @@ namespace mscript
 
                         // see if we should raise an error if the command fails
                         bool raise_error = true;
+                        if (is_local_error_suppress)
+                        {
+                            raise_error = false;
+                            m_symbols.assign(L"ms_SuppressCommandError", false, true); // avoid confusion
+                        }
+                        else
                         {
                             object suppress_error_obj;
                             if (m_symbols.tryGet(L"ms_SuppressCommandError", suppress_error_obj))
