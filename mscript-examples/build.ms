@@ -70,6 +70,6 @@ xcopy /Y ..\mscript\mscript-examples\*.ms site\samples\.
 > "Finalizing installer..."
 * setenv("installer_filename", "mscript4.msi")
 xcopy /Y mscript-SetupFiles\mscript.msi  site\releases\%ms_version%\%installer_filename%
-signtool sign /f mscript.pfx /p password site\releases\%ms_version%\%installer_filename%
+signtool sign /n "Michael Balloni" site\releases\%ms_version%\%installer_filename%
 
 > "All done."

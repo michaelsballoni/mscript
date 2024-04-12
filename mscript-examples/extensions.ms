@@ -5,7 +5,7 @@
 / One parameter -> that's the directory to process
 / Otherwise, error out
 $ dir_path = ""
-% arguments.length()
+[] arguments.length()
 	= 0
 		* dir_path = "."
 	}

@@ -114,7 +114,7 @@ int wmain(int argc, wchar_t* argv[])
 	{
 		std::cout << std::endl;
 
-		std::cout << "Usage: mscript3 <script path> ..." << std::endl;
+		std::cout << "Usage: mscript4 <script path> ..." << std::endl;
 		
 		std::cout << std::endl;
 
