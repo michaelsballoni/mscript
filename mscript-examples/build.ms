@@ -8,20 +8,20 @@ $ version = arguments.get(0)
 > "Version " + version
 * setenv("ms_version", version)
 
-> "Binaries..."
+echo Binaries...
 >!
 rmdir /S /Q binaries
 mkdir binaries
 xcopy /Y ..\mscript\Win32\Release\*.dll binaries\.
 xcopy /Y ..\mscript\Win32\Release\*.exe binaries\.
 
-> "Samples..."
+echo Samples...
 >!
 rmdir /S /Q samples
 mkdir samples
 xcopy /Y ..\mscript\mscript-examples\*.ms samples\.
 
-> "Licenses..."
+echo Licenses...
 >!
 rmdir /S /Q licenses
 mkdir licenses
@@ -42,7 +42,7 @@ $ filenames = list()
 	* filenames.set(f, "binaries\" + filenames.get(f))
 }
 
-> "Resource hacking..."
+echo Resource hacking...
 >!
 del resources.res
 ResourceHacker.exe -open resources.rc -save resources.res -action compile
@@ -52,34 +52,34 @@ ResourceHacker.exe -open resources.rc -save resources.res -action compile
 	ResourceHacker.exe -open %ms_filepath% -save %ms_filepath% -action addoverwrite -resource resources.res
 }
 
-> "Signing...all at once..."
+echo Signing...all at once...
 >!
 * setenv("filenames_combined", filenames.join(" "))
 signtool sign /n "Michael Balloni" %filenames_combined%
 
-> "Building installer..."
+echo Building installer...
 "C:\Program Files (x86)\Caphyon\Advanced Installer 21.6\bin\x86\AdvancedInstaller.com" /rebuild mscript.aip
 
-> "Building release site..."
+echo Building release site...
 >!
 rmdir /S /Q site\releases\%ms_version%
 mkdir site\releases\%ms_version%
 
-> "Collecting samples..."
+echo Collecting samples...
 >!
 rmdir /S /Q site\samples
 mkdir site\samples
 xcopy /Y ..\mscript\mscript-examples\*.ms site\samples\.
 
-> "Assembling release..."
+echo Assembling release...
 @ filename : filenames
 	* setenv("ms_filepath", filename)
 	xcopy /Y %ms_filepath% site\releases\%ms_version%\.
 }
 
-> "Finalizing installer..."
+echo Finalizing installer...
 * setenv("installer_filename", "mscript4.msi")
 xcopy /Y /-I mscript-SetupFiles\mscript.msi site\releases\%ms_version%\%installer_filename%
 signtool sign /n "Michael Balloni" site\releases\%ms_version%\%installer_filename%
 
-> "All done."
+echo All done.

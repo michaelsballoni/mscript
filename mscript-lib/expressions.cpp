@@ -1899,7 +1899,7 @@ namespace mscript
             } },
 
             // section / level tracing
-            { "settraceinfo", [this](object& first, const object::list& paramList) -> object {
+            { "settracing", [this](object& first, const object::list& paramList) -> object {
                 if
                 (
                     paramList.size() != 2
@@ -1909,7 +1909,7 @@ namespace mscript
                     paramList[1].type() != object::object_type::NUMBER
                 )
                 {
-                    raiseError("setTraceInfo() takes a list of sections to enable, and a level to trace at");
+                    raiseError("setTracing() takes a list of sections to enable, and a level to trace at");
                 }
 
                 this->m_traceInfo.ActiveSections.clear();
