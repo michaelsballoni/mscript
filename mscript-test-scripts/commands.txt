@@ -7,11 +7,16 @@ $ result = exec("echo foobar")
 >
 
 * setenv("foo", "bar")
-* result = exec("echo %foo%")
 
+* result = exec("echo %foo%")
 > "Should be true: " + result.get("success")
 > "Should be 0: " + result.get("exit_code")
 > "Should be bar: " + trimmed(result.get("output"))
+
+> 
+
+$ presult = popen("echo %foo%")
+> "Should be bar2: " + trimmed(presult)
 
 >
 
@@ -32,6 +37,16 @@ $ sys_val1 = system("bletbletbletfoofoobar")
 $ sys_val1 = system("bletbletbletfoofoobar", true)
 > "sys_val1 = " + sys_val1
 
+>
+
+$ popen_val = popen("foobarbletbletblet")
+! err
+	> "foobarbletbletblet error: " + err
+}
+
+$ popen_val2 = popen("foobarbletbletblet", true)
+> "popen_val2 = " + popen_val2
+
 ===
 
 Should be true: true
@@ -42,8 +57,13 @@ Should be true: true
 Should be 0: 0
 Should be bar: bar
 
+Should be bar2: bar
+
 expandedEnvVars: Should be true: true
 
 sys_val0 = 0
 bletbletbletfoofoobar error: system() failed with exit code 1
 sys_val1 = 1
+
+foobarbletbletblet error: popen() failed with exit code 1
+popen_val2 = 

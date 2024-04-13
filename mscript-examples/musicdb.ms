@@ -43,13 +43,11 @@ O
 / Do the dir of the user's Music directory
 / Surprisingly fast/
 ~ loadLines()
-	>!
-	dir /B /S "C:\Users\%USERNAME%\Music"
-	? ms_ErrorLevel <> 0
-		> fmt("Running the dir command failed with exit code {0}", ms_ErrorLevel)
+	<- splitLines(popen('dir /B /S "C:\Users\%USERNAME%\Music"'))
+	! err
+		> "Running the dir command failed: " + err
 		<- list()
 	}
-	<- splitLines(ms_CommandOutput)
 }
 
 / Walk dir output processing each line in turn

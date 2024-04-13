@@ -27,10 +27,7 @@ rmdir /S /Q licenses
 mkdir licenses
 xcopy /Y ..\mscript\mscript-licenses\*.* licenses\.
 
-> "Resource hacking and signing..."
->!
-del resources.res
-ResourceHacker.exe -open resources.rc -save resources.res -action compile
+/ Collect our list of filenames we care about
 $ filenames = list()
 * filenames.add("mscript4.exe")
 * filenames.add("mscript-db.dll")
@@ -39,17 +36,31 @@ $ filenames = list()
 * filenames.add("mscript-registry.dll")
 * filenames.add("mscript-sample.dll")
 * filenames.add("mscript-timestamp.dll")
-@ filename : filenames
-	> "..." + filename
-	* setenv("ms_filepath", "binaries\" + filename)
-	ResourceHacker.exe -open %ms_filepath% -save %ms_filepath% -action addoverwrite -resource resources.res
-	signtool sign /f mscript.pfx /p password %ms_filepath%
+
+/ Update our filenames to be in the relative binaries folder
+++ f : 0 -> filenames.length() - 1
+	* filenames.set(f, "binaries\" + filenames.get(f))
 }
 
-> "Building installer..."
-AdvancedInstaller.com /rebuild mscript.aip
+> "Resource hacking..."
+>!
+del resources.res
+ResourceHacker.exe -open resources.rc -save resources.res -action compile
+@ filename : filenames
+	> "..." + filename
+	* setenv("ms_filepath", filename)
+	ResourceHacker.exe -open %ms_filepath% -save %ms_filepath% -action addoverwrite -resource resources.res
+}
 
-> "Building site..."
+> "Signing...all at once..."
+>!
+* setenv("filenames_combined", filenames.join(" "))
+signtool sign /n "Michael Balloni" %filenames_combined%
+
+> "Building installer..."
+"C:\Program Files (x86)\Caphyon\Advanced Installer 21.6\bin\x86\AdvancedInstaller.com" /rebuild mscript.aip
+
+> "Building release site..."
 >!
 rmdir /S /Q site\releases\%ms_version%
 mkdir site\releases\%ms_version%
@@ -62,14 +73,13 @@ xcopy /Y ..\mscript\mscript-examples\*.ms site\samples\.
 
 > "Assembling release..."
 @ filename : filenames
-	> "..." + filename
-	* setenv("ms_filepath", "binaries\" + filename)
+	* setenv("ms_filepath", filename)
 	xcopy /Y %ms_filepath% site\releases\%ms_version%\.
 }
 
 > "Finalizing installer..."
 * setenv("installer_filename", "mscript4.msi")
-xcopy /Y mscript-SetupFiles\mscript.msi  site\releases\%ms_version%\%installer_filename%
+xcopy /Y /-I mscript-SetupFiles\mscript.msi site\releases\%ms_version%\%installer_filename%
 signtool sign /n "Michael Balloni" site\releases\%ms_version%\%installer_filename%
 
 > "All done."

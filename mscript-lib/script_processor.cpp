@@ -1006,14 +1006,11 @@ namespace mscript
                             object command_obj = evaluate(line, callDepth);
                             if (command_obj.type() != object::STRING)
                                 raiseError("Command expression does not result in string");
-
                             command_str = command_obj.stringVal();
-
                             is_local_error_suppress = true;
                         }
                         else
                             m_symbols.assign(L"ms_SuppressCommandError", true, true);
-
                     }
                     else if (first == '>') // single line expression print
                     {
@@ -1053,28 +1050,14 @@ namespace mscript
                             }
                         }
 
-                        // initialize the command results into local variables
+                        // initialize the exit code local variable
                         m_symbols.assign(L"ms_ErrorLevel", double(-1), true);
-                        m_symbols.assign(L"ms_CommandOutput", std::wstring(), true);
 
-                        // start the command
-                        FILE* file = _wpopen(command_str.c_str(), L"rt");
-                        if (file == nullptr)
-                            raiseError("Command could not be started");
-
-                        // slurp up the command's output
-                        std::string output;
-                        char buffer[4096];
-                        while (fgets(buffer, sizeof(buffer), file))
-                            output.append(buffer);
-
-                        // finish up
-                        double exit_code = double(_pclose(file));
-                        std::wstring cmd_output = toWideStr(output);
+                        // do the deed
+                        double exit_code = double(_wsystem(command_str.c_str()));
 
                         // set the command results into local variables
                         m_symbols.assign(L"ms_ErrorLevel", exit_code, true);
-                        m_symbols.assign(L"ms_CommandOutput", cmd_output, true);
 
                         // raise hell if that didn't work out...if the user wants to
                         // NOTE: store off all the command info as the code that handles the error 
@@ -1085,7 +1068,6 @@ namespace mscript
                             error_idx.set(std::wstring(L"Error"), std::wstring(L"Command failed with exit code " + num2wstr(exit_code)));
                             error_idx.set(std::wstring(L"Command"), command_str);
                             error_idx.set(std::wstring(L"ErrorLevel"), double(exit_code));
-                            error_idx.set(std::wstring(L"CommandOutput"), cmd_output);
                             throw mscript::user_exception(error_idx);
                         }
                     }

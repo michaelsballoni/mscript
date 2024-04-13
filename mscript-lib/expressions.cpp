@@ -1263,7 +1263,6 @@ namespace mscript
             // Process Control
             //
             { "exec", [](object& first, const object::list& paramList) -> object {
-                (void)first;
                 if (paramList.size() < 1 || first.type() != object::STRING)
                     raiseError("exec() works with a command string");
 
@@ -1344,6 +1343,81 @@ namespace mscript
                 }
 
                 return retVal;
+            } },
+
+            { "system", [this](object& first, const object::list& paramList) -> object {
+                if
+                (
+                    paramList.empty()
+                    ||
+                    paramList.size() > 2
+                    ||
+                    first.type() != object::object_type::STRING
+                    ||
+                    (paramList.size() == 2 && paramList[1].type() != object::object_type::BOOL)
+                )
+                {
+                    raiseError("system() takes one string expression for the command to run, "
+                               "and a boolean for whether to raise errors on failure");
+                }
+
+                // raise errors by default, users to pass true to suppress them
+                bool raise_errors = paramList.size() < 2 || !paramList[1].boolVal();
+                int exit_code = ::_wsystem(first.stringVal().c_str());
+                if (raise_errors && exit_code != 0)
+                    raiseError("system() failed with exit code " + std::to_string(exit_code));
+                return object(double(exit_code));
+            } },
+
+            { "popen", [](object& first, const object::list& paramList) -> object {
+                if
+                (
+                    paramList.empty()
+                    ||
+                    paramList.size() > 2
+                    ||
+                    first.type() != object::object_type::STRING
+                    ||
+                    (paramList.size() == 2 && paramList[1].type() != object::object_type::BOOL)
+                )
+                {
+                    raiseError("popen() takes one string expression for the command to run, "
+                               "and a boolean for whether to raise errors on failure");
+                }
+
+                // raise errors by default, users to pass true to suppress them
+                bool raise_errors = paramList.size() < 2 || !paramList[1].boolVal();
+
+                FILE* file = _wpopen(first.stringVal().c_str(), L"rt");
+                if (file == nullptr)
+                {
+                    if (raise_errors)
+                        raiseError("popen() failed starting command");
+                    else
+                        return std::wstring();
+                }
+
+                std::wstring output;
+                char buffer[4096];
+                std::string temp;
+                while (fgets(buffer, sizeof(buffer), file))
+                    temp.append(buffer);
+                output = toWideStr(temp);
+
+                bool success = feof(file) != 0;
+
+                int exit_code = _pclose(file);
+                file = nullptr;
+
+                if (raise_errors)
+                {
+                    if (!success)
+                        raiseError("popen() failed executing command");
+                    else if (exit_code != 0)
+                        raiseError("popen() failed with exit code " + std::to_string(exit_code));
+                }
+
+                return output;
             } },
 
             { "setenv", [](object& first, const object::list& paramList) -> object {
@@ -1854,31 +1928,7 @@ namespace mscript
                 else
                     return evaluate(first.stringVal());
             } },
-
-            { "system", [this](object& first, const object::list& paramList) -> object {
-                if
-                (
-                    paramList.empty() 
-                    || 
-                    paramList.size() > 2 
-                    ||
-                    first.type() != object::object_type::STRING 
-                    || 
-                    (paramList.size() == 2 && paramList[1].type() != object::object_type::BOOL)
-                )
-                {
-                    raiseError("system() takes one string expression for the command to run, "
-                               "and a boolean for whether to raise errors on failure");
-                }
-
-                // raise errors by default, users to pass true to suppress them
-                bool raise_errors = paramList.size() < 2 || !paramList[1].boolVal(); 
-                int exit_code = ::_wsystem(first.stringVal().c_str());
-                if (raise_errors && exit_code != 0)
-                    raiseError("system() failed with exit code " + std::to_string(exit_code));
-                return object(double(exit_code));
-            } },
-         };
+        };
 
         //
         // Function calls

@@ -22,8 +22,8 @@ $ dir_path = ""
 / The /B gives us a bare list of full paths
 / The /S gives us all paths in the directory and all of its subdirectories
 echo Getting file paths...
->> 'dir /B /S "' + dir_path + '"'
-$ paths = splitLines(ms_CommandOutput)
+* setenv("dir_path", dir_path)
+$ paths = splitLines(popen('dir /B /S "%dir_path%"'))
 
 / Loop over the paths collecting extension stats
 / An index is like a Scripting.Dictionary
@@ -46,7 +46,7 @@ $ ext_stats = index()
 	
 	/ Extract the file extension, skip ahead if not as expected
 	$ ext = toLower(path.subset(dot_index + 1))
-	? ext.length() < 2 || ext.get(1) = '.' || ext.has('\')
+	? (ext.length() >= 2 && ext.get(1) = '.') || ext.has('\')
 		^ 
 	}
 	

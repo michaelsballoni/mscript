@@ -70,9 +70,13 @@ $ rebuild = args.get("-rebuild")
 	* exit(1)
 }
 
+/ Set up later commands
+* setenv("log_file_path", log_file_path)
+* setenv("db_file_path", db_file_path)
+
 / Start logging to a fresh file every time
 >!
->> fmt('del "{0}"', log_file_path)
+del "%log_file_path%"
 * mslog_start(log_file_path, log_level)
 ~ logError(msg)
 	* mslog_error(msg)
@@ -88,8 +92,8 @@ $ rebuild = args.get("-rebuild")
 
 $ did_db_file_exist = false
 {
-	>> fmt('IF EXIST "{0}" ECHO exists', db_file_path)
-	* did_db_file_exist = trimmed(ms_CommandOutput) == "exists"
+	$ exists_str = popen('IF EXIST "%db_file_path%" ECHO exists')
+	* did_db_file_exist = trimmed(exists_str) == "exists"
 }
 
 ? !did_db_file_exist
@@ -98,7 +102,7 @@ $ did_db_file_exist = false
 
 ? rebuild
 	>!
-	>> fmt('del "{0}"', db_file_path)
+	del "%db_file_path%"
 	
 	* logMsg("Processing files and folders...")
 	* msdb_sql_init("db", db_file_path)
@@ -177,9 +181,9 @@ and directories to recurse on
 	
 	$ dir_output_lines = null
 	{
-		$ dir_result = exec(fmt('dir "{0}"', dirPath))
-		$ dir_output = dir_result.get("output")
-		* dir_output_lines = splitLines(dir_output)
+		* setenv("dirPath", dirPath)
+		$ dir_str = popen('dir "%dirPath%"')
+		* dir_output_lines = splitLines(dir_str)
 	}
 	
 	$ found_dirs = list()

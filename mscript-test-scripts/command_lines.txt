@@ -1,13 +1,11 @@
 echo foobar
 > "LastCommand: " + ms_LastCommand
-> "CommandOutput: " + trimmed(ms_CommandOutput)
 > "ErrorLevel: " + ms_ErrorLevel
 
 >
 
 >> "echo foobar 2"
 > "LastCommand: " + ms_LastCommand
-> "CommandOutput: " + trimmed(ms_CommandOutput)
 > "ErrorLevel: " + ms_ErrorLevel
 
 >
@@ -15,7 +13,6 @@ echo foobar
 >!
 >> "bletmonkey foo foo bar"
 > "LastCommand: " + ms_LastCommand
-> "CommandOutput: " + trimmed(ms_CommandOutput)
 > "ErrorLevel: " + ms_ErrorLevel
 
 >
@@ -23,7 +20,6 @@ echo foobar
 >!
 bletmonkey foo foo bar 2
 > "LastCommand: " + ms_LastCommand
-> "CommandOutput: " + trimmed(ms_CommandOutput)
 > "ErrorLevel: " + ms_ErrorLevel
 
 >
@@ -32,7 +28,6 @@ bletmonkey foo foo bar 2
 ! err_idx
 	> "Error: " + err_idx.get("Error")
 	> "Command: " + err_idx.get("Command")
-	> "CommandOutput: " + trimmed(err_idx.get("CommandOutput"))
 	> "ErrorLevel: " + err_idx.get("ErrorLevel")
 }
 
@@ -42,34 +37,27 @@ foofoofoo bletblet monkey 2
 ! err_idx
 	> "Error: " + err_idx.get("Error")
 	> "Command: " + err_idx.get("Command")
-	> "CommandOutput: " + trimmed(err_idx.get("CommandOutput"))
 	> "ErrorLevel: " + err_idx.get("ErrorLevel")
 }
 
 ===
 
 LastCommand: echo foobar
-CommandOutput: foobar
 ErrorLevel: 0
 
 LastCommand: echo foobar 2
-CommandOutput: foobar 2
 ErrorLevel: 0
 
 LastCommand: bletmonkey foo foo bar
-CommandOutput: 
 ErrorLevel: 1
 
 LastCommand: bletmonkey foo foo bar 2
-CommandOutput: 
 ErrorLevel: 1
 
 Error: Command failed with exit code 1
 Command: foofoofoo bletblet monkey
-CommandOutput: 
 ErrorLevel: 1
 
 Error: Command failed with exit code 1
 Command: foofoofoo bletblet monkey 2
-CommandOutput: 
 ErrorLevel: 1
