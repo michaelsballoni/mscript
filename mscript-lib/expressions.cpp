@@ -1018,22 +1018,32 @@ namespace mscript
                 (void)first;
                 if
                 (
-                    paramList.size() != 3
+                    paramList.size() < 3
+                    ||
+                    ((paramList.size() - 1) % 2) != 0
                     ||
                     (paramList[0].type() != object::STRING)
-                    ||
-                    (paramList[1].type() != object::STRING)
-                    ||
-                    (paramList[2].type() != object::STRING)
                 )
                 {
                     raiseError("replaced() takes a string, a string to find, and a string to replace it with");
                 }
 
                 std::wstring input = paramList[0].stringVal();
-                std::wstring toFind = paramList[1].stringVal();
-                std::wstring toReplaceWith = paramList[2].stringVal();
-                input = replace(input, toFind, toReplaceWith);
+                for (size_t r = 1; r < paramList.size(); r += 2)
+                {
+                    if
+                    (
+                        (paramList[r].type() != object::STRING)
+                        ||
+                        (paramList[r + 1].type() != object::STRING)
+                    )
+                    {
+                        raiseError("replaced() replacement requires string to find, and string to replace it with");
+                    }
+                    std::wstring toFind = paramList[r].stringVal();
+                    std::wstring toReplaceWith = paramList[r + 1].stringVal();
+                    input = replace(input, toFind, toReplaceWith);
+                }
                 return input;
             } },
 

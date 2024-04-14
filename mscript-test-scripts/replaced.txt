@@ -1,0 +1,36 @@
+$ val
+
+* val = replaced()
+! err
+	> "empty call"
+}
+
+* val = replaced("foo")
+! err
+	> "one call"
+}
+
+* val = replaced("foobar", "foo", "poo")
+> val
+
+* val = replaced("foobar", "foo", "poo", "bar")
+! err
+	> "three call"
+}
+
+* val = replaced("foobar", "foo", "poo", "bar", "baz")
+> val
+
+* val = replaced("foobar", "foo", "poo", "bar", "baz", "blet")
+! err
+	> "five call"
+}
+
+===
+
+empty call
+one call
+poobar
+three call
+poobaz
+five call
