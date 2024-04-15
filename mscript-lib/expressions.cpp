@@ -190,7 +190,16 @@ namespace mscript
         {
             const std::string& op = sm_ops[opdx];
             size_t opLen = op.length();
-            bool is_op_alpha = opLen == 3; // && isalpha(op[0]) && isalpha(op[1]) && isalpha(op[2]);
+
+            bool is_op_alpha = true;
+            for (size_t p = 0; p < opLen; ++p)
+            {
+                if (!isalpha(op[p])) 
+                {
+                    is_op_alpha = false;
+                    break;
+                }
+            }
 
             size_t parenCount = 0;
 
@@ -268,11 +277,11 @@ namespace mscript
                         object leftVal = evaluate(leftStr);
 
                         // Short circuitry
-                        if ((op == "&&" || _stricmp(op.c_str(), "AND") == 0) && !leftVal.boolVal())
+                        if ((op == "&&" || op == "AND") && !leftVal.boolVal())
                         {
                             value = false;
                         }
-                        else if ((op == "||" || _stricmp(op.c_str(), "OR") == 0) && leftVal.boolVal())
+                        else if ((op == "||" || op == "OR") && leftVal.boolVal())
                         {
                             value = true;
                         }
@@ -284,9 +293,9 @@ namespace mscript
                             // Handle nulls with equivalent checks
                             if (leftVal.isNull() || rightVal.isNull())
                             {
-                                if (op == "=" || op == "==" || _stricmp(op.c_str(), "EQU") == 0)
+                                if (op == "=" || op == "==" || op == "EQU")
                                     value = leftVal == rightVal;
-                                else if (op == "!=" || op == "<>" || _stricmp(op.c_str(), "NEQ") == 0)
+                                else if (op == "!=" || op == "<>" || op == "NEQ")
                                     value = leftVal != rightVal;
                                 else
                                     raiseWError(L"Invalid operator for null values: " + expStr);
@@ -410,13 +419,13 @@ namespace mscript
                                 bool leftBool = leftVal.boolVal();
                                 bool rightBool = rightVal.boolVal();
 
-                                if (op == "&&" || _stricmp(op.c_str(), "AND") == 0)
+                                if (op == "&&" || op == "AND")
                                     value = leftBool && rightBool;
-                                else if (op == "||" || _stricmp(op.c_str(), "OR") == 0)
+                                else if (op == "||" || op == "OR")
                                     value = leftBool || rightBool;
-                                else if (op == "=" || op == "==" || _stricmp(op.c_str(), "EQU") == 0)
+                                else if (op == "=" || op == "==" || op == "EQU")
                                     value = leftBool == rightBool;
-                                else if (op == "!=" || op == "<>" || _stricmp(op.c_str(), "NEQ") == 0)
+                                else if (op == "!=" || op == "<>" || op == "NEQ")
                                     value = leftBool != rightBool;
                                 else
                                     raiseWError(L"Unrecognized boolean operator: " + expStr);

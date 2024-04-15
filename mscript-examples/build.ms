@@ -1,27 +1,32 @@
 ? arguments.length() != 1
 	> "Usage: mscript-builder.exe build.ms version"
-	> 'version should be like "3.0.0"'
+	> 'version should be like "4.0.0"'
 	* exit(0)
 }
 
 $ version = arguments.get(0)
 > "Version " + version
+$ version_parts = version.split('.')
+? version_parts.length() != 3
+	> "ERROR: Invalid version, not three parts!"
+	* exit(1)
+}
 * setenv("ms_version", version)
 
-echo Binaries...
+> "Binaries..."
 >!
 rmdir /S /Q binaries
 mkdir binaries
 xcopy /Y ..\mscript\Win32\Release\*.dll binaries\.
 xcopy /Y ..\mscript\Win32\Release\*.exe binaries\.
 
-echo Samples...
+> "Samples..."
 >!
 rmdir /S /Q samples
 mkdir samples
 xcopy /Y ..\mscript\mscript-examples\*.ms samples\.
 
-echo Licenses...
+> "Licenses..."
 >!
 rmdir /S /Q licenses
 mkdir licenses
@@ -42,7 +47,17 @@ $ filenames = list()
 	* filenames.set(f, "binaries\" + filenames.get(f))
 }
 
-echo Resource hacking...
+> "Resource hacking..."
+$ resource_contents = readFile("resources.template", "utf8")
+* resource_contents = \
+	resource_contents.replaced \
+	( \
+		"%MAJOR%", version_parts.get(0), \
+		"%MINOR%", version_parts.get(1), \
+		"%BUILD%", version_parts.get(2) \
+	)
+* writeFile("resources.rc", resource_contents, "utf8")
+
 >!
 del resources.res
 ResourceHacker.exe -open resources.rc -save resources.res -action compile
@@ -52,34 +67,34 @@ ResourceHacker.exe -open resources.rc -save resources.res -action compile
 	ResourceHacker.exe -open %ms_filepath% -save %ms_filepath% -action addoverwrite -resource resources.res
 }
 
-echo Signing...all at once...
+> "Signing...all at once..."
 >!
 * setenv("filenames_combined", filenames.join(" "))
 signtool sign /n "Michael Balloni" %filenames_combined%
 
-echo Building installer...
+> "Building installer..."
 "C:\Program Files (x86)\Caphyon\Advanced Installer 21.6\bin\x86\AdvancedInstaller.com" /rebuild mscript.aip
 
-echo Building release site...
+> "Building release site..."
 >!
 rmdir /S /Q site\releases\%ms_version%
 mkdir site\releases\%ms_version%
 
-echo Collecting samples...
+> "Collecting samples..."
 >!
 rmdir /S /Q site\samples
 mkdir site\samples
 xcopy /Y ..\mscript\mscript-examples\*.ms site\samples\.
 
-echo Assembling release...
+> "Assembling release..."
 @ filename : filenames
 	* setenv("ms_filepath", filename)
 	xcopy /Y %ms_filepath% site\releases\%ms_version%\.
 }
 
-echo Finalizing installer...
+> "Finalizing installer..."
 * setenv("installer_filename", "mscript4.msi")
 xcopy /Y /-I mscript-SetupFiles\mscript.msi site\releases\%ms_version%\%installer_filename%
 signtool sign /n "Michael Balloni" site\releases\%ms_version%\%installer_filename%
 
-echo All done.
+> "All done."
