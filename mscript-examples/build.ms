@@ -97,4 +97,11 @@ xcopy /Y ..\mscript\mscript-examples\*.ms site\samples\.
 xcopy /Y /-I mscript-SetupFiles\mscript.msi site\releases\%ms_version%\%installer_filename%
 signtool sign /n "Michael Balloni" site\releases\%ms_version%\%installer_filename%
 
+> "Clean up..."
+rmdir /S /Q binaries
+rmdir /S /Q samples
+rmdir /S /Q licenses
+rmdir /S /Q mscript-cache
+rmdir /S /Q mscript-SetupFiles
+
 > "All done."
