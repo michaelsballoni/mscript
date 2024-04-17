@@ -152,6 +152,9 @@ namespace mscript
         if (upper == "CRLF")
             return toWideStr("\r\n");
 
+        if (upper == "ESC")
+            return toWideStr("\033");
+
         if (upper == "PI")
             return M_PI;
 

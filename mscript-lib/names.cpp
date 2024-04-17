@@ -42,6 +42,7 @@ bool mscript::isReserved(const std::wstring& name)
         L"tab",
         L"crlf",
         L"lf",
+        L"esc"
     };
-    return ReservedWords.find(name) != ReservedWords.end();
+    return ReservedWords.find(toLower(name)) != ReservedWords.end();
 }
