@@ -17,7 +17,7 @@ int mscript::findMatchingEnd(const std::vector<std::wstring>& lines, int startIn
     {
         auto markers = findElses(lines, startIndex + 1, endIndex, L"=", L"<>");
         if (markers.empty())
-            raiseError("No } found for % statement");
+            raiseError("No } found for [] statement");
         else
             return markers.back() + 1;
     }
@@ -124,7 +124,7 @@ bool mscript::isLineBlockBegin(const std::wstring& line)
         return false;
 
     wchar_t start_c = line[0];
-    static std::vector<char> block_beginnings{ '?', '@', '#', '~', '!', '%', '=' };
+    static std::vector<char> block_beginnings{ '?', '@', '#', '~', '!', '=' };
     for (char block_c : block_beginnings)
     {
         if (start_c == block_c)
