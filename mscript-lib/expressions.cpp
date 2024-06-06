@@ -1231,7 +1231,7 @@ namespace mscript
                 (void)first;
                 bool full_match = false;
                 if (paramList.size() < 2 || paramList.size() > 3)
-                    raiseError("isMatch() works string to match and pattern and optional allow substring match");
+                    raiseError("isMatch() works with a string to match and pattern and optional allow substring match");
                 else if (paramList[0].type() != object::STRING)
                     raiseError("isMatch() only works with string input");
                 else if (paramList[1].type() != object::STRING)
@@ -1244,7 +1244,7 @@ namespace mscript
                         full_match = paramList[2].boolVal();
                 }
 
-                std::wregex re(paramList[1].stringVal());
+                std::wregex re(paramList[1].stringVal(), std::regex_constants::awk);
                 return 
                     full_match
                     ? std::regex_match(first.stringVal(), re)
@@ -1267,7 +1267,7 @@ namespace mscript
                         full_match = paramList[2].boolVal();
                 }
 
-                std::wregex re(paramList[1].stringVal());
+                std::wregex re(paramList[1].stringVal(), std::regex_constants::awk);
 
                 std::wsmatch sm;
                 if (full_match)
@@ -1279,6 +1279,37 @@ namespace mscript
                 for (const auto& m : sm)
                     output.push_back(m.str());
                 return output;
+            } },
+
+            { "getmatchlength", [](object& first, const object::list& paramList) -> object {
+                (void)first;
+                bool full_match = false;
+                if (paramList.size() < 2 || paramList.size() > 3)
+                    raiseError("getMatchLength() works with a string to match and pattern and optional allow substring match");
+                else if (paramList[0].type() != object::STRING)
+                    raiseError("getMatchLength() only works with string input");
+                else if (paramList[1].type() != object::STRING)
+                    raiseError("getMatchLength() only works with string input");
+                else if (paramList.size() == 3)
+                {
+                    if (paramList[2].type() != object::BOOL)
+                        raiseError("getMatchLength() optional parameter to require full string match must be bool");
+                    else
+                        full_match = paramList[2].boolVal();
+                }
+
+                std::wregex re(paramList[1].stringVal(), std::regex_constants::awk);
+
+                std::wsmatch sm;
+                if (full_match)
+                    std::regex_match(first.stringVal(), sm, re);
+                else
+                    std::regex_search(first.stringVal(), sm, re);
+
+                object::list output;
+                for (const auto& m : sm)
+                    return double(m.str().length());
+                return double(-1);
             } },
 
             //
