@@ -156,7 +156,7 @@ mscript::syncheck
                 bool seenQuestion = false;
                 bool seenEndingElse = false;
 
-                auto markers = findElses(lines, l, endLine, L"?", L"<>");
+                auto markers = findElses(lines, l, endLine, L"?", L"<>", false);
 
                 int endMarker = markers.back();
                 l = endMarker;
@@ -213,7 +213,7 @@ mscript::syncheck
                 bool seenQuestion = false;
                 bool seenEndingElse = false;
 
-                auto markers = findElses(lines, loopStart + 1, loopEnd - 1, L"=", L"<>");
+                auto markers = findElses(lines, loopStart + 1, loopEnd - 1, L"=", L"<>", true);
 
                 const int max_markers_idx = int(markers.size()) - 1;
                 for (int m = 0; m <= max_markers_idx; ++m)

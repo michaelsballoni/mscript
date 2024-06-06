@@ -22,14 +22,16 @@ $ del_settings = index("some", null)
 $ get_settings = msreg_get_settings(key)
 
 @ cur_key : sorted(put_settings.keys())
-	? cur_key == "some"
-		* sleep(0)
-	}
-	? !get_settings.has(cur_key)
-		* error("get settings lacks: " + cur_key)
-	}
-	? get_settings.get(cur_key) != put_settings.get(cur_key)
-		* error("get settings value does not match: get=" + get_settings.get(cur_key) + " - put=" + put_settings.get(cur_key)
+	[] true
+		= cur_key == "some"
+			* sleep(0)
+		}
+		= !get_settings.has(cur_key)
+			* error("get settings lacks: " + cur_key)
+		}
+		= get_settings.get(cur_key) != put_settings.get(cur_key)
+			* error("get settings value does not match: get=" + get_settings.get(cur_key) + " - put=" + put_settings.get(cur_key)
+		}
 	}
 }
 
@@ -40,14 +42,16 @@ $ sub_keys = sorted(msreg_get_sub_keys(key))
 $ found_blet = false
 $ found_some = false
 @ sub : sub_keys
-	? sub = "blet"
-		* found_blet = true
-	}
-	? sub = "some"
-		* found_some = true
-	}
-	<>
-		* error("invalid sub key: " + sub)
+	[] true
+		= sub = "blet"
+			* found_blet = true
+		}
+		= sub = "some"
+			* found_some = true
+		}
+		<>
+			* error("invalid sub key: " + sub)
+		}
 	}
 }
 ? !found_blet

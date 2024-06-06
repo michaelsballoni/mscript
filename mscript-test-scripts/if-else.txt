@@ -12,29 +12,34 @@
 	> "Should be false"
 }
 
-? false
-	* error("? was false")
+>
+
+$ val = 10
+? val > 1
+	> "val > 1"
 }
-? true
-	> "Should be second ?"
+? val > 2
+	> "val > 2"
 }
 <>
-	* error("? was true")
+	* error("val is 10, > 2")
 }
 
-? true
-	> "Should be first true"
+? val < 0
+	* error("val is 10 not < 0")
 }
-? true
-	* error("? was true again")
+? val > 3
+	> "val > 3"
 }
 <>
-	* error("? was true")
+	* error("val is 10, > 3")
 }
 
 ===
 
 Should be true
 Should be false
-Should be second ?
-Should be first true
+
+val > 1
+val > 2
+val > 3

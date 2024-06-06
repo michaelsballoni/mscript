@@ -10,14 +10,16 @@ $ cache = index()
 
 * cache.set("foo", "bar")
 
-? !f("foo")
-	* error("foo not found!")
-}
-? cache.get("foo") != "bar"
-	* error("foo is not bar!")
-}
-<>
-	> "Success!!"
+[] true
+	= !f("foo")
+		* error("foo not found!")
+	}
+	= cache.get("foo") != "bar"
+		* error("foo is not bar!")
+	}
+	<>
+		> "Success!!"
+	}
 }
 
 ===

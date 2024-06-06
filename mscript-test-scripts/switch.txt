@@ -83,6 +83,18 @@ $ label = "foo"
 	}
 }
 
+[] 13
+	= 12
+		* error("nope")
+	}
+	= 13
+		> "Found 13!"
+	}
+	<>
+		* error("nope 2")
+	}
+}
+
 ===
 
 Got 10!
@@ -93,3 +105,4 @@ Got null!
 Val is null
 Got FOO
 Got BAR
+Found 13!

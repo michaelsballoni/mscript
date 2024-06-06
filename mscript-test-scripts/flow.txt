@@ -58,14 +58,16 @@ $ afterBlockComment = 2
 {
 	> "When"
 	$ whenny = 13
-	? whenny < 13
-		> "kid"
-	}
-	? whenny >= 18
-		> "adult"
-	}
-	<>
-		> "teen"
+	[] true
+		= whenny < 13
+			> "kid"
+		}
+		= whenny >= 18
+			> "adult"
+		}
+		<>
+			> "teen"
+		}
 	}
 }
 

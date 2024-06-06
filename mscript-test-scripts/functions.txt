@@ -10,14 +10,16 @@
 }
 
 ~ fib(n)
-	? n <= 0
-		<- 0
-	}
-	? n <= 2
-		<- 1
-	}
-	<>
-		<- fib(n - 2) + fib(n - 1)
+	[] true
+		= n <= 0
+			<- 0
+		}
+		= n <= 2
+			<- 1
+		}
+		<>
+			<- fib(n - 2) + fib(n - 1)
+		}
 	}
 }
 
@@ -34,14 +36,16 @@
 }
 
 ~ ager(whenny)
-	? whenny < 13
-		> "kid"
-	}
-	? whenny >= 18
-		> "adult"
-	}
-	<>
-		> "teen"
+	[] true
+		= whenny < 13
+			> "kid"
+		}
+		= whenny >= 18
+			> "adult"
+		}
+		<>
+			> "teen"
+		}
 	}
 }
 

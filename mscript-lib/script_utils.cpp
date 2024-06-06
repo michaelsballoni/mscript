@@ -6,7 +6,7 @@ int mscript::findMatchingEnd(const std::vector<std::wstring>& lines, int startIn
 {
     if (startsWith(lines[startIndex], L"?"))
     {
-        auto markers = findElses(lines, startIndex, endIndex, L"?", L"<>");
+        auto markers = findElses(lines, startIndex, endIndex, L"?", L"<>", false);
         if (markers.empty())
             raiseError("No } found for ? statement");
         else
@@ -15,7 +15,7 @@ int mscript::findMatchingEnd(const std::vector<std::wstring>& lines, int startIn
 
     if (startsWith(lines[startIndex], L"[]"))
     {
-        auto markers = findElses(lines, startIndex + 1, endIndex, L"=", L"<>");
+        auto markers = findElses(lines, startIndex + 1, endIndex, L"=", L"<>", true);
         if (markers.empty())
             raiseError("No } found for [] statement");
         else
@@ -49,13 +49,15 @@ mscript::findElses
     int startIndex, 
     int endIndex, 
     const wchar_t* lineStart,
-    const wchar_t* lineEnd
+    const wchar_t* lineEnd,
+    bool multiStart
 )
 {
     int block_depth = 0;
 
     bool last_when_start = false;
     bool last_when_end = false;
+    bool seen_start_yet = false;
 
     std::vector<int> retVal;
     for (int i = startIndex; i <= endIndex; ++i)
@@ -72,7 +74,7 @@ mscript::findElses
 
         if (block_depth == 1)
         {
-            if (startsWith(line, lineStart))
+            if (startsWith(line, lineStart) && (multiStart || !seen_start_yet))
             {
                 if (last_when_end)
                     break;
@@ -81,6 +83,8 @@ mscript::findElses
 
                 last_when_start = true;
                 last_when_end = false;
+
+                seen_start_yet = true;
             }
             else if (line == lineEnd)
             {

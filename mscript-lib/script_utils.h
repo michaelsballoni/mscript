@@ -14,7 +14,8 @@ namespace mscript
 			int startIndex, 
 			int endIndex, 
 			const wchar_t* lineStart,
-			const wchar_t* lineEnd
+			const wchar_t* lineEnd,
+			bool multiStart
 		);
 
 	bool isLineBlockBegin(const std::wstring& line);
