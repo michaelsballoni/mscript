@@ -35,12 +35,12 @@ It is a line-based, pseudo-object-oriented scripting language that uses symbols 
 To jump in and see more mscript, check out some [sample scripts](mscript-examples)
 
 ## project layout
-The mscript project is a Visual Studio solution.  mscript has no external dependencies; it statically links the runtime
+The mscript project is a Visual Studio C++ solution.
 
 Here are the projects that make up the solution:
 
 ### mscript-core
-The mscript-core project contains the minimum necessary function for DLL integraion
+The mscript-core project contains the minimum necessary function for [DLL integraions](https://mscript.io/#dllintegration)
 
 - object
 - object_json
@@ -63,11 +63,11 @@ Unit tests
 
 You can only do so much with unit tests without the test code getting large and unwieldy
 
-Instead of making bad unit tests, I made a set of files with script to execute and results to expect
+Instead of making big bad unit tests, I made a set of files with script to execute and results to expect
 
 In mscript-test-scripts you'll find test files, with statements up top and expected results below, separated by a === line
 
-mscript-test-runner runs all scripts in the directory and validates that it gets the expected results
+mscript-test-runner runs all scripts in the directory and validates that it gets all the expected results
 
 ### mscript
 
