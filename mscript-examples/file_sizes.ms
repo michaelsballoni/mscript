@@ -148,14 +148,16 @@ O // UI loop
 		* size_bytes = 0
 	}
 	$ size_str = ""
-	? size_bytes > 1024 * 1024 * 1024
-		* size_str = "Size (GB): " + round(size_bytes / 1024 / 1024 / 1024, 2)
-	}
-	? size_bytes > 1024 * 1024
-		* size_str = "Size (MB): " + round(size_bytes / 1024 / 1024, 2)
-	}
-	<>
-		* size_str = "Size (KB): " + round(size_bytes / 1024, 2)
+	[] true
+		= size_bytes > 1024 * 1024 * 1024
+			* size_str = "Size (GB): " + round(size_bytes / 1024 / 1024 / 1024, 2)
+		}
+		= size_bytes > 1024 * 1024
+			* size_str = "Size (MB): " + round(size_bytes / 1024 / 1024, 2)
+		}
+		<>
+			* size_str = "Size (KB): " + round(size_bytes / 1024, 2)
+		}
 	}
 	* logMsg(size_str)
 	
@@ -188,14 +190,7 @@ and directories to recurse on
 	
 	$ found_dirs = list()
 	$ found_file_sizes = index()
-	$ line_pattern = \
-		"[0-9\/]+" + \
-		"\s*" + \
-		"[0-9\:]+\s*(AM|PM)" + \
-		"\s*" + \
-		"((\<DIR\>\s*)|([0-9\,]+))" + \
-		"\s*" + \
-		"(\S.*)"
+	$ line_pattern = "[0-9\/]+\s*[0-9\:]+\s*(AM|PM)\s*((\<DIR\>\s*)|([0-9\,]+))\s*(\S.*)"
 	@ line : dir_output_lines
 		/ Skip header lines
 		? line.firstLocation(" ") == 0

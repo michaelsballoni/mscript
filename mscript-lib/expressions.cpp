@@ -1244,7 +1244,7 @@ namespace mscript
                         full_match = paramList[2].boolVal();
                 }
 
-                std::wregex re(paramList[1].stringVal(), std::regex_constants::awk);
+                std::wregex re(paramList[1].stringVal());
                 return 
                     full_match
                     ? std::regex_match(first.stringVal(), re)
@@ -1267,7 +1267,7 @@ namespace mscript
                         full_match = paramList[2].boolVal();
                 }
 
-                std::wregex re(paramList[1].stringVal(), std::regex_constants::awk);
+                std::wregex re(paramList[1].stringVal());
 
                 std::wsmatch sm;
                 if (full_match)
@@ -1298,7 +1298,7 @@ namespace mscript
                         full_match = paramList[2].boolVal();
                 }
 
-                std::wregex re(paramList[1].stringVal(), std::regex_constants::awk);
+                std::wregex re(paramList[1].stringVal());
 
                 std::wsmatch sm;
                 if (full_match)

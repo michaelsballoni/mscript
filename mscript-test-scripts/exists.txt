@@ -1,0 +1,8 @@
+* eval("x = x")
+! err
+	> "err = " + err
+}
+
+===
+
+err = Unknown variable name: x
